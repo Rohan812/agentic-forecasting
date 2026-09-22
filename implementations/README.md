@@ -29,7 +29,7 @@ implementations/
 `-- pyproject.toml            # local workspace packaging
 ```
 
-`ai_stocks_forecasting/` is a **work-in-progress scaffold**, not yet a finished reference implementation: it is a copy of the energy/oil Python modules with the package name rewired, and its contents are still WTI-targeted pending retargeting to NVDA. It has no notebooks and no `specs/` yet. See [`ai_stocks_forecasting/README.md`](ai_stocks_forecasting/README.md) for what remains.
+`ai_stocks_forecasting/` is a **work-in-progress scaffold**, not yet a finished reference implementation: it is a copy of the energy/oil Python modules with the package name rewired. Its data path is retargeted (`build_nvda_service()` registers NVDA's adjusted close as `nvda_stock_price`); the prompts, task specs, and skills are still WTI-targeted. It has no notebooks and no `specs/` yet. See [`ai_stocks_forecasting/README.md`](ai_stocks_forecasting/README.md) for what remains.
 
 YAML backtest and eval specs live under each use case in `specs/`. Each directory is independent; see its `README.md` for the walkthrough. For the build-phase moves — onboarding data, standing up an experiment, customizing an agent, auditing a result — see [`guides/`](../guides/). To chat with the concierge or a domain starter in the ADK browser UI, see [`guides/05-access-adk-web-via-ssh-tunnel.md`](../guides/05-access-adk-web-via-ssh-tunnel.md) (includes the Coder SSH tunnel).
 

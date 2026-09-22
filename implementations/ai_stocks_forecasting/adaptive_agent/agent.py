@@ -60,6 +60,8 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from ai_stocks_forecasting.adaptive_agent.skill_tools import build_skill_tools
+from ai_stocks_forecasting.analyst_agent import compress_history
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES
 from aieng.forecasting.evaluation.task import ForecastingTask
@@ -74,8 +76,6 @@ from aieng.forecasting.methods.agentic.agent_factory import (
     ContextRetrievalConfig,
 )
 from aieng.forecasting.models import ADVANCED_MODEL, LITE_MODEL
-from ai_stocks_forecasting.adaptive_agent.skill_tools import build_skill_tools
-from ai_stocks_forecasting.analyst_agent import compress_history
 from pydantic import BaseModel
 
 

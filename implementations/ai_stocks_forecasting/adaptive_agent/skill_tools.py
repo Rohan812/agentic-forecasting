@@ -60,7 +60,6 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from aieng.forecasting.methods.agentic.adaptive_skill import AdaptiveSkillStore
 from ai_stocks_forecasting.adaptive_agent.skill_state import (
     CalibrationCorrection,
     Hypothesis,
@@ -68,6 +67,7 @@ from ai_stocks_forecasting.adaptive_agent.skill_state import (
     VersionEntry,
     WtiStrategyState,
 )
+from aieng.forecasting.methods.agentic.adaptive_skill import AdaptiveSkillStore
 
 
 # ---------------------------------------------------------------------------

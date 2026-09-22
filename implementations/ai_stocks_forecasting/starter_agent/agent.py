@@ -29,6 +29,10 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+# Reuse the existing WTI prompt builder + history compression — these serialise
+# the task/context into the agent's JSON payload and are not worth duplicating.
+from ai_stocks_forecasting.analyst_agent import WtiPriceForecastPromptBuilder
+from ai_stocks_forecasting.starter_agent.tools import ToolSpec, news_search
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.task import ForecastingTask
 from aieng.forecasting.methods.agentic import (
@@ -42,11 +46,6 @@ from aieng.forecasting.methods.agentic.agent_factory import (
     ContextRetrievalConfig,
 )
 from aieng.forecasting.models import LITE_MODEL
-
-# Reuse the existing WTI prompt builder + history compression — these serialise
-# the task/context into the agent's JSON payload and are not worth duplicating.
-from ai_stocks_forecasting.analyst_agent import WtiPriceForecastPromptBuilder
-from ai_stocks_forecasting.starter_agent.tools import ToolSpec, news_search
 
 
 # Skills live next to this module. The forecasting contract is always loaded;

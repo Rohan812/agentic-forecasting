@@ -33,6 +33,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ai_stocks_forecasting.data import NVDA_SERIES_ID, build_nvda_service
 from aieng.forecasting.data import DataService
 from aieng.forecasting.methods.agentic import ForecastTool
 from aieng.forecasting.methods.agentic.agent_factory import (
@@ -41,7 +42,6 @@ from aieng.forecasting.methods.agentic.agent_factory import (
 )
 from aieng.forecasting.methods.numerical.darts_arima import DartsAutoARIMAPredictor
 from aieng.forecasting.models import LITE_MODEL
-from ai_stocks_forecasting.data import WTI_SERIES_ID, build_wti_service
 
 
 # Skills live next to this module; each tool loads its own playbook.
@@ -196,7 +196,7 @@ def code_sandbox() -> ToolSpec:
 
 def arima_forecast(
     *,
-    series_id: str = WTI_SERIES_ID,
+    series_id: str = NVDA_SERIES_ID,
     frequency: str = "B",
     num_samples: int = 200,
     data_service: DataService | None = None,
@@ -222,7 +222,7 @@ def arima_forecast(
         built. Pass one to point the tool at your own series (or to avoid a data
         fetch in tests).
     """
-    service = data_service if data_service is not None else build_wti_service()
+    service = data_service if data_service is not None else build_nvda_service()
     tool = ForecastTool(service, predictor=DartsAutoARIMAPredictor(num_samples=num_samples))
     return ToolSpec(
         label="arima_forecast",

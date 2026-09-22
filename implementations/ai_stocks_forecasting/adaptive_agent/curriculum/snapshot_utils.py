@@ -20,8 +20,8 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from aieng.forecasting.methods.agentic.adaptive_skill import AdaptiveSkillStore
 from ai_stocks_forecasting.adaptive_agent.skill_state import WtiStrategyState
+from aieng.forecasting.methods.agentic.adaptive_skill import AdaptiveSkillStore
 
 
 _YAML_FILENAME = "skill_state.yaml"

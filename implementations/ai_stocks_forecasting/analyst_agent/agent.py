@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from ai_stocks_forecasting.data import NVDA_SERIES_ID, build_nvda_service
 from aieng.forecasting.data import DataService
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES
@@ -50,7 +51,6 @@ from aieng.forecasting.methods.agentic.agent_factory import (
 )
 from aieng.forecasting.methods.numerical.darts_arima import DartsAutoARIMAPredictor
 from aieng.forecasting.models import ADVANCED_MODEL, LITE_MODEL
-from ai_stocks_forecasting.data import WTI_SERIES_ID, build_wti_service
 from pydantic import BaseModel
 
 
@@ -236,7 +236,7 @@ You have access to `run_forecast`, a conventional statistical baseline
 auditable interface and returns a structured forecast you can reason from.
 
 Call it ONCE before producing your forecast, with:
-- `series_id`: "{WTI_SERIES_ID}"
+- `series_id`: "{NVDA_SERIES_ID}"
 - `cutoff_date`: the `as_of` date from the payload (YYYY-MM-DD). This is the
   information cutoff — the model uses only data on or before it.
 - `horizons`: the `horizons` list from the payload.
@@ -587,7 +587,7 @@ def build_wti_tool_config(
     data_service : DataService or None
         Pre-populated data service with the WTI series registered. When
         ``None``, one is constructed via
-        :func:`~ai_stocks_forecasting.data.build_wti_service` (cache-backed).
+        :func:`~ai_stocks_forecasting.data.build_nvda_service` (cache-backed).
         Series data is read by the tool but never enters the LLM context.
     num_samples : int, default=200
         Monte Carlo sample count for AutoARIMA. Kept modest to bound agent
@@ -607,7 +607,7 @@ def build_wti_tool_config(
     -------
     AgentConfig
     """
-    service = data_service if data_service is not None else build_wti_service()
+    service = data_service if data_service is not None else build_nvda_service()
     forecast_tool = ForecastTool(service, predictor=DartsAutoARIMAPredictor(num_samples=num_samples))
 
     return AgentConfig(

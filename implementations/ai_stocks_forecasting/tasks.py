@@ -12,6 +12,11 @@ from datetime import datetime
 from typing import Any, ClassVar, Literal
 
 import pandas as pd
+from ai_stocks_forecasting.analyst_agent import (
+    build_wti_multitask_news_config,
+    compress_history,
+)
+from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES, BinaryForecast, Prediction
 from aieng.forecasting.evaluation.task import ForecastingTask
@@ -23,11 +28,6 @@ from aieng.forecasting.methods.agentic import (
 from aieng.forecasting.methods.agentic.agent_factory import AgentConfig
 from aieng.forecasting.methods.agentic.outputs import AgentForecastOutput
 from aieng.forecasting.models import LITE_MODEL
-from ai_stocks_forecasting.analyst_agent import (
-    build_wti_multitask_news_config,
-    compress_history,
-)
-from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
 from pydantic import BaseModel, Field
 
 
