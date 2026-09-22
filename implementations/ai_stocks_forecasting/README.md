@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, and numerical baselines are NVDA**; **the agent layer is still WTI-targeted** — prompt strings, task specs, and skills all describe crude oil. Retargeting them is the work of the tasks below.
+> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, and the statistics contract are NVDA**; **the agent layer is still WTI-targeted** — prompt strings, task specs, and skills all describe crude oil. Retargeting them is the work of the tasks below.
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -19,6 +19,8 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **pending** — NVDA calibration anchors |
 | `analysis.py`, `viz.py`, `prophet_baseline.py` | Shared analysis, plotting, Prophet baseline | domain-neutral; `score_backtest_results` fixed to honour `mae_horizon` (see below) |
 | `baselines.py` | *new* — not from energy | **done** — runs the two numerical baselines through a spec |
+| `signals.py` | *new* — not from energy | **contract fixed, bodies pending** — the statistics gate (see below) |
+| `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard and coverage-vs-sharpness |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **pending** — semiconductor / AI-capex / export-control instructions |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **pending** — `NvdaStrategyState` with a `NewsPattern` field |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
@@ -33,7 +35,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Add the statistics module | `signals.py` — shock-window flagging, matched negative controls, train/holdout split, pattern metrics, and the graduation gate |
+| Implement `signals.py` | flagging, control sampling, splits, Fisher's exact + bootstrap, the gate, regime labels — each with tests |
 | Retarget the agent layer | NVDA analyst instructions, shock task spec, strategy-state schema |
 
 ---
@@ -121,6 +123,64 @@ Per horizon (USD/share):
 ### Known gap: US market holidays
 
 145 of an expected 153 predictions (51 origins x 3 horizons) are scored. The 8 missing ones are horizons whose target date lands on a Monday US market holiday — MLK Day, Presidents' Day, Memorial Day, Labor Day 2025. Pandas' `BDay` counts those as business days, the NYSE does not trade, so there is no actual to score against and the harness drops the prediction. Only the 5- and 10-day horizons are affected; 21 business days from a Monday always lands on a Tuesday. This is correct behaviour, not a bug, but it means horizon counts are uneven (5 bd: 47, 10 bd: 47, 21 bd: 51) and per-horizon means are not over identical origin sets.
+
+## The statistics contract (`signals.py`)
+
+[`signals.py`](signals.py) is the interface between the two halves of the system. The
+discovery agent proposes candidate news patterns; this module — deterministic, LLM-free —
+decides whether a candidate has earned the right to influence a forecast. The agent side
+imports these functions and nothing else from the statistics layer.
+
+```python
+flag_shock_windows(prices_df, threshold_pct=7.0, horizon_days=1) -> list[Window]
+sample_matched_controls(windows, prices_df, n_each=1, seed=None) -> list[Window]
+train_holdout_split(windows, holdout_fraction=0.5)               -> tuple[list[Window], list[Window]]
+evaluate_pattern(pattern_matches, shock_labels, base_rate=None)  -> PatternMetrics
+gate_pass(metrics, holdout_metrics)                              -> bool
+label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
+```
+
+`Window` and `PatternMetrics` are frozen dataclasses. **Signatures and gate thresholds are
+final; the bodies raise `NotImplementedError`** and are implemented next, each with tests.
+
+A pattern graduates to the master strategy file only if *all five* criteria hold:
+
+| Criterion | Threshold | Why |
+|---|---|---|
+| `n_matches` | ≥ 5 (`MIN_MATCHES`) | below this the confidence interval is too wide for a high precision to mean anything |
+| `lift` (train) | ≥ 2.0 (`MIN_LIFT`) | must at least double the shock probability over the base rate |
+| `p_value` (train) | < 0.05 (`MAX_P_VALUE`) | Fisher's exact, not chi-squared — cell counts are small by construction |
+| `ci_low` | > 1.0 | the bootstrap interval on lift must exclude "no effect" |
+| `lift` (holdout) | ≥ 1.5 (`MIN_HOLDOUT_LIFT`) | some shrinkage is honest; a pattern that exists only where it was found is not |
+
+The conjunction is the point — each criterion alone is gameable. This is also the reason the
+shock threshold is ±7% and not ±10%: at ±10% there are 13 shock events in 2020–2024, so
+almost nothing could clear `MIN_MATCHES` and `MAX_P_VALUE` together.
+
+Callers should record the **reason** for a rejection into the per-experiment file, not just
+the boolean. "Rejected: lift 2.4 but holdout lift 0.9" tells the next study session
+something; `False` does not.
+
+## Charts
+
+[`01_leaderboard_and_calibration.ipynb`](01_leaderboard_and_calibration.ipynb) holds the
+CRPS leaderboard and the coverage-vs-sharpness chart. Both load by globbing
+`data/predictions/<spec_id>/`, so a new predictor appears the moment its YAML lands —
+re-running the notebook is the entire update path, and `SPEC_ID` switches between the 2025
+backtest and the protected 2026 window.
+
+The coverage chart plots realised coverage of the 80% interval against its mean width, one
+panel per horizon. On the nominal-80% line is honest, below is overconfident, above is vague;
+further left on the line is better. **It exists to prevent a specific false conclusion:**
+because the numerical floor is so overconfident, an agent with honestly wide intervals beats
+it on coverage almost for free. Walking to the line by widening intervals until they contain
+everything is not a result. The claim worth making is moving *left* along the line, or
+improving CRPS, which penalises vagueness and miscalibration together.
+
+Colour encodes the predictor **family**, marker shape the individual predictor. The
+categorical palette is only validated for colourblind separation up to three series on a
+scatter, so a fourth hue would fail the check; and tying colour to family rather than rank
+means adding a predictor never repaints the existing ones between phases.
 
 ## Cutoff discipline
 
