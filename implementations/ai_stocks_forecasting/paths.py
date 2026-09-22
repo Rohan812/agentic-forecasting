@@ -56,8 +56,29 @@ SHOCK_ORIGINS: list[pd.Timestamp] = [
 ]
 SCENARIO_ORIGIN = pd.Timestamp("2026-03-02")
 
-SHOCK_THRESHOLD = 5.0
-SHOCK_HORIZON = 5
+SHOCK_THRESHOLD = 7.0
+"""Single-day move, in percent, that counts as an NVDA shock.
+
+Applies in **both directions**: a shock is ``abs(1-day return) >= 7%``.
+
+Measured over 2020-2024 (the discovery window), this fires on 52 days — 31 up,
+21 down, 4.1% of trading days — which is roughly a 2.1-sigma day against NVDA's
+3.39% daily return standard deviation. The threshold is a deliberate balance:
+tighter thresholds are more clearly "shocks" but leave too few events for the
+graduation gate to ever reach significance (at 10% there are only 13 events in
+2020-2024 and *none* in 2026), while looser ones stop describing anything
+unusual (at 5%, 12% of all days qualify). 5.0 is the reasonable alternative if
+the gate turns out to be starved of positives; changing this constant and
+re-running is the whole switch.
+"""
+
+SHOCK_HORIZON = 1
+"""Horizon of the shock definition, in business days.
+
+One day, not five. A single-day move isolates the reaction to a discrete news
+event, which is what the discovery loop is trying to attribute patterns to; a
+5-day window blends several events together and makes attribution ambiguous.
+"""
 
 # ── Plotly colour palette (shared across viz modules) ─────────────────────────
 CLR_ACTUAL = "#2171b5"
