@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, and shock definition are NVDA**; **the agent layer is still WTI-targeted** — prompt strings, task specs, and skills all describe crude oil. Retargeting them is the work of the tasks below.
+> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, and numerical baselines are NVDA**; **the agent layer is still WTI-targeted** — prompt strings, task specs, and skills all describe crude oil. Retargeting them is the work of the tasks below.
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -17,7 +17,8 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `data.py` | WTI `DataService` wiring (`CL=F` via `YFinanceDailyAdapter`) | **done** — `NVDA_SERIES_ID` + `build_nvda_service()`; covariate panel removed |
 | `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 7%`, both directions. Cache-path constants are still energy-named |
 | `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **pending** — NVDA calibration anchors |
-| `analysis.py`, `viz.py`, `prophet_baseline.py` | Shared analysis, plotting, Prophet baseline | mostly domain-neutral |
+| `analysis.py`, `viz.py`, `prophet_baseline.py` | Shared analysis, plotting, Prophet baseline | domain-neutral; `score_backtest_results` fixed to honour `mae_horizon` (see below) |
+| `baselines.py` | *new* — not from energy | **done** — runs the two numerical baselines through a spec |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **pending** — semiconductor / AI-capex / export-control instructions |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **pending** — `NvdaStrategyState` with a `NewsPattern` field |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
@@ -33,7 +34,6 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Add the statistics module | `signals.py` — shock-window flagging, matched negative controls, train/holdout split, pattern metrics, and the graduation gate |
-| Run the baselines | `LastValuePredictor` and `DartsAutoARIMAPredictor` through `backtest()` |
 | Retarget the agent layer | NVDA analyst instructions, shock task spec, strategy-state schema |
 
 ---
@@ -81,6 +81,46 @@ Shocks are **asymmetric**: upside outnumbers downside roughly 3:2 at ±7% and 3:
 Both use `task_id: nvda_price_forecast`, `target_series_id: nvda_stock_price`, horizons `[5, 10, 21]` business days, `warmup: 250`, and load as `MultiTargetBacktestSpec` (matching the energy/oil specs, not the single-task `BacktestSpec`).
 
 The eval `end` is the latest origin whose 21-business-day horizon still resolves against cached data. It must stay at least 21 business days behind the most recent cached price, so extend it as newer data accumulates.
+
+## Baselines
+
+```bash
+uv run python -m ai_stocks_forecasting.baselines                   # 2025 backtest
+uv run python -m ai_stocks_forecasting.baselines --spec nvda_eval  # 2026 protected eval
+```
+
+[`baselines.py`](baselines.py) runs `LastValuePredictor` and `DartsAutoARIMAPredictor(num_samples=100)` through a spec and writes one YAML per predictor per task to `data/predictions/<spec_id>/`. Re-running is cheap — `cached_multi_backtest` loads whatever is already on disk and only computes what is missing; pass `--force` to recompute.
+
+Committed reference outputs for the 2025 backtest live in [`data/predictions/nvda_backtest/`](data/predictions/nvda_backtest/), so the numbers below can be re-read without a re-run.
+
+### 2025 backtest results — 51 weekly origins
+
+| Predictor | Mean CRPS | MAE h=21 | 80% coverage |
+|---|---|---|---|
+| Naive (last value) | 10.67 | 13.44 | 0.0% (degenerate intervals) |
+| AutoARIMA | **10.03** | 16.46 | **14.5%** |
+
+Per horizon (USD/share):
+
+| Horizon | CRPS naive | CRPS ARIMA | MAE naive | MAE ARIMA | ARIMA coverage | ARIMA 80% width |
+|---|---|---|---|---|---|---|
+| 5 bd | 8.23 | **7.45** | **8.23** | 8.56 | 10.6% | $3.91 |
+| 10 bd | 10.09 | **8.79** | **10.09** | 10.50 | 17.0% | $7.02 |
+| 21 bd | **13.44** | 13.54 | **13.44** | 16.46 | 15.7% | $12.74 |
+
+**Read these two findings before building on top of them.**
+
+*AutoARIMA wins on CRPS but loses on point accuracy.* Its MAE is worse than the naive random walk at every horizon. It only leads on CRPS because the naive predictor emits degenerate (zero-width) intervals, so CRPS collapses to absolute error for it. On a liquid equity the random walk is a genuinely strong point forecast, and beating it is the real bar.
+
+*AutoARIMA is severely overconfident.* Its 80% intervals contain the outcome **14.5%** of the time, against a nominal 80%. A $3.91 interval at a 5-day horizon is far too narrow for a stock whose daily return standard deviation is 3.39%. This is the headline for the coverage-vs-sharpness chart: the numerical baseline sits at the extreme sharp-and-wrong corner, so a news-grounded agent with honestly wide intervals can beat it on coverage almost trivially. Claiming that as a win would be misleading — the honest comparison is CRPS, which penalises both miscalibration and vagueness.
+
+### A fix carried in this implementation
+
+`score_backtest_results` in [`analysis.py`](analysis.py) accepted a `mae_horizon` argument and never used it, returning MAE pooled across all horizons under the key `mae_h21`. It is fixed here to filter by horizon. The energy/oil copy still has the original behaviour, so `mae_h21` values are **not** comparable between the two implementations — on NVDA the pooled and h=21 figures differ substantially (10.67 vs 13.44 for the naive baseline).
+
+### Known gap: US market holidays
+
+145 of an expected 153 predictions (51 origins x 3 horizons) are scored. The 8 missing ones are horizons whose target date lands on a Monday US market holiday — MLK Day, Presidents' Day, Memorial Day, Labor Day 2025. Pandas' `BDay` counts those as business days, the NYSE does not trade, so there is no actual to score against and the harness drops the prediction. Only the 5- and 10-day horizons are affected; 21 business days from a Monday always lands on a Tuesday. This is correct behaviour, not a bug, but it means horizon counts are uneven (5 bd: 47, 10 bd: 47, 21 bd: 51) and per-horizon means are not over identical origin sets.
 
 ## Cutoff discipline
 

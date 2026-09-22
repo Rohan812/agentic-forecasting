@@ -42,6 +42,17 @@ def score_backtest_results(
     eval window, is all of them, leaving MAE/coverage ``nan``). This is post-hoc
     scoring of realised outcomes, not a forecast-time view, so a late cutoff is
     correct and introduces no leakage.
+
+    ``mae_horizon`` selects which horizon the MAE is computed at, and the
+    returned key is named after it (``mae_h21`` for the default).  ``mean_crps``
+    and ``coverage_80`` are pooled across *all* horizons.
+
+    .. note::
+       The energy/oil copy of this helper accepts ``mae_horizon`` but never
+       applies it, so its ``mae_h21`` is really the MAE pooled over every
+       horizon.  On NVDA the two differ substantially (13.44 vs 10.67 for the
+       naive baseline), so the values are not comparable across the two
+       implementations.
     """
     resolved_as_of = actuals_as_of or datetime.now(tz=timezone.utc).replace(tzinfo=None)
     all_scores: list[float] = []
@@ -65,7 +76,8 @@ def score_backtest_results(
             if actual is None:
                 continue
             median = pred.payload.point_forecast
-            mae_errors.append(abs(median - actual))
+            if _business_horizon(pd.Timestamp(pred.as_of), fd) == mae_horizon:
+                mae_errors.append(abs(median - actual))
             q80 = pred.payload.quantiles.get(0.80)
             q20 = pred.payload.quantiles.get(0.20)
             if q80 is not None and q20 is not None:
@@ -73,7 +85,7 @@ def score_backtest_results(
 
     return {
         "mean_crps": float(np.mean(all_scores)) if all_scores else float("nan"),
-        "mae_h21": float(np.mean(mae_errors)) if mae_errors else float("nan"),
+        f"mae_h{mae_horizon}": float(np.mean(mae_errors)) if mae_errors else float("nan"),
         "coverage_80": float(np.mean(coverage_hits) * 100) if coverage_hits else float("nan"),
     }
 

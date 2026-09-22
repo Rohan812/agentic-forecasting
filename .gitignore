@@ -41,6 +41,9 @@ implementations/**/data/
 !implementations/energy_oil_forecasting/data/
 !implementations/energy_oil_forecasting/data/predictions/
 !implementations/energy_oil_forecasting/data/predictions/**
+!implementations/ai_stocks_forecasting/data/
+!implementations/ai_stocks_forecasting/data/predictions/
+!implementations/ai_stocks_forecasting/data/predictions/**
 
 # workspace-specific agents
 .github/agents/
