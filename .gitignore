@@ -56,3 +56,6 @@ implementations/**/data/
 data/yfinance/
 
 .claude/
+
+# nested duplicate clone of this repo (local working copy, never committed)
+/agentic-forecasting/
