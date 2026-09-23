@@ -47,12 +47,17 @@ def score_backtest_results(
     returned key is named after it (``mae_h21`` for the default).  ``mean_crps``
     and ``coverage_80`` are pooled across *all* horizons.
 
+    ``coverage_80`` is the share of outcomes inside the central 80% interval,
+    the 10th to 90th percentile.
+
     .. note::
-       The energy/oil copy of this helper accepts ``mae_horizon`` but never
-       applies it, so its ``mae_h21`` is really the MAE pooled over every
-       horizon.  On NVDA the two differ substantially (13.44 vs 10.67 for the
-       naive baseline), so the values are not comparable across the two
-       implementations.
+       Two bugs in the energy/oil copy of this helper are fixed here.  It
+       accepts ``mae_horizon`` but never applies it, so its ``mae_h21`` is
+       really the MAE pooled over every horizon (13.44 vs 10.67 for the NVDA
+       naive baseline).  And it computes "80% coverage" from the 20th and 80th
+       percentiles, which bound a **60%** interval, so its coverage figures are
+       measured against the wrong target.  Neither metric is comparable across
+       the two implementations.
     """
     resolved_as_of = actuals_as_of or datetime.now(tz=timezone.utc).replace(tzinfo=None)
     all_scores: list[float] = []
@@ -78,10 +83,9 @@ def score_backtest_results(
             median = pred.payload.point_forecast
             if _business_horizon(pd.Timestamp(pred.as_of), fd) == mae_horizon:
                 mae_errors.append(abs(median - actual))
-            q80 = pred.payload.quantiles.get(0.80)
-            q20 = pred.payload.quantiles.get(0.20)
-            if q80 is not None and q20 is not None:
-                coverage_hits.append(float(q20 <= actual <= q80))
+            lo80, hi80 = _qval(pred.payload.quantiles, 0.1), _qval(pred.payload.quantiles, 0.9)
+            if not (np.isnan(lo80) or np.isnan(hi80)):
+                coverage_hits.append(float(lo80 <= actual <= hi80))
 
     return {
         "mean_crps": float(np.mean(all_scores)) if all_scores else float("nan"),
@@ -261,7 +265,8 @@ def predictions_to_frame(
                 as_of = pd.Timestamp(pred.as_of)
                 fdate = pd.Timestamp(pred.forecast_date).normalize()
                 q = pred.payload.quantiles
-                lo80, hi80 = _qval(q, 0.2), _qval(q, 0.8)
+                # A central 80% interval runs from the 10th to the 90th percentile.
+                lo80, hi80 = _qval(q, 0.1), _qval(q, 0.9)
                 point = float(pred.payload.point_forecast)
                 actual = actual_by_date.get(fdate)
                 rows.append(
@@ -272,11 +277,11 @@ def predictions_to_frame(
                         "forecast_date": fdate,
                         "horizon": _business_horizon(as_of, fdate),
                         "point": point,
-                        "q10": _qval(q, 0.1),
-                        "q20": lo80,
+                        "q10": lo80,
+                        "q20": _qval(q, 0.2),
                         "q50": _qval(q, 0.5),
-                        "q80": hi80,
-                        "q90": _qval(q, 0.9),
+                        "q80": _qval(q, 0.8),
+                        "q90": hi80,
                         "actual": actual,
                         "crps": float(score),
                         "abs_error": abs(point - actual) if actual is not None else float("nan"),

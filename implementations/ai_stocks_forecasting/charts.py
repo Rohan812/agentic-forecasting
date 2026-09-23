@@ -26,6 +26,7 @@ rest on colour alone.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -33,6 +34,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
 from ai_stocks_forecasting.analysis import predictions_to_frame
+from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from aieng.forecasting.data import DataService
 from aieng.forecasting.evaluation.backtest import BacktestResult
 
@@ -201,6 +203,152 @@ def coverage_sharpness(
     return fig, axes
 
 
+def predicted_vs_actual(
+    frame: pd.DataFrame,
+    data_service: DataService,
+    horizons: tuple[int, ...] = (5, 10, 21),
+    predictors: list[str] | None = None,
+    series_id: str = NVDA_SERIES_ID,
+    title: str = "NVDA: forecasts vs actual price",
+) -> tuple[Figure, Any]:
+    """Line chart of each predictor's forecasts against the actual daily price.
+
+    One panel per horizon, sharing the time axis.  In each panel the black line
+    is the actual close, and each predictor's point forecast is drawn at the
+    date it was *forecasting* (``forecast_date``, not the origin), so a perfect
+    forecaster would sit exactly on the black line.  The shaded band is the
+    central 80% interval (10th to 90th percentile); predictors with zero-width
+    intervals, such as the naive baseline, get no band.
+
+    **How to read it.**  The naive forecast is the actual line shifted right by
+    the horizon, so on a 21-day panel it visibly lags every turn.  A model that
+    adds information tracks turns sooner than that; a model whose band keeps
+    missing the black line is overconfident; one whose band is far wider than
+    the line's wiggles is vague.
+
+    Parameters
+    ----------
+    frame
+        Scored frame from :func:`load_scored_frame`.
+    data_service
+        Source of the actual daily price for the black line.
+    horizons
+        Business-day horizons, one panel each.
+    predictors
+        Subset of ``frame['predictor']`` to draw.  ``None`` draws all of them.
+    series_id
+        Target series for the actual-price line.
+    title
+        Figure title.
+
+    Returns
+    -------
+    tuple[Figure, Any]
+        The figure and its array of axes.
+    """
+    names = sorted(frame["predictor"].unique()) if predictors is None else predictors
+    markers = _marker_map(frame)
+    now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+    actual = data_service.get_series(series_id, as_of=now).set_index("timestamp")["value"]
+
+    fig, axes = plt.subplots(len(horizons), 1, figsize=(12, 3.4 * len(horizons)), sharex=True)
+    fig.patch.set_facecolor(SURFACE)
+    axes_list = list(axes) if len(horizons) > 1 else [axes]
+
+    start = pd.Timestamp(frame["forecast_date"].min()) - pd.Timedelta(days=5)
+    end = pd.Timestamp(frame["forecast_date"].max())
+    window = actual.loc[start:end]
+
+    for ax, horizon in zip(axes_list, horizons, strict=False):
+        ax.set_facecolor(SURFACE)
+        # Each panel shows the actual price only as far as its own forecasts reach,
+        # so the line never runs on underneath the direct labels at the right.
+        panel_end = pd.Timestamp(frame.loc[frame["horizon"] == horizon, "forecast_date"].max())
+        panel_actual = window.loc[:panel_end]
+        ax.plot(panel_actual.index, panel_actual.values, color=INK_PRIMARY, linewidth=2, label="Actual close", zorder=4)
+        ends: list[tuple[str, pd.Timestamp, float]] = []
+        for name in names:
+            sub = frame[(frame["predictor"] == name) & (frame["horizon"] == horizon)].sort_values("forecast_date")
+            if sub.empty:
+                continue
+            family = sub["family"].iloc[0]
+            color = FAMILY_COLORS.get(family, FAMILY_COLORS["Other"])
+            dates = pd.to_datetime(sub["forecast_date"])
+            if (sub["q90"] - sub["q10"]).max() > 1e-9:
+                ax.fill_between(dates, sub["q10"], sub["q90"], color=color, alpha=0.14, linewidth=0, zorder=1)
+            ax.plot(
+                dates,
+                sub["point"],
+                color=color,
+                linewidth=2,
+                marker=markers.get(name, "o"),
+                markersize=6,
+                markeredgecolor=SURFACE,  # surface ring keeps overlapping markers readable
+                markeredgewidth=1,
+                label=f"{name} · {family}",
+                zorder=3,
+            )
+            ends.append((name, dates.iloc[-1], float(sub["point"].iloc[-1])))
+        _stacked_end_labels(ax, ends)
+        ax.set_title(f"h = {horizon} business days ahead", fontsize=10.5, color=INK_PRIMARY, loc="left")
+        ax.set_ylabel("USD / share", color=INK_SECONDARY, fontsize=9.5)
+        ax.grid(True, color=GRID, linewidth=0.8, zorder=0)
+        ax.set_axisbelow(True)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_color(GRID)
+        ax.tick_params(colors=INK_MUTED, labelsize=9)
+        # Room on the right for the direct labels.
+        ax.set_xlim(start, end + pd.Timedelta(days=(end - start).days * 0.13))
+
+    handles, labels = axes_list[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="upper right",
+        frameon=False,
+        fontsize=9,
+        labelcolor=INK_SECONDARY,
+        ncol=len(labels),
+        bbox_to_anchor=(0.995, 0.985),
+    )
+    fig.suptitle(title, fontsize=14, color=INK_PRIMARY, fontweight="600", x=0.01, ha="left", y=0.99)
+    fig.text(
+        0.01,
+        0.005,
+        "Each forecast is plotted at the date it forecast. Shaded band: central 80% interval.",
+        fontsize=9,
+        color=INK_MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.02, 1, 0.95))
+    return fig, axes
+
+
+def _stacked_end_labels(ax: Axes, ends: list[tuple[str, pd.Timestamp, float]], gap_pt: float = 11.0) -> None:
+    """Direct-label each line at its last point, pushing labels apart vertically.
+
+    Forecasts that end at nearly the same price — common, since most models sit
+    close to the random walk — would otherwise print their labels on top of each
+    other.  Labels are ordered by end value and spread ``gap_pt`` points apart
+    around the cluster's centre; the text wears ink, the colour stays in the line.
+    """
+    if not ends:
+        return
+    ordered = sorted(ends, key=lambda e: e[2])
+    centre = (len(ordered) - 1) / 2
+    for rank, (name, x, y) in enumerate(ordered):
+        ax.annotate(
+            name,
+            (x, y),
+            xytext=(8, (rank - centre) * gap_pt),
+            textcoords="offset points",
+            va="center",
+            fontsize=8.5,
+            color=INK_SECONDARY,
+        )
+
+
 def _marker_map(frame: pd.DataFrame) -> dict[str, str]:
     """Assign a stable marker shape per predictor, grouped by family."""
     order = sorted(frame["predictor"].unique()) if not frame.empty else []
@@ -281,4 +429,5 @@ __all__ = [
     "coverage_sharpness",
     "coverage_sharpness_table",
     "load_scored_frame",
+    "predicted_vs_actual",
 ]
