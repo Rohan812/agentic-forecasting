@@ -32,16 +32,19 @@ cutoff (February 2025 onward).
 
 Status
 ------
-**Skeleton.**  Signatures, return types, and the gate thresholds are fixed so
-the agent side can code against them immediately.  Bodies raise
-:class:`NotImplementedError` and are implemented next, each with its own tests.
+**Partly implemented.**  :func:`flag_shock_windows` and
+:func:`sample_matched_controls` are implemented and tested.  The remaining
+functions keep their final signatures and raise :class:`NotImplementedError`
+until their own tasks land.
 """
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import Literal
 
+import numpy as np
 import pandas as pd
 from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
 
@@ -85,6 +88,66 @@ With fewer matches the confidence interval is so wide that a high precision
 carries no information.  This is the main reason the shock threshold was set at
 ±7% rather than ±10%: at ±10% there are only 13 shock events in 2020-2024, so
 almost nothing could clear both this and :data:`MAX_P_VALUE`.
+"""
+
+
+# ── Window construction ───────────────────────────────────────────────────────
+# How shocks are grouped into independent events and how their controls are
+# drawn.  Module constants for the same reason as the gate thresholds: every
+# committed result was built the same way, and changing the rules is a diff.
+
+SHOCK_CLUSTER_GAP_DAYS = 1
+"""Shocks this many trading days apart or closer are one event, not several.
+
+The default merges consecutive trading days.  Measured on 2020-2024 at ±7%, it
+turns 52 shock days into 48 events.  The only clusters are the COVID crash week
+(four shocks on 2020-03-12, 13, 16 and 17) and 2024-07-30/31.  Wider gaps merge
+more aggressively:
+
+====  ======
+gap   events
+====  ======
+0     52
+1     48
+2     44
+3     41
+5     35
+10    25
+====  ======
+
+Wider is more conservative about independence, but leaves the gate fewer events.
+At a 5-day gap, for example, the 2025-04-03/04 tariff crash would absorb the
+separate +18.7% relief rally on 2025-04-09.
+"""
+
+VOL_WINDOW_DAYS = 21
+"""Trailing-volatility window, in sessions, used to match controls to shocks.
+
+The same definition as :mod:`ai_stocks_forecasting.shock_anchors`: the standard
+deviation of the 21 daily returns *strictly before* the session, so it is
+something the agent could know at the origin.
+"""
+
+CONTROL_WINDOW_DAYS = 63
+"""Controls are drawn within this many trading days (about a quarter) of their shock.
+
+This keeps each control in the same market era and roughly the same point in the
+earnings cycle as its shock, the "seasonal" half of the matching.
+"""
+
+CONTROL_EXCLUSION_DAYS = 5
+"""No control within this many trading days (one week) of any shock, or of a window's span.
+
+Otherwise a control lands inside the same news cycle as a shock, and the news
+that preceded the shock gets counted as preceding a "normal" day too.
+"""
+
+CONTROL_POOL_MULTIPLE = 5
+"""Each shock's controls are sampled from its ``n_each * 5`` best-matched candidates.
+
+Taking only the nearest matches would make the draw deterministic and could
+re-use the same handful of days.  Sampling from a small pool keeps the match
+tight while leaving the seed meaningful.
 """
 
 
@@ -169,12 +232,25 @@ class PatternMetrics:
     ci_high: float
 
 
+def _close_series(prices_df: pd.DataFrame) -> pd.Series:
+    """Return the price history as a float series indexed by trading day."""
+    series = prices_df.set_index(pd.to_datetime(prices_df["timestamp"]))["value"].astype(float)
+    return series.sort_index()
+
+
 def flag_shock_windows(
     prices_df: pd.DataFrame,
     threshold_pct: float = SHOCK_THRESHOLD,
     horizon_days: int = SHOCK_HORIZON,
 ) -> list[Window]:
-    """Find every window whose realised move clears the shock threshold.
+    """Find every independent shock event in a price history.
+
+    A session is a shock when its simple return over ``horizon_days`` reaches
+    ``threshold_pct`` in absolute value.  Simple returns in percent match
+    :data:`~ai_stocks_forecasting.paths.SHOCK_THRESHOLD` and the calibration in
+    :mod:`ai_stocks_forecasting.shock_anchors`, so "shock" means the same thing
+    in the gate as in the shock task's prompt anchors.  Log returns would shift
+    the threshold asymmetrically and produce a different event set.
 
     Parameters
     ----------
@@ -186,31 +262,55 @@ def flag_shock_windows(
         :data:`~ai_stocks_forecasting.paths.SHOCK_THRESHOLD` (7.0).  Applied in
         **both directions**.
     horizon_days
-        Business-day span the move is measured over.  Defaults to
+        Trading-day span the move is measured over.  Defaults to
         :data:`~ai_stocks_forecasting.paths.SHOCK_HORIZON` (1).
 
     Returns
     -------
     list[Window]
-        One window per shock, each with ``is_shock=True`` and a populated
+        One window per event, with ``is_shock=True`` and a populated
         ``direction``, ordered by ``event_date``.
 
     Notes
     -----
-    Two decisions the implementation has to make explicitly:
+    *Clusters are one event.*  Shocks within :data:`SHOCK_CLUSTER_GAP_DAYS`
+    trading days of each other are merged, which is also what stops overlapping
+    multi-day windows being double-counted when ``horizon_days > 1``.  Counting a
+    four-day crash as four independent events would let a single news pattern
+    score four hits for one piece of news.
 
-    *Overlapping shocks.*  At ``horizon_days > 1`` consecutive qualifying
-    windows overlap and would double-count a single event.  Merge them into one
-    window anchored on the largest move.  At the committed ``horizon_days=1``
-    this cannot arise, but the parameter is exposed so the choice must not be
-    silently wrong if someone changes it.
-
-    *Adjacent-day clusters.*  Even at one day, shocks cluster — 2025-01-27
-    (-17.0%) and 2025-01-28 (+8.9%) are one earnings narrative, not two
-    independent events.  Treating them as independent inflates the sample the
-    gate thinks it has.  Decide and document a minimum separation.
+    *A merged window is anchored on its largest move* (``event_date``,
+    ``return_pct`` and ``direction`` come from it).  Its ``as_of`` is the session
+    before the cluster's *first* shock, not before the largest one.  Otherwise
+    the agent's news window would include coverage of a crash that had already
+    started.
     """
-    raise NotImplementedError("Phase 1, Team Signals T1")
+    close = _close_series(prices_df)
+    dates = close.index
+    returns = (close.pct_change(horizon_days) * 100.0).to_numpy()
+
+    shock_pos = np.flatnonzero(np.abs(np.nan_to_num(returns)) >= threshold_pct)
+    if shock_pos.size == 0:
+        return []
+
+    # Overlapping multi-day windows (gap < horizon_days) are always one event.
+    max_gap = SHOCK_CLUSTER_GAP_DAYS + horizon_days - 1
+    clusters = np.split(shock_pos, np.flatnonzero(np.diff(shock_pos) > max_gap) + 1)
+
+    windows: list[Window] = []
+    for cluster in clusters:
+        anchor = int(cluster[np.argmax(np.abs(returns[cluster]))])
+        move = float(returns[anchor])
+        windows.append(
+            Window(
+                as_of=dates[int(cluster[0]) - horizon_days],
+                event_date=dates[anchor],
+                is_shock=True,
+                return_pct=move,
+                direction="up" if move > 0 else "down",
+            )
+        )
+    return windows
 
 
 def sample_matched_controls(
@@ -218,8 +318,10 @@ def sample_matched_controls(
     prices_df: pd.DataFrame,
     n_each: int = 1,
     seed: int | None = None,
+    *,
+    threshold_pct: float = SHOCK_THRESHOLD,
 ) -> list[Window]:
-    """Draw non-shock control windows matched to the given shock windows.
+    """Draw non-shock control sessions matched to the given shock windows.
 
     Without controls, precision cannot be compared against anything: a pattern
     that matches every window whatsoever would look perfect on shocks alone.
@@ -237,24 +339,97 @@ def sample_matched_controls(
     seed
         Seed for the sampler.  Pass one whenever a result will be committed —
         a graduated pattern's evidence has to be reproducible.
+    threshold_pct
+        The shock threshold the windows were flagged with.  Any session at or
+        above it is excluded as a control, together with its neighbours.  Pass
+        the same value given to :func:`flag_shock_windows`.
 
     Returns
     -------
     list[Window]
-        Control windows with ``is_shock=False`` and ``direction=None``.
+        One-session control windows with ``is_shock=False`` and
+        ``direction=None``, ordered by ``event_date``.  No session is used twice.
+
+    Raises
+    ------
+    ValueError
+        If ``n_each < 1``, or if ``windows`` contains a non-shock window.
 
     Notes
     -----
-    Matching is what makes the comparison fair, and what to match on is a real
-    decision, not a formality. Matching on calendar proximity controls for the
-    market regime but risks landing inside the same news cycle as the shock;
-    matching on volatility regime controls for the fact that shocks cluster in
-    high-volatility periods, so an unmatched control set is quietly drawn from
-    calmer markets and any pattern correlated with volatility will look
-    predictive. Controls must also exclude the shock windows themselves and
-    their immediate neighbours.
+    Each shock's controls come from sessions that are:
+
+    1. **Not near any shock.**  Every session whose return reaches
+       ``threshold_pct``, and every window's ``as_of``-to-``event_date`` span,
+       is excluded along with :data:`CONTROL_EXCLUSION_DAYS` sessions either side.
+    2. **In the same era.**  Within :data:`CONTROL_WINDOW_DAYS` of the shock.
+    3. **In the same volatility regime.**  Candidates are ranked by how close
+       their trailing volatility is to the shock's, measured over the
+       :data:`VOL_WINDOW_DAYS` returns before the episode began.  The controls
+       are then sampled from the best :data:`CONTROL_POOL_MULTIPLE` ``* n_each``.
+
+    The volatility match is the one that matters most.  Shocks cluster in
+    volatile markets, so controls drawn at random come mostly from calm ones.
+    Any pattern that merely tracks volatility, such as "analysts expect
+    turbulence", would then look predictive of shocks when it only predicts
+    the regime they happen in.
+
+    Shocks are visited in a seeded random order, so no period systematically
+    gets first pick of the candidates.  If a shock has fewer eligible candidates
+    than ``n_each``, it gets what is available and a warning is raised, rather
+    than silently drawing unmatched controls.
     """
-    raise NotImplementedError("Phase 1, Team Signals T1")
+    if n_each < 1:
+        raise ValueError(f"n_each must be at least 1, got {n_each}.")
+    if any(not w.is_shock for w in windows):
+        raise ValueError("sample_matched_controls expects shock windows only; got a window with is_shock=False.")
+
+    close = _close_series(prices_df)
+    dates = close.index
+    n = len(dates)
+    position = {d: i for i, d in enumerate(dates)}
+    returns = close.pct_change() * 100.0
+    vol_before = returns.rolling(VOL_WINDOW_DAYS).std().shift(1).to_numpy()
+    ret = returns.to_numpy()
+
+    excluded = np.isnan(vol_before)  # also covers the first session, which has no prior day
+    for p in np.flatnonzero(np.abs(np.nan_to_num(ret)) >= threshold_pct):
+        excluded[max(0, p - CONTROL_EXCLUSION_DAYS) : p + CONTROL_EXCLUSION_DAYS + 1] = True
+    for w in windows:
+        start, end = position[w.as_of], position[w.event_date]
+        excluded[max(0, start - CONTROL_EXCLUSION_DAYS) : end + CONTROL_EXCLUSION_DAYS + 1] = True
+
+    rng = np.random.default_rng(seed)
+    used = np.zeros(n, dtype=bool)
+    chosen_all: list[int] = []
+    for i in rng.permutation(len(windows)):
+        w = windows[i]
+        event = position[w.event_date]
+        candidates = np.arange(max(0, event - CONTROL_WINDOW_DAYS), min(n, event + CONTROL_WINDOW_DAYS + 1))
+        candidates = candidates[~excluded[candidates] & ~used[candidates]]
+        if candidates.size < n_each:
+            warnings.warn(
+                f"Only {candidates.size} eligible control(s) near the shock on {w.event_date.date()}; wanted {n_each}.",
+                stacklevel=2,
+            )
+        if candidates.size == 0:
+            continue
+
+        # Volatility known at the close before the episode's first session.
+        target_vol = vol_before[position[w.as_of] + 1]
+        if np.isnan(target_vol):
+            pool = candidates
+        else:
+            order = np.argsort(np.abs(vol_before[candidates] - target_vol), kind="stable")
+            pool = candidates[order[: CONTROL_POOL_MULTIPLE * n_each]]
+        picked = rng.choice(pool, size=min(n_each, pool.size), replace=False)
+        used[picked] = True
+        chosen_all.extend(int(c) for c in picked)
+
+    return [
+        Window(as_of=dates[c - 1], event_date=dates[c], is_shock=False, return_pct=float(ret[c]))
+        for c in sorted(chosen_all)
+    ]
 
 
 def train_holdout_split(
@@ -413,10 +588,15 @@ def label_regimes(
 
 
 __all__ = [
+    "CONTROL_EXCLUSION_DAYS",
+    "CONTROL_POOL_MULTIPLE",
+    "CONTROL_WINDOW_DAYS",
     "MAX_P_VALUE",
     "MIN_HOLDOUT_LIFT",
     "MIN_LIFT",
     "MIN_MATCHES",
+    "SHOCK_CLUSTER_GAP_DAYS",
+    "VOL_WINDOW_DAYS",
     "Direction",
     "PatternMetrics",
     "Regime",

@@ -22,7 +22,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
-| `signals.py` | *new* — not from energy | **contract fixed, bodies pending** — the statistics gate (see below) |
+| `signals.py` | *new* — not from energy | **flagging and control sampling done**; split, scoring, gate and regime labels pending (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
@@ -39,7 +39,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Implement `signals.py` | flagging, control sampling, splits, Fisher's exact + bootstrap, the gate, regime labels — each with tests |
+| Finish `signals.py` | train/holdout split (after the model cutoff), Fisher's exact + bootstrap, the gate, regime labels — each with tests |
 | Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
@@ -166,15 +166,36 @@ imports these functions and nothing else from the statistics layer.
 
 ```python
 flag_shock_windows(prices_df, threshold_pct=7.0, horizon_days=1) -> list[Window]
-sample_matched_controls(windows, prices_df, n_each=1, seed=None) -> list[Window]
+sample_matched_controls(windows, prices_df, n_each=1, seed=None, *, threshold_pct=7.0) -> list[Window]
 train_holdout_split(windows, holdout_fraction=0.5)               -> tuple[list[Window], list[Window]]
 evaluate_pattern(pattern_matches, shock_labels, base_rate=None)  -> PatternMetrics
 gate_pass(metrics, holdout_metrics)                              -> bool
 label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 ```
 
-`Window` and `PatternMetrics` are frozen dataclasses. **Signatures and gate thresholds are
-final; the bodies raise `NotImplementedError`** and are implemented next, each with tests.
+`Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows` and
+`sample_matched_controls` are implemented and tested**; the other functions keep their final
+signatures and raise `NotImplementedError` until their own tasks land.
+
+**Shock windows.** A session is a shock when its simple return reaches ±7%, the same definition
+the shock task's prompt anchors use, so "shock" means one thing everywhere. Shocks on
+consecutive trading days are merged into **one event** (`SHOCK_CLUSTER_GAP_DAYS = 1`), so the
+four-day COVID crash in March 2020 counts once, not four times. A merged window is anchored on
+its largest move, but its news cutoff (`as_of`) is the session before the episode's *first*
+shock. Anchoring the cutoff on the largest move would let the agent read coverage of a crash
+already under way. On 2020–2024 this gives **48 events** (29 up / 19 down) from 52 shock days.
+Wider merge gaps are more conservative about independence but leave the gate fewer events: 44
+at a 2-day gap, 35 at 5, 25 at 10.
+
+**Matched controls.** Each shock's controls are ordinary sessions that are (1) at least a week
+away from *every* shock in the price history, including shocks the caller didn't pass in,
+which matters when sampling controls for a training split while the holdout's shocks are
+still in the data; (2) within about a quarter of the shock; and (3) closest to it in
+**trailing 21-day volatility**. That last rule matters most. Shocks cluster in volatile markets,
+so random controls come disproportionately from calm ones, and any headline that merely tracks
+volatility would then look predictive. On 2020–2024 the matched controls' median trailing
+volatility is 3.61% against the shocks' 3.58%; random non-shock days sit at 3.35%, with a far
+calmer lower quartile (2.26% against 3.11%). Draws are seeded and never reuse a session.
 
 A pattern graduates to the master strategy file only if *all five* criteria hold:
 
