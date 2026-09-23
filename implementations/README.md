@@ -24,9 +24,13 @@ implementations/
 |   `-- specs/                #     backtest and eval YAML
 |-- boc_rate_decisions/       # 4 · Discrete-event reference: BoC cut/hold/hike direction
 |   `-- specs/                #     direction + binary backtest / eval / smoke YAML
+|-- ai_stocks_forecasting/    # 5 · NVDA news-grounded equity forecaster (scaffold in progress)
+|   `-- specs/                #     backtest and eval YAML
 |-- tests/                    # tests for implementation-specific helper modules
 `-- pyproject.toml            # local workspace packaging
 ```
+
+`ai_stocks_forecasting/` is a **work-in-progress scaffold**, not yet a finished reference implementation: it is a copy of the energy/oil Python modules with the package name rewired. Its data path, specs, shock definition, numerical baselines, statistics contract (`signals.py`), analyst prompt strings, shock task spec, and a draft master-strategy schema (`NvdaStrategyState`) are retargeted (`build_nvda_service()` registers NVDA's adjusted close as `nvda_stock_price`). The factory names, the scenario task, the adaptive agent, and the skills are still WTI-targeted. See [`ai_stocks_forecasting/README.md`](ai_stocks_forecasting/README.md) for what remains.
 
 YAML backtest and eval specs live under each use case in `specs/`. Each directory is independent; see its `README.md` for the walkthrough. For the build-phase moves — onboarding data, standing up an experiment, customizing an agent, auditing a result — see [`guides/`](../guides/). To chat with the concierge or a domain starter in the ADK browser UI, see [`guides/05-access-adk-web-via-ssh-tunnel.md`](../guides/05-access-adk-web-via-ssh-tunnel.md) (includes the Coder SSH tunnel).
 

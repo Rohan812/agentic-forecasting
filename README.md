@@ -13,6 +13,8 @@ The repo has two layers. A small core library (`aieng.forecasting`) owns cutoff-
 | 2 | [Food price forecasting](implementations/food_price_forecasting/) | Multivariate Canadian food CPI in the style of Canada's Food Price Report (nine sub-indices, 12-month trajectory, avg/avg YoY) | Naive last-value, AutoARIMA; report-grounded LLM-Process (quantile grid and sampled trajectory) |
 | 3 | [Energy / oil](implementations/energy_oil_forecasting/) | Daily WTI crude under regime-breaking news (continuous trajectory, binary up-shock, scenario analysis) | Prophet, LLM-Process, news-grounded agent, code-executing agent, adaptive (curriculum-trained) agent |
 | 4 | [BoC rate decisions](implementations/boc_rate_decisions/) | Will the Bank of Canada cut, hold, or hike at its next meeting? (ordered categorical; binary cut-vs-not special case) | Climatological frequency, multinomial logistic, categorical LLM-Process, analyst agent; LLM-as-judge reasoning alignment |
+| 5 | [AI stocks (NVDA)](implementations/ai_stocks_forecasting/) | Daily NVDA price under AI/semiconductor news, with a discovery loop that graduates news patterns only after they clear a statistical gate | *scaffold in progress* — naive last-value and log-return AutoARIMA baselines scored on a 2025 backtest, with a pattern-graduation gate contract; agent layer still being retargeted from energy/oil |
+
 
 Also in this README: [Setup](#setup) · [Core concepts](#core-concepts) · [Repository layout](#repository-layout) · [Documentation](#documentation)
 
@@ -39,7 +41,7 @@ Use cases, methods, and links are in the [contents](#contents) table above. Each
 
 **Start here → #0 [`getting_started/`](implementations/getting_started/)** if the evaluation loop is new to you. That directory also includes [`99_repo_concierge.ipynb`](implementations/getting_started/99_repo_concierge.ipynb) — a lite-model repo guide for “how does this codebase work?” questions (`uv run adk run implementations/getting_started/concierge_agent` from the repo root).
 
-**Not sure where to start building?** Each of the four domain implementations (#1–#4) ends with a `99_starter_agent.ipynb` — a fresh, hackable **starter agent** (a `starter_agent/` module) with toggleable news search and code execution, two lightweight tool-usage skills, an interactive cell, and one scored forecast. It's the consistent "continue from here" entry point for taking any reference use case in an agentic direction, and a quick end-to-end test of that use case's agent stack.
+**Not sure where to start building?** Each of the four completed domain implementations (#1–#4) ends with a `99_starter_agent.ipynb` — a fresh, hackable **starter agent** (a `starter_agent/` module) with toggleable news search and code execution, two lightweight tool-usage skills, an interactive cell, and one scored forecast. It's the consistent "continue from here" entry point for taking any reference use case in an agentic direction, and a quick end-to-end test of that use case's agent stack.
 
 ## Time Series Data sources
 
@@ -138,7 +140,7 @@ New to the project? Open [`implementations/getting_started/00_environment_check.
 
 ### Populate the data cache
 
-Data is fetched once and cached locally (gitignored). Each implementation names the fetch script(s) it needs in its own `README.md` — for example `scripts/fetch_cpi.py` (getting started), `scripts/fetch_sp500_market.py` + `scripts/fetch_fred.py` (S&P 500), `scripts/fetch_wti.py` (energy), and `scripts/fetch_boc.py` and `scripts/fetch_boc_press_releases.py` (BoC). Run the relevant one before opening that implementation's notebooks:
+Data is fetched once and cached locally (gitignored). Each implementation names the fetch script(s) it needs in its own `README.md` — for example `scripts/fetch_cpi.py` (getting started), `scripts/fetch_sp500_market.py` + `scripts/fetch_fred.py` (S&P 500), `scripts/fetch_wti.py` (energy), `scripts/fetch_nvda.py` (AI stocks), and `scripts/fetch_boc.py` and `scripts/fetch_boc_press_releases.py` (BoC). Run the relevant one before opening that implementation's notebooks:
 
 ```bash
 uv run python scripts/fetch_cpi.py

@@ -1,0 +1,46 @@
+# NVDA Eval Spec — 2026 Protected Prospective Competition
+#
+# Runs on 33 weekly origins from Jan 5, 2026 to Aug 17, 2026.
+# Target is NVIDIA's split- and dividend-adjusted daily close (yfinance: NVDA).
+# Horizons: 5, 10, 21 business days.
+#
+# The end date is the latest origin whose longest horizon (21 business days)
+# still resolves against available data. Keep it at least 21 business days
+# behind the most recent cached NVDA price (see scripts/fetch_nvda.py) so every
+# origin fully resolves; extend it as newer data accumulates.
+#
+# Cutoff note: all of 2026 is after the ~Jan 2025 training cutoff of both proxy
+# models, so this window measures forecasting rather than recall. It is the
+# honest comparison ground. See LLM_CUTOFFS.md.
+#
+# Shock coverage: the window contains one ±7% single-day move on 2026-02-06
+# (+7.9%). A second, on 2026-08-27 (+8.7%), falls inside the 21-business-day
+# horizon of the final origins rather than being an origin itself. Shocks are
+# scarce here by construction — a shock task scored on this window alone has
+# very few positives, so read Brier scores alongside the 2025 backtest.
+#
+# Cost note: 33 weekly origins is the full grid. Agent and LLM-Process runs are
+# priced per origin; subset the origins for exploratory runs and reserve the
+# full grid for scored comparisons.
+
+spec_id: nvda_eval
+
+description: >-
+  Prospective/out-of-sample evaluation period in 2026 for daily NVDA stock
+  price. Evaluates selected contender models on 33 weekly origins spanning
+  January through August 2026, entirely after both proxy models' training
+  cutoff, to measure real-time news-grounded forecasting performance.
+
+tasks:
+  - task_id: nvda_price_forecast
+    target_series_id: nvda_stock_price
+    horizons: [5, 10, 21]
+    frequency: B
+    description: >-
+      NVIDIA Corporation split- and dividend-adjusted daily close (yfinance
+      symbol: NVDA), projected 5, 10, and 21 trading days ahead.
+
+start: "2026-01-05"
+end: "2026-08-17"
+stride: 5
+warmup: 250

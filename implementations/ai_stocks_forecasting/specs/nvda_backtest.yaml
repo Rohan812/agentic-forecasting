@@ -1,0 +1,40 @@
+# NVDA Backtest Spec — 2025 Weekly Rolling Backtest
+#
+# Runs weekly origins across 2025. Stride is 5 business days (weekly).
+# Target is NVIDIA's split- and dividend-adjusted daily close (yfinance: NVDA).
+# Horizons: 5, 10, 21 business days.
+#
+# Origin count : 51 (weekly Mondays in 2025)
+# Warmup       : 250 trading days (~1 year) of historical prices
+#
+# Cutoff note: 2025 is mostly *after* the ~Jan 2025 training cutoff of both
+# proxy models, so LLM and agent rows are scored on genuinely unseen origins.
+# The first few January origins sit closest to the cutoff and should be read
+# with that in mind. See LLM_CUTOFFS.md.
+#
+# This window contains 7 single-day moves of at least ±7% (the shock threshold
+# in ai_stocks_forecasting.paths), clustered in Jan–Apr 2025 — enough shock
+# events for a meaningful per-regime error split.
+
+spec_id: nvda_backtest
+
+description: >-
+  Weekly rolling backtest in 2025 for daily NVDA stock price forecasting.
+  Evaluates trajectory forecasts (5, 10, 21 business days) with CRPS/MAE and
+  binary shock forecasts (a move of at least ±7% in one business day) with
+  Brier Score. Used to select the top contender models before the protected
+  2026 evaluation.
+
+tasks:
+  - task_id: nvda_price_forecast
+    target_series_id: nvda_stock_price
+    horizons: [5, 10, 21]
+    frequency: B
+    description: >-
+      NVIDIA Corporation split- and dividend-adjusted daily close (yfinance
+      symbol: NVDA), projected 5, 10, and 21 trading days ahead.
+
+start: "2025-01-06"
+end: "2025-12-22"
+stride: 5
+warmup: 250
