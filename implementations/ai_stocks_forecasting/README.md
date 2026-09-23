@@ -18,9 +18,10 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 7%`, both directions. Cache-path constants are still energy-named |
 | `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **pending** — NVDA calibration anchors |
 | `analysis.py`, `viz.py`, `prophet_baseline.py` | Shared analysis, plotting, Prophet baseline | domain-neutral; `score_backtest_results` fixed to honour `mae_horizon` (see below) |
-| `baselines.py` | *new* — not from energy | **done** — runs the two numerical baselines through a spec |
+| `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
 | `signals.py` | *new* — not from energy | **contract fixed, bodies pending** — the statistics gate (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard and coverage-vs-sharpness |
+| `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **pending** — semiconductor / AI-capex / export-control instructions |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **pending** — `NvdaStrategyState` with a `NewsPattern` field |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
@@ -91,30 +92,54 @@ uv run python -m ai_stocks_forecasting.baselines                   # 2025 backte
 uv run python -m ai_stocks_forecasting.baselines --spec nvda_eval  # 2026 protected eval
 ```
 
-[`baselines.py`](baselines.py) runs `LastValuePredictor` and `DartsAutoARIMAPredictor(num_samples=100)` through a spec and writes one YAML per predictor per task to `data/predictions/<spec_id>/`. Re-running is cheap — `cached_multi_backtest` loads whatever is already on disk and only computes what is missing; pass `--force` to recompute.
+[`baselines.py`](baselines.py) runs `LastValuePredictor` and `DartsAutoARIMAPredictor(num_samples=1000, log_transform=True)` through a spec and writes one YAML per predictor per task to `data/predictions/<spec_id>/`. Re-running is cheap: `cached_multi_backtest` loads whatever is already on disk and only computes what is missing. Pass `--force` to recompute.
 
 Committed reference outputs for the 2025 backtest live in [`data/predictions/nvda_backtest/`](data/predictions/nvda_backtest/), so the numbers below can be re-read without a re-run.
 
-### 2025 backtest results — 51 weekly origins
+### Why AutoARIMA is fitted on log prices
 
-| Predictor | Mean CRPS | MAE h=21 | 80% coverage |
-|---|---|---|---|
-| Naive (last value) | 10.67 | 13.44 | 0.0% (degenerate intervals) |
-| AutoARIMA | **10.03** | 16.46 | **14.5%** |
+With `log_transform=True` the model is fitted on `log(price)` and the samples are converted back with `exp`. AutoARIMA selects **`(0,1,0)` with drift at every origin**, and one difference of a log price is the log return. So this is a model of daily log returns: a random walk with a drift of about +0.12% a day. Its point forecast is the naive one plus that drift. What it adds is **honest intervals whose width scales with the price**, which makes it the naive forecast *as a distribution*. The zero-width naive predictor can't play that role.
+
+There are three reasons not to fit on raw dollars. NVDA rose about 3,600x across the training window. On raw prices AutoARIMA selected second differencing, which extends recent slopes in a straight line. A fixed-dollar error treats a $1 move in 2003 the same as one in 2025. And raw-level Gaussian intervals put probability on negative prices: one committed forecast had a 10th percentile of −$44.
+
+1,000 Monte Carlo samples, not 100, because the point forecast is the *median of the samples*. At 100 samples the 21-day median jittered by about 2.3% from origin to origin, enough to push the log model's MAE above naive's (11.17 against 10.67). At 1,000 the jitter drops to about 0.84% and MAE falls below naive.
+
+### 2025 backtest results: 51 weekly origins
+
+| Predictor | Mean CRPS | MAE | Median abs. error | 80% coverage |
+|---|---|---|---|---|
+| Naive (last value) | 10.67 | 10.67 | 8.85 | 0.0% (degenerate intervals) |
+| AutoARIMA (log returns) | **8.17** | **10.37** | **7.90** | **77.2%** |
 
 Per horizon (USD/share):
 
 | Horizon | CRPS naive | CRPS ARIMA | MAE naive | MAE ARIMA | ARIMA coverage | ARIMA 80% width |
 |---|---|---|---|---|---|---|
-| 5 bd | 8.23 | **7.45** | **8.23** | 8.56 | 10.6% | $3.91 |
-| 10 bd | 10.09 | **8.79** | **10.09** | 10.50 | 17.0% | $7.02 |
-| 21 bd | **13.44** | 13.54 | **13.44** | 16.46 | 15.7% | $12.74 |
+| 5 bd | 8.23 | **6.25** | 8.23 | **7.90** | 72.3% | $22.17 |
+| 10 bd | 10.09 | **7.60** | 10.09 | **9.70** | 80.9% | $31.66 |
+| 21 bd | 13.44 | **10.48** | 13.44 | **13.26** | 78.4% | $46.48 |
 
-**Read these two findings before building on top of them.**
+**Read these findings before building on top of them.**
 
-*AutoARIMA wins on CRPS but loses on point accuracy.* Its MAE is worse than the naive random walk at every horizon. It only leads on CRPS because the naive predictor emits degenerate (zero-width) intervals, so CRPS collapses to absolute error for it. On a liquid equity the random walk is a genuinely strong point forecast, and beating it is the real bar.
+*The honest floor is roughly 23% better than naive on CRPS, and almost all of that comes from the intervals.* The point forecasts differ only by the drift, and the point-error gap is small (10.37 against 10.67). The CRPS gap is large because the naive predictor emits a point mass, so its CRPS is just its absolute error. The log model is scored as a real distribution and is close to calibrated.
 
-*AutoARIMA is severely overconfident.* Its 80% intervals contain the outcome **14.5%** of the time, against a nominal 80%. A $3.91 interval at a 5-day horizon is far too narrow for a stock whose daily return standard deviation is 3.39%. This is the headline for the coverage-vs-sharpness chart: the numerical baseline sits at the extreme sharp-and-wrong corner, so a news-grounded agent with honestly wide intervals can beat it on coverage almost trivially. Claiming that as a win would be misleading — the honest comparison is CRPS, which penalises both miscalibration and vagueness.
+*It is already on the coverage line.* 77% realised against a nominal 80%, slightly narrow at the 5-day horizon (72%). **There is no cheap coverage win left for the agents**: widening intervals doesn't beat a floor that is already honest. The claims worth making are the same coverage from a narrower interval, or lower CRPS.
+
+*The headroom is in shock windows.* The floor's CRPS is 7.36 in quiet windows and 11.45 in windows that contain a ±7% day, the same pattern as before, now measured on an honest baseline. Anticipating those moves is what news grounding is meant to buy.
+
+*The drift is a modelling choice worth revisiting.* It is estimated from the whole history since 1999, so every forecast leans about +2.5% upward over 21 days, reflecting NVDA's long-run average return. A shorter fitting window is the obvious experiment.
+
+### The raw-price baseline, and why it was replaced
+
+An earlier version fitted AutoARIMA on raw prices, and every calendar gap reached the model as `NaN`. Its results are kept in [`data/predictions/archive/`](data/predictions/archive/) as evidence. They are not a baseline, and the chart loader doesn't pick them up. [`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) walks through the diagnosis. In short: NYSE was closed on 2025-01-09 for a national day of mourning. That put a `NaN` in the second-to-last training row, which flipped the selected model and produced a **−77% forecast** where the gap-free series gives +2.7%. The three worst forecasts in the backtest were exactly the three origins with a holiday in that position.
+
+| Variant | Mean CRPS | MAE | Largest miss | 80% coverage |
+|---|---|---|---|---|
+| Raw prices, `NaN` gaps (original) | 10.03 | 11.97 | $101.13 | 14.5% |
+| Raw prices, forward-filled | 9.06 | 10.48 | $30.96 | 13.8% |
+| **Log prices, forward-filled (shipped)** | **8.17** | **10.37** | $32.47 | **77.2%** |
+
+Forward-filling removes the blowups but does nothing for calibration. The log fit is what makes the intervals honest. Both fixes are now in the core `DartsAutoARIMAPredictor`: forward-filling is on by default for every caller, and `log_transform` is opt-in.
 
 ### A fix carried in this implementation
 
@@ -122,7 +147,7 @@ Per horizon (USD/share):
 
 ### Known gap: US market holidays
 
-145 of an expected 153 predictions (51 origins x 3 horizons) are scored. The 8 missing ones are horizons whose target date lands on a Monday US market holiday — MLK Day, Presidents' Day, Memorial Day, Labor Day 2025. Pandas' `BDay` counts those as business days, the NYSE does not trade, so there is no actual to score against and the harness drops the prediction. Only the 5- and 10-day horizons are affected; 21 business days from a Monday always lands on a Tuesday. This is correct behaviour, not a bug, but it means horizon counts are uneven (5 bd: 47, 10 bd: 47, 21 bd: 51) and per-horizon means are not over identical origin sets.
+145 of an expected 153 predictions (51 origins x 3 horizons) are scored. The 8 missing ones are horizons whose target date lands on a Monday US market holiday — MLK Day, Presidents' Day, Memorial Day, Labor Day 2025. Pandas' `BDay` counts those as business days, the NYSE does not trade, so there is no actual to score against and the harness drops the prediction. Only the 5- and 10-day horizons are affected; 21 business days from a Monday always lands on a Tuesday. This is correct behaviour, not a bug, but it means horizon counts are uneven (5 bd: 47, 10 bd: 47, 21 bd: 51) and per-horizon means are not over identical origin sets. The same calendar mismatch on the *fitting* side, holidays reaching the model as `NaN`, was a real bug, fixed as described above.
 
 ## The statistics contract (`signals.py`)
 
@@ -171,11 +196,14 @@ backtest and the protected 2026 window.
 
 The coverage chart plots realised coverage of the 80% interval against its mean width, one
 panel per horizon. On the nominal-80% line is honest, below is overconfident, above is vague;
-further left on the line is better. **It exists to prevent a specific false conclusion:**
-because the numerical floor is so overconfident, an agent with honestly wide intervals beats
-it on coverage almost for free. Walking to the line by widening intervals until they contain
-everything is not a result. The claim worth making is moving *left* along the line, or
-improving CRPS, which penalises vagueness and miscalibration together.
+further left on the line is better. The log-return AutoARIMA floor sits close to the line, so
+**an agent cannot win by widening its intervals.** Walking to the line that way is not a
+result. The claim worth making is moving *left* along the line, the same coverage from a
+narrower interval, or improving CRPS, which penalises vagueness and miscalibration together.
+
+[`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) is the root-cause analysis of the
+original raw-price baseline's −77% forecast, described above. It reads the archived results
+and deliberately refits with the old code path, so the failure stays reproducible.
 
 Colour encodes the predictor **family**, marker shape the individual predictor. The
 categorical palette is only validated for colourblind separation up to three series on a

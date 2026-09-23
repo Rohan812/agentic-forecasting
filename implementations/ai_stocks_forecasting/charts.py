@@ -107,6 +107,7 @@ def _display_name(predictor_id: str) -> str:
     pretty = {
         "last_value_naive": "Naive (last value)",
         "darts_autoarima": "AutoARIMA",
+        "darts_autoarima_log": "AutoARIMA (log returns)",
         "darts_lightgbm": "LightGBM",
         "prophet_daily": "Prophet",
     }
@@ -210,12 +211,15 @@ def _panel(ax: Axes, summary: pd.DataFrame, horizon: int, markers: dict[str, str
     """Draw one horizon's panel."""
     ax.set_facecolor(SURFACE)
     ax.axhline(NOMINAL_COVERAGE, color=INK_MUTED, linestyle="--", linewidth=1.2, zorder=1)
+    # Reference label on the left: well-calibrated predictors have wide intervals
+    # and sit on the line at the right, while the left end of the line is where
+    # the degenerate zero-width baseline lives, far below it.
     ax.text(
-        0.99,
+        0.01,
         NOMINAL_COVERAGE + 1.5,
         "nominal 80%",
         transform=ax.get_yaxis_transform(),
-        ha="right",
+        ha="left",
         fontsize=8.5,
         color=INK_MUTED,
     )
@@ -238,12 +242,16 @@ def _panel(ax: Axes, summary: pd.DataFrame, horizon: int, markers: dict[str, str
                 zorder=3,
                 label=f"{predictor} · {family}",
             )
+            # A point near the nominal line would put a label above it straight
+            # onto the dashed line, so near the line the label goes underneath.
+            near_line = abs(row["coverage_80"] - NOMINAL_COVERAGE) < 12
             ax.annotate(
                 predictor,
                 (row["mean_width"], row["coverage_80"]),
                 textcoords="offset points",
-                xytext=(0, 14),
+                xytext=(0, -18 if near_line else 14),
                 ha="center",
+                va="top" if near_line else "baseline",
                 fontsize=9,
                 color=INK_SECONDARY,  # text wears ink tokens, never the series colour
                 zorder=4,
