@@ -1,4 +1,10 @@
-"""WTI crude oil analyst agent configurations and prompt builder.
+"""NVDA equity analyst agent configurations and prompt builder.
+
+The instruction strings are NVDA-targeted (semiconductor cycle, hyperscaler AI
+capex, export controls, supply chain). The factory and prompt-builder names
+still carry the ``wti`` prefix inherited from the energy/oil parent; renaming
+them (``build_nvda_news_config`` and friends) is a separate step so that this
+change is prompt text only.
 
 Provides four :class:`~aieng.forecasting.methods.agentic.agent_factory.AgentConfig`
 factories that define progressive agent capability levels:
@@ -58,10 +64,11 @@ from pydantic import BaseModel
 # System prompt (root analyst agent)
 # ---------------------------------------------------------------------------
 
-_WTI_MULTITASK_ANALYST_INSTRUCTION = """\
+_NVDA_MULTITASK_ANALYST_INSTRUCTION = """\
 ## Role
 
-You are an expert WTI crude oil market analyst.
+You are an expert equity analyst covering NVIDIA (NASDAQ: NVDA) and the AI \
+semiconductor complex.
 
 ## Input
 
@@ -70,8 +77,8 @@ You will receive a JSON payload containing:
 - `as_of`: the forecast origin date (temporal cutoff)
 - `horizons`: integer horizon steps (business days ahead)
 - `standard_quantiles`: quantile levels for continuous forecasts (when applicable)
-- `origin_price_usd_bbl`: WTI close on the origin date
-- `target_history_csv`: compressed WTI daily close history
+- `origin_price_usd`: NVDA split-adjusted close on the origin date, USD per share
+- `target_history_csv`: compressed NVDA daily close history (split-adjusted)
 
 When context retrieval is enabled, call ``search_web`` BEFORE answering.
 
@@ -86,8 +93,8 @@ return the JSON directly as plain text with no preamble.\
 """
 
 
-def _build_wti_analyst_instruction() -> str:
-    """Build the tool-free WTI analyst instruction (price history only).
+def _build_nvda_analyst_instruction() -> str:
+    """Build the tool-free NVDA analyst instruction (price history only).
 
     Tool-specific guidance (web search, code exec, forecast tool) is appended
     by the config factories that enable those capabilities — never reference a
@@ -100,17 +107,19 @@ def _build_wti_analyst_instruction() -> str:
     schema = ContinuousAgentForecastOutput.prompt_schema_json()
     return (
         "## Role\n\n"
-        "You are an expert WTI crude oil market analyst. You produce calibrated "
-        "probabilistic price forecasts for WTI crude oil futures, grounded in "
-        "supply/demand fundamentals, geopolitical risk, and historical price dynamics.\n\n"
+        "You are an expert equity analyst covering NVIDIA (NVDA) and the AI "
+        "semiconductor complex. You produce calibrated probabilistic forecasts of "
+        "NVDA's split-adjusted share price, grounded in the AI-accelerator demand "
+        "cycle, hyperscaler capital expenditure, supply-chain capacity, export-control "
+        "policy, and NVDA's own historical return dynamics.\n\n"
         "## Forecasting contract\n\n"
         "You will receive a JSON payload containing:\n"
         "- `task`: the task identifier\n"
         "- `as_of`: the forecast origin date in YYYY-MM-DD format\n"
         "- `horizons`: a list of integer horizon steps (business days ahead)\n"
         "- `standard_quantiles`: the exact quantile levels you must produce\n"
-        "- `target_summary`: last close price, 52-week range, and observation count\n"
-        "- `target_history_csv`: WTI daily close history (recent 6 months daily, "
+        "- `target_summary`: last close price (USD/share), 52-week range, and observation count\n"
+        "- `target_history_csv`: NVDA split-adjusted daily close history (recent 6 months daily, "
         "older history as weekly averages)\n\n"
         "Rules:\n"
         "1. Produce one forecast for each horizon listed in `horizons`.\n"
@@ -127,14 +136,18 @@ def _build_wti_analyst_instruction() -> str:
         '`"quantiles"` is a **list** of `{"quantile": <level>, "value": <price>}` '
         "objects — not a dict. Omit any field not shown above.\n\n"
         "## Analysis discipline\n\n"
-        "Document your key assumptions (OPEC+ policy, shipping lane risk, inventory "
-        "levels, macro demand) in the `rationale` fields of your forecast output. "
+        "Document your key assumptions (data-center demand and hyperscaler capex "
+        "guidance, product-cycle timing, TSMC/CoWoS supply, export-control exposure, "
+        "earnings-date proximity, and the broad risk-on/risk-off tone of the market) "
+        "in the `rationale` fields of your forecast output. NVDA routinely moves 3-4% "
+        "in a day and 7%+ around earnings, so do not produce intervals narrower than "
+        "its realised volatility justifies. "
         "Reason only from the payload (and any tools listed in later sections of "
         "this instruction — if none are listed, you have no tools)."
     )
 
 
-_WTI_ANALYST_INSTRUCTION = _build_wti_analyst_instruction()
+_NVDA_ANALYST_INSTRUCTION = _build_nvda_analyst_instruction()
 
 # Appended only by configs that enable ContextRetrievalConfig (news / code / tool).
 _CONTEXT_RETRIEVAL_SUPPLEMENT = """
@@ -155,25 +168,34 @@ speculate about what the news might have said — proceed with price-history \
 and other available signals only, and note the gap in your rationale.
 
 Recommended queries (call ``search_web`` once per topic):
-- ``search_web(query="WTI crude oil price trend and OPEC+ supply decisions", cutoff_date=<as_of>)``
-- ``search_web(query="Persian Gulf geopolitical risk shipping lane disruptions", cutoff_date=<as_of>)``
-- ``search_web(query="US Strategic Petroleum Reserve policy and global demand outlook", cutoff_date=<as_of>)``
+- ``search_web(query="NVIDIA stock news, analyst revisions and next earnings date", cutoff_date=<as_of>)``
+- ``search_web(query="hyperscaler AI capex guidance and TSMC CoWoS AI accelerator supply", cutoff_date=<as_of>)``
+- ``search_web(query="US AI chip export controls China and AMD or custom-silicon competition with NVIDIA", cutoff_date=<as_of>)``
+
+Each ``search_web`` call runs a search plus an independent leakage-verifier \
+call, so keep to these three unless a result points at a specific event \
+(e.g. an earnings date inside the forecast horizon) that needs one follow-up.
 """
 
 # ---------------------------------------------------------------------------
 # Context retrieval instruction (sub-agent)
 # ---------------------------------------------------------------------------
 
-_WTI_CONTEXT_RETRIEVAL_INSTRUCTION = """\
-You are an oil market intelligence specialist with access to web search.
+_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION = """\
+You are a semiconductor and AI-infrastructure equity intelligence specialist \
+with access to web search.
 
 Search for information relevant to the query and return a concise structured \
 markdown summary (3-5 paragraphs) covering relevant aspects of:
-- WTI/Brent crude price level and recent trend
-- OPEC+ production decisions and supply outlook
-- Geopolitical risks in the Persian Gulf, Middle East, key shipping lanes
-- US Strategic Petroleum Reserve and energy policy signals
-- Notable tanker/shipping incidents or supply disruption signals
+- NVDA share price level, recent trend, and any unusually large recent moves
+- NVDA earnings: the next report date, guidance, and data-center revenue trend
+- Hyperscaler AI capital expenditure (Microsoft, Alphabet, Amazon, Meta, \
+Oracle) and signs of acceleration or pull-back
+- US export controls and trade policy affecting AI accelerators, especially \
+sales to China
+- Supply chain: TSMC advanced-node and CoWoS packaging capacity, HBM supply, \
+product-ramp timing (e.g. new GPU generations)
+- Competitive launches from AMD, Intel, and hyperscaler custom silicon
 - Published analyst forecasts or unusual price-target revisions
 
 Ground your summary in the search results you actually retrieve. \
@@ -240,7 +262,7 @@ Call it ONCE before producing your forecast, with:
 - `cutoff_date`: the `as_of` date from the payload (YYYY-MM-DD). This is the
   information cutoff — the model uses only data on or before it.
 - `horizons`: the `horizons` list from the payload.
-- `frequency`: "B" (WTI trades on business days).
+- `frequency`: "B" (NVDA trades on business days).
 
 The tool returns JSON with point forecasts and 80%/90% prediction intervals per
 horizon. Treat it as a disciplined statistical anchor: combine it with the
@@ -262,7 +284,7 @@ _SKILLS_ROOT = Path(__file__).parent / "skills"
 
 
 def compress_history(df: pd.DataFrame) -> str:
-    """Compress WTI daily history to stay within context limits.
+    """Compress NVDA daily history to stay within context limits.
 
     Returns daily bars for the most recent 6 months and weekly averages for
     older history.  The CSV header is ``date,close``.
@@ -304,7 +326,7 @@ def compress_history(df: pd.DataFrame) -> str:
 
 
 class WtiPriceForecastPromptBuilder(BaseModel):
-    """Prompt builder for WTI crude oil price forecasting tasks.
+    """Prompt builder for NVDA share-price forecasting tasks.
 
     Produces a structured JSON payload for the analyst agent containing the
     task specification, compressed price history, and a data summary.
@@ -348,7 +370,7 @@ class WtiPriceForecastPromptBuilder(BaseModel):
             "horizons": list(task.horizons),
             "standard_quantiles": list(STANDARD_QUANTILES),
             "target_summary": {
-                "last_close_usd_bbl": last_close,
+                "last_close_usd": last_close,
                 "last_date": last_date,
                 "n_trading_days": int(len(df)),
                 "52w_high": float(trailing_252.max()),
@@ -384,7 +406,7 @@ def build_wti_basic_config(model: str = LITE_MODEL) -> AgentConfig:
     return AgentConfig(
         name="wti_analyst_basic",
         model=model,
-        instruction=_WTI_ANALYST_INSTRUCTION,
+        instruction=_NVDA_ANALYST_INSTRUCTION,
     )
 
 
@@ -422,10 +444,10 @@ def build_wti_multitask_news_config(
     return AgentConfig(
         name="wti_analyst_multitask",
         model=model,
-        instruction=_WTI_MULTITASK_ANALYST_INSTRUCTION,
+        instruction=_NVDA_MULTITASK_ANALYST_INSTRUCTION,
         context_retrieval=ContextRetrievalConfig(
             enabled=True,
-            instruction=_WTI_CONTEXT_RETRIEVAL_INSTRUCTION,
+            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
             search_model=search_model,
             verifier_model=verifier_model,
             verifier_max_attempts=verifier_max_attempts,
@@ -477,10 +499,10 @@ def build_wti_news_config(
     return AgentConfig(
         name="wti_analyst_news",
         model=model,
-        instruction=_WTI_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT,
+        instruction=_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT,
         context_retrieval=ContextRetrievalConfig(
             enabled=True,
-            instruction=_WTI_CONTEXT_RETRIEVAL_INSTRUCTION,
+            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
             search_model=search_model,
             verifier_model=verifier_model,
             verifier_max_attempts=verifier_max_attempts,
@@ -538,11 +560,11 @@ def build_wti_code_exec_config(
     return AgentConfig(
         name="wti_analyst_code",
         model=model,
-        instruction=(_WTI_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _CODE_EXEC_SKILLS_SUPPLEMENT),
+        instruction=(_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _CODE_EXEC_SKILLS_SUPPLEMENT),
         max_output_tokens=max_output_tokens,
         context_retrieval=ContextRetrievalConfig(
             enabled=True,
-            instruction=_WTI_CONTEXT_RETRIEVAL_INSTRUCTION,
+            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
             search_model=search_model,
             verifier_model=verifier_model,
             verifier_max_attempts=verifier_max_attempts,
@@ -571,7 +593,7 @@ def build_wti_tool_config(
     This is the fourth analyst capability level. It combines bounded Google
     Search (temporal cutoff enforced) with a
     :class:`~aieng.forecasting.methods.agentic.forecast_tool.ForecastTool`
-    that runs AutoARIMA on the WTI series. In contrast to
+    that runs AutoARIMA on the NVDA series. In contrast to
     :func:`build_wti_code_exec_config` — which gives the agent open-ended code
     execution — this path exposes a rigid, pre-specified tool, trading
     flexibility for control and reproducibility.
@@ -585,7 +607,7 @@ def build_wti_tool_config(
         the lite model (``gemini-3.1-flash-lite-preview``) independently of ``model`` so that Gemini
         handles Google Search even when the analyst uses a different provider.
     data_service : DataService or None
-        Pre-populated data service with the WTI series registered. When
+        Pre-populated data service with the NVDA series registered. When
         ``None``, one is constructed via
         :func:`~ai_stocks_forecasting.data.build_nvda_service` (cache-backed).
         Series data is read by the tool but never enters the LLM context.
@@ -613,10 +635,10 @@ def build_wti_tool_config(
     return AgentConfig(
         name="wti_analyst_tool",
         model=model,
-        instruction=(_WTI_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _FORECAST_TOOL_SUPPLEMENT),
+        instruction=(_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _FORECAST_TOOL_SUPPLEMENT),
         context_retrieval=ContextRetrievalConfig(
             enabled=True,
-            instruction=_WTI_CONTEXT_RETRIEVAL_INSTRUCTION,
+            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
             search_model=search_model,
             verifier_model=verifier_model,
             verifier_max_attempts=verifier_max_attempts,

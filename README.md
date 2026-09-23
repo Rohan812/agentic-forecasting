@@ -15,6 +15,7 @@ The repo has two layers. A small core library (`aieng.forecasting`) owns cutoff-
 | 4 | [BoC rate decisions](implementations/boc_rate_decisions/) | Will the Bank of Canada cut, hold, or hike at its next meeting? (ordered categorical; binary cut-vs-not special case) | Climatological frequency, multinomial logistic, categorical LLM-Process, analyst agent; LLM-as-judge reasoning alignment |
 | 5 | [AI stocks (NVDA)](implementations/ai_stocks_forecasting/) | Daily NVDA price under AI/semiconductor news, with a discovery loop that graduates news patterns only after they clear a statistical gate | *scaffold in progress* — naive last-value and log-return AutoARIMA baselines scored on a 2025 backtest, with a pattern-graduation gate contract; agent layer still being retargeted from energy/oil |
 
+
 Also in this README: [Setup](#setup) · [Core concepts](#core-concepts) · [Repository layout](#repository-layout) · [Documentation](#documentation)
 
 > **👉 First time here? Run the environment check.** After `uv sync` (see [Setup](#setup)), open [`implementations/getting_started/00_environment_check.ipynb`](implementations/getting_started/00_environment_check.ipynb) and run it top to bottom. It's a self-guided preflight that verifies every capability — proxy LLM inference, Langfuse, E2B code execution, StatCan/FRED data access, and an end-to-end mini backtest — and tells you exactly what to fix when something isn't set up. **Do this before anything else.**

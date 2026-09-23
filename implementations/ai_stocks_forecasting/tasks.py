@@ -56,7 +56,7 @@ class WtiMultitaskPromptBuilder(BaseModel):
             "as_of": str(context.as_of)[:10],
             "horizons": list(task.horizons),
             "standard_quantiles": list(STANDARD_QUANTILES),
-            "origin_price_usd_bbl": float(last_row["value"]),
+            "origin_price_usd": float(last_row["value"]),
             "target_history_csv": compress_history(df),
         }
         return json.dumps(payload, indent=2)
@@ -153,7 +153,8 @@ class ScenarioAgentForecastOutput(AgentForecastOutput):
 # Notebook 03 copies these into editable cells; the factory uses these defaults.
 
 TASK_TRAJECTORY_SPEC = (
-    "Forecast the WTI crude oil price at each horizon listed in the payload "
+    "Forecast NVDA's split-adjusted closing share price (USD) at each horizon "
+    "listed in the payload "
     "(`horizons`, business days ahead).\n\n"
     "Rules:\n"
     "  - Produce one forecast for each horizon in `horizons`.\n"
@@ -168,18 +169,38 @@ TASK_TRAJECTORY_SPEC = (
 )
 
 TASK_SHOCK_SPEC = (
-    f"Estimate P(up) — the probability that WTI will close MORE THAN\n"
-    f"${int(SHOCK_THRESHOLD)}/bbl HIGHER than today's price at the end of\n"
-    f"{SHOCK_HORIZON} trading days.\n\n"
-    "This is a directional upside question only.\n\n"
-    "Calibration guidance:\n"
-    "  - No unusual upside catalyst       -> base rate ~10-15%\n"
-    "  - Escalating unconfirmed risk      -> 20-40%\n"
-    "  - Confirmed supply disruption      -> 60-85%\n\n"
+    f"Estimate P(shock) — the probability that NVDA's close {SHOCK_HORIZON} "
+    f"trading day(s) after `as_of` differs from the `as_of` close by at least "
+    f"{SHOCK_THRESHOLD:g}% in EITHER direction (|return| >= {SHOCK_THRESHOLD:g}%).\n\n"
+    "This is a two-sided magnitude question: a large drop counts exactly like a "
+    "large rally. Report which way you lean in `direction_bias`, but the "
+    "probability is for a move of either sign.\n\n"
+    "Calibration anchors (NVDA, 2020-2024, share of sessions with a move this large;\n"
+    "trailing vol = std of daily returns over the previous 21 sessions):\n"
+    "  - Any session, unconditional                     -> ~4%\n"
+    "  - Calm tape (trailing vol < 2.5%), no earnings    -> ~1%\n"
+    "  - Normal tape (trailing vol 2.5-3.5%), no earnings -> ~4%\n"
+    "  - Elevated vol (trailing vol > 3.5%), no earnings -> ~6%\n"
+    "  - Session right after a >=7% move                -> ~8%\n"
+    "  - Next session is the reaction to NVDA's own quarterly results "
+    "(reported after the close) -> ~40%\n\n"
+    "Start from the anchor that matches the price history and the calendar, then "
+    "move away from it only for a specific, dated catalyst inside the horizon "
+    "(e.g. an announced export-control ruling, a hyperscaler capex guidance "
+    "change, a major competitor launch). Generic AI enthusiasm or a strong "
+    "trend is not a catalyst. Probabilities above ~15% outside an earnings "
+    "reaction need a named event. Upside shocks were more common than downside "
+    "(31 up vs 21 down).\n\n"
     "If a `set_model_response` tool is available, call it with your complete "
     "JSON as `json_response`. Otherwise return the JSON directly as plain text.\n\n"
     "Required JSON format:\n" + DiscreteAgentForecastOutput.prompt_schema_json()
 )
+"""Two-sided NVDA shock question with base-rate anchors.
+
+The anchors come from :func:`ai_stocks_forecasting.shock_anchors.anchor_table`
+over 2020-2024 at the committed ``SHOCK_THRESHOLD`` / ``SHOCK_HORIZON``; re-run
+that module and update these numbers if either constant changes.
+"""
 
 TASK_SCENARIOS_SPEC = (
     "Identify the three scenarios that oil market analysts and experts are most "
