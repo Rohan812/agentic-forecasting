@@ -22,7 +22,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
-| `signals.py` | *new* — not from energy | **flagging and control sampling done**; split, scoring, gate and regime labels pending (see below) |
+| `signals.py` | *new* — not from energy | **flagging, control sampling and the train/holdout split done**; scoring, gate and regime labels pending (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
@@ -39,7 +39,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Finish `signals.py` | train/holdout split (after the model cutoff), Fisher's exact + bootstrap, the gate, regime labels — each with tests |
+| Finish `signals.py` | Fisher's exact + bootstrap, the gate, regime labels — each with tests |
 | Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
@@ -174,15 +174,15 @@ imports these functions and nothing else from the statistics layer.
 ```python
 flag_shock_windows(prices_df, threshold_pct=7.0, horizon_days=1) -> list[Window]
 sample_matched_controls(windows, prices_df, n_each=1, seed=None, *, threshold_pct=7.0) -> list[Window]
-train_holdout_split(windows, holdout_fraction=0.5)               -> tuple[list[Window], list[Window]]
+train_holdout_split(windows)                                     -> tuple[list[Window], list[Window]]
 evaluate_pattern(pattern_matches, shock_labels, base_rate=None)  -> PatternMetrics
 gate_pass(metrics, holdout_metrics)                              -> bool
 label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 ```
 
-`Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows` and
-`sample_matched_controls` are implemented and tested**; the other functions keep their final
-signatures and raise `NotImplementedError` until their own tasks land.
+`Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows`,
+`sample_matched_controls` and `train_holdout_split` are implemented and tested**; the other
+functions keep their final signatures and raise `NotImplementedError` until their own tasks land.
 
 **Shock windows.** A session is a shock when its simple return reaches ±5%, the same definition
 the shock task's prompt anchors use, so "shock" means one thing everywhere. Shocks on
@@ -201,6 +201,7 @@ independence but leave the gate fewer events: 93 at a 2-day gap, 53 at 5, 29 at 
    holdout's shocks are still in the data.
 2. **Within about six months of the shock.**
 3. **Closest to it in trailing 21-day volatility.**
+4. **On the same side of the holdout boundary**, and never straddling it (see below).
 
 The volatility rule matters most. Shocks cluster in volatile markets, so random controls come
 disproportionately from calm ones, and any headline that merely tracks volatility would then
@@ -215,6 +216,47 @@ volatility match collapsed and 41 of 117 events got no control. A small buffer a
 the safe side. A control near a shock's news occasionally matches a pattern and *lowers*
 measured lift, which makes the gate conservative. Calm controls *inflate* the lift of anything
 volatility-correlated, which makes it permissive.
+
+**Train / holdout split.** `train_holdout_split(windows)` splits by date, not by fraction. The
+boundary is `HOLDOUT_START = 2025-02-01`, the first month neither proxy model remembers
+([`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md)):
+
+- **Train** is everything before 2025-02-01. January 2025 counts as train, because it sits on
+  the cutoff boundary.
+- **The holdout** is Feb–Dec 2025, and a window must lie wholly inside it, its news cutoff
+  included.
+- **2026 is in neither.** It's the protected evaluation.
+
+The original plan split 2024 in half. That fails for a subtle reason: both models remember
+2024, and memorisation *raises* in-sample precision. A remembered pattern would pass a 2024
+holdout just as easily as its training data. Only data the models cannot remember tests a
+pattern.
+
+On the real pipeline (flag → sample → split, 2020 onward) the split gives:
+
+| Split | Shocks | Controls | Base rate |
+|---|---|---|---|
+| Train (2020 – Jan 2025) | 119 | 119 | 0.50 |
+| Holdout (Feb–Dec 2025) | 13 | 13 | 0.50 |
+
+The 2026 windows are excluded. Any split with fewer than `MIN_SPLIT_SHOCKS = 10` shocks is
+**refused with an error** rather than returned: at ±7% the holdout would hold 4, and the
+gate's holdout criterion would be decided by noise.
+
+Two details worth knowing:
+
+- **Controls stay with their shock's period.** That's rule 4 above. Without it, controls for
+  2025 shocks drifted into 2024 and 2026, and the holdout ended up with 13 shocks but only 5
+  controls.
+- **The holdout's volatility match is looser than train's**, 3.28% against the shocks' 3.76%
+  (train: 3.51% against 3.52%). Its 13 shocks cluster in the volatile spring of 2025, and a short
+  window offers few volatile quiet days. Matching still closes most of the gap: random quiet
+  days from the same months sit at 2.21%.
+
+**One caveat for anyone reading 2025 results: the holdout overlaps the 2025 backtest spec.** A
+pattern graduated because it held up in Feb–Dec 2025 will flatter any 2025 backtest of a
+forecaster that uses it. The honest measure of a pattern-using forecaster is the protected
+2026 evaluation.
 
 A pattern graduates to the master strategy file only if *all five* criteria hold:
 

@@ -15,10 +15,13 @@ import pandas as pd
 from ai_stocks_forecasting.paths import SHOCK_THRESHOLD
 from ai_stocks_forecasting.signals import (
     CONTROL_EXCLUSION_DAYS,
+    HOLDOUT_END,
+    HOLDOUT_START,
     VOL_WINDOW_DAYS,
     Window,
     flag_shock_windows,
     sample_matched_controls,
+    train_holdout_split,
 )
 
 
@@ -171,3 +174,86 @@ def test_controls_reject_non_shock_windows() -> None:
         assert "shock windows only" in str(exc)
     else:
         raise AssertionError("Expected a ValueError for a non-shock window.")
+
+
+# ── Train / holdout split ─────────────────────────────────────────────────────
+
+
+def _window(event: str, is_shock: bool = True) -> Window:
+    """Build a one-session window whose news cutoff is the previous business day."""
+    event_date = pd.Timestamp(event)
+    return Window(
+        as_of=event_date - pd.offsets.BDay(1),
+        event_date=event_date,
+        is_shock=is_shock,
+        return_pct=6.0 if is_shock else 0.5,
+        direction="up" if is_shock else None,
+    )
+
+
+def test_split_puts_the_holdout_after_the_model_cutoff() -> None:
+    """Train is everything before the cutoff, holdout is Feb-Dec 2025, and 2026 is in neither.
+
+    January 2025 goes to train: it sits on the cutoff boundary, so it may be
+    remembered.  A window whose news cutoff falls before the boundary and whose
+    move falls after it belongs to neither split.  The input is shuffled to
+    check each split comes back in date order.
+    """
+    train_shocks = [f"2024-{m:02d}-15" for m in range(1, 12)] + ["2025-01-15"]
+    holdout_shocks = [f"2025-{m:02d}-14" for m in range(2, 13)]
+    windows = [_window(d) for d in train_shocks + holdout_shocks]
+    windows += [_window("2024-12-10", is_shock=False), _window("2025-06-10", is_shock=False)]
+    straddler = _window("2025-02-03")  # a Monday: its as_of is Friday 2025-01-31
+    protected = [_window("2026-02-06"), _window("2026-03-10", is_shock=False)]
+    windows += [straddler, *protected]
+    windows = [windows[i] for i in np.random.default_rng(0).permutation(len(windows))]
+
+    train, holdout = train_holdout_split(windows)
+
+    assert [w.event_date for w in train] == sorted(pd.Timestamp(d) for d in [*train_shocks, "2024-12-10"])
+    assert [w.event_date for w in holdout] == sorted(pd.Timestamp(d) for d in [*holdout_shocks, "2025-06-10"])
+    assert straddler not in train + holdout
+    assert not any(w in train + holdout for w in protected), "The protected 2026 evaluation must not be touched."
+
+
+def test_split_refuses_a_holdout_too_small_to_judge() -> None:
+    """Four holdout shocks, like the old ±7% threshold gave, is refused with a message naming the fix."""
+    windows = [_window(f"2024-{m:02d}-15") for m in range(1, 13)]
+    windows += [_window(f"2025-{m:02d}-14") for m in (3, 5, 7, 9)]
+    try:
+        train_holdout_split(windows)
+    except ValueError as exc:
+        message = str(exc)
+        assert "holdout split holds 4 shock window(s)" in message
+        assert "SHOCK_THRESHOLD" in message
+    else:
+        raise AssertionError("Expected a ValueError for a four-shock holdout.")
+
+
+def test_controls_stay_on_their_shocks_side_of_the_holdout_boundary() -> None:
+    """A shock just before the cutoff gets only pre-cutoff controls; holdout shocks get only holdout ones.
+
+    Each shock's candidate window reaches far across a boundary, so without the
+    rule controls would cross it.  The March 2025 shock's window reaches back
+    to the holdout's first session (2025-02-03).  That session's own news
+    cutoff is 2025-01-31, so it straddles the boundary and must be skipped.
+    The December shock's window reaches into protected 2026.  Asking for more
+    controls than exist takes every eligible session, so the check is
+    deterministic.
+    """
+    rng = np.random.default_rng(2)
+    dates = pd.bdate_range("2024-06-03", "2026-03-31")
+    r = np.clip(rng.normal(0.0, 0.3 * T, len(dates) - 1), -0.8 * T, 0.8 * T)
+    for day, move in (("2025-01-22", 1.8 * T), ("2025-03-12", 1.8 * T), ("2025-12-22", -1.8 * T)):
+        r[dates.get_loc(pd.Timestamp(day)) - 1] = move
+    prices = _prices(r, start="2024-06-03")
+    shocks = flag_shock_windows(prices)
+    assert [w.event_date for w in shocks] == [pd.Timestamp(d) for d in ("2025-01-22", "2025-03-12", "2025-12-22")]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        before = sample_matched_controls(shocks[:1], prices, n_each=500, seed=0)
+        inside = sample_matched_controls(shocks[1:], prices, n_each=500, seed=0)
+
+    assert before and all(c.event_date < HOLDOUT_START for c in before)
+    assert inside and all(c.as_of >= HOLDOUT_START and c.event_date <= HOLDOUT_END for c in inside)

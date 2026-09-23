@@ -32,8 +32,9 @@ cutoff (February 2025 onward).
 
 Status
 ------
-**Partly implemented.**  :func:`flag_shock_windows` and
-:func:`sample_matched_controls` are implemented and tested.  The remaining
+**Partly implemented.**  :func:`flag_shock_windows`,
+:func:`sample_matched_controls` and :func:`train_holdout_split` are implemented
+and tested.  The remaining
 functions keep their final signatures and raise :class:`NotImplementedError`
 until their own tasks land.
 """
@@ -162,6 +163,39 @@ CONTROL_POOL_MULTIPLE = 5
 Taking only the nearest matches would make the draw deterministic and could
 re-use the same handful of days.  Sampling from a small pool keeps the match
 tight while leaving the seed meaningful.
+"""
+
+
+# ── Holdout ───────────────────────────────────────────────────────────────────
+# Where train stops and validation starts.  Module constants for the same reason
+# as the gate thresholds: they define what "validated" means for every
+# graduated pattern.
+
+HOLDOUT_START = pd.Timestamp("2025-02-01")
+"""First day of the holdout: the first month neither proxy model remembers.
+
+``LLM_CUTOFFS.md`` measured it.  The lite model still recalls the 2025-01-02
+close and first fails on 2025-02-03; the advanced model's recall ends in
+2024-11.  A holdout inside the remembered period cannot catch a memorised
+pattern.  Memorisation *raises* in-sample precision, so a remembered pattern
+passes a remembered holdout just as easily as its training split.
+"""
+
+HOLDOUT_END = pd.Timestamp("2025-12-31")
+"""Last day of the holdout: the day before the protected 2026 evaluation.
+
+The 2026 window is kept for the final forecasting claim.  No shock or control
+from it may enter pattern discovery or validation.
+"""
+
+MIN_SPLIT_SHOCKS = 10
+"""Fewest shock windows either split may hold before :func:`train_holdout_split` refuses.
+
+At the committed ±5% threshold the holdout holds 13 shock events; at the earlier
+±7% it held 4, and that is the kind of configuration this floor exists to reject.
+With a handful of shocks, one extra hit swings holdout lift enormously, and the
+``MIN_HOLDOUT_LIFT`` criterion would be passed or failed by chance.  10 leaves a
+little room below 13 for events a caller filters out.
 """
 
 
@@ -381,6 +415,13 @@ def sample_matched_controls(
        their trailing volatility is to the shock's, measured over the
        :data:`VOL_WINDOW_DAYS` returns before the episode began.  The controls
        are then sampled from the best :data:`CONTROL_POOL_MULTIPLE` ``* n_each``.
+    4. **On the same side of the holdout boundary.**  Before :data:`HOLDOUT_START`,
+       inside the holdout, or after :data:`HOLDOUT_END` (protected), the same as
+       the shock, and never straddling a boundary.  Without this rule,
+       controls for 2025 holdout shocks drift into 2024 or 2026.  On the real
+       data, the holdout ended up with 13 shocks but only 5 controls, and its
+       base rate no longer matched train's.  The sampler was also reading
+       protected-period sessions.
 
     The volatility match is the one that matters most.  Shocks cluster in
     volatile markets, so controls drawn at random come mostly from calm ones.
@@ -406,7 +447,13 @@ def sample_matched_controls(
     vol_before = returns.rolling(VOL_WINDOW_DAYS).std().shift(1).to_numpy()
     ret = returns.to_numpy()
 
-    excluded = np.isnan(vol_before)  # also covers the first session, which has no prior day
+    # Each session's period: 0 before the holdout, 1 inside it, 2 protected. A
+    # control must share its shock's period and must not straddle a boundary
+    # (its news cutoff, the previous session, on the other side).
+    period = np.where(dates < HOLDOUT_START, 0, np.where(dates <= HOLDOUT_END, 1, 2))
+    straddles = np.concatenate([[True], period[1:] != period[:-1]])
+
+    excluded = np.isnan(vol_before) | straddles  # also covers the first session, which has no prior day
     for p in np.flatnonzero(np.abs(np.nan_to_num(ret)) >= threshold_pct):
         excluded[max(0, p - CONTROL_EXCLUSION_DAYS) : p + CONTROL_EXCLUSION_DAYS + 1] = True
     for w in windows:
@@ -420,7 +467,7 @@ def sample_matched_controls(
         w = windows[i]
         event = position[w.event_date]
         candidates = np.arange(max(0, event - CONTROL_WINDOW_DAYS), min(n, event + CONTROL_WINDOW_DAYS + 1))
-        candidates = candidates[~excluded[candidates] & ~used[candidates]]
+        candidates = candidates[~excluded[candidates] & ~used[candidates] & (period[candidates] == period[event])]
         if candidates.size < n_each:
             warnings.warn(
                 f"Only {candidates.size} eligible control(s) near the shock on {w.event_date.date()}; wanted {n_each}.",
@@ -446,40 +493,83 @@ def sample_matched_controls(
     ]
 
 
-def train_holdout_split(
-    windows: list[Window],
-    holdout_fraction: float = 0.5,
-) -> tuple[list[Window], list[Window]]:
-    """Split windows into a discovery set and a validation set.
+def train_holdout_split(windows: list[Window]) -> tuple[list[Window], list[Window]]:
+    """Split windows into a discovery set and a post-cutoff validation set.
 
     Parameters
     ----------
     windows
-        Shock and control windows combined.
-    holdout_fraction
-        Share of windows reserved for validation.
+        Shock and control windows, from :func:`flag_shock_windows` and
+        :func:`sample_matched_controls`.
 
     Returns
     -------
     tuple[list[Window], list[Window]]
-        ``(train, holdout)``.
+        ``(train, holdout)``, each ordered by ``event_date``.  ``train`` holds
+        every window whose ``event_date`` is before :data:`HOLDOUT_START`.
+        ``holdout`` holds every window that lies wholly inside
+        [:data:`HOLDOUT_START`, :data:`HOLDOUT_END`], its ``as_of`` included.
+        Windows after :data:`HOLDOUT_END` belong to the protected evaluation and
+        are in neither.  So is a window that straddles :data:`HOLDOUT_START`,
+        with its news cutoff before the boundary and its move after it.
+
+    Raises
+    ------
+    ValueError
+        If either split holds fewer than :data:`MIN_SPLIT_SHOCKS` shock windows.
+        The gate would still run, but its holdout criterion would be decided by
+        noise, so refusing is the honest answer.
 
     Notes
     -----
-    The split must be **chronological, not random**.  A random split lets a
-    pattern discovered from one half of an earnings cycle validate on the other
-    half of the same cycle, which measures memorisation rather than
-    generalisation. Splitting on time is the only version that answers the
-    question the gate is actually asking.
+    **The split is by date, not by fraction, and certainly not random.**  A
+    random split lets a pattern found in one half of an earnings cycle validate
+    on the other half of the same cycle.  A chronological split inside
+    2020-2024, as first planned, still fails: both proxy models remember that
+    period, so a memorised pattern would pass its holdout as easily as its
+    training data.  Only data the models cannot remember tests a pattern, and
+    that means a holdout that starts after the measured cutoff.
 
-    Both halves need enough shocks to be assessable — see :data:`MIN_MATCHES`.
-    At ±5% there are 117 shock events in 2020-2024 and 13 in Feb-Dec 2025, the
-    clean window after the model cutoff.  ``LLM_CUTOFFS.md`` explains why a
-    holdout inside the remembered period cannot catch memorised patterns.  The
-    implementation should refuse, loudly, rather than return a holdout too
-    small to validate anything.
+    **Controls stay with their shock's split.**  :func:`sample_matched_controls`
+    draws every control from the same period as its shock, so each split keeps
+    its shock-to-control ratio.  Windows built some other way are split by
+    their own dates, like everything else.  :func:`evaluate_pattern` computes
+    each split's base rate from that split's own windows either way.
+
+    **The holdout overlaps the 2025 backtest spec.**  A pattern graduated
+    because it held up in Feb-Dec 2025 will flatter any 2025 backtest of a
+    forecaster that uses it.  The pattern was selected partly for working
+    there.  The honest measure of a pattern-using forecaster is the protected
+    2026 evaluation.
+
+    This function sets no lower bound on ``train``.  Pass windows from the
+    discovery period (2020 onward) rather than the whole price history.
     """
-    raise NotImplementedError("Phase 1, Team Signals T2")
+
+    def by_date(w: Window) -> pd.Timestamp:
+        return w.event_date
+
+    train = sorted((w for w in windows if w.event_date < HOLDOUT_START), key=by_date)
+    holdout = sorted(
+        (w for w in windows if w.as_of >= HOLDOUT_START and w.event_date <= HOLDOUT_END),
+        key=by_date,
+    )
+
+    for name, part in (("train", train), ("holdout", holdout)):
+        n_shocks = sum(w.is_shock for w in part)
+        if n_shocks < MIN_SPLIT_SHOCKS:
+            hint = (
+                f"The holdout is {HOLDOUT_START:%Y-%m-%d} to {HOLDOUT_END:%Y-%m-%d}, the clean window after the "
+                "models' training cutoff. A lower SHOCK_THRESHOLD yields more events; at ±7% this window "
+                "holds only 4."
+                if name == "holdout"
+                else "Pass windows from the discovery period (2020 onward), before the holdout."
+            )
+            raise ValueError(
+                f"The {name} split holds {n_shocks} shock window(s); at least {MIN_SPLIT_SHOCKS} are needed "
+                f"for its lift to mean anything. {hint}"
+            )
+    return train, holdout
 
 
 def evaluate_pattern(
@@ -607,10 +697,13 @@ __all__ = [
     "CONTROL_EXCLUSION_DAYS",
     "CONTROL_POOL_MULTIPLE",
     "CONTROL_WINDOW_DAYS",
+    "HOLDOUT_END",
+    "HOLDOUT_START",
     "MAX_P_VALUE",
     "MIN_HOLDOUT_LIFT",
     "MIN_LIFT",
     "MIN_MATCHES",
+    "MIN_SPLIT_SHOCKS",
     "SHOCK_CLUSTER_GAP_DAYS",
     "VOL_WINDOW_DAYS",
     "Direction",
