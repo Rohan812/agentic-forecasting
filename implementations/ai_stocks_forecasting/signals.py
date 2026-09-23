@@ -22,11 +22,13 @@ The pipeline the functions compose into::
                                                                           True ──> written to the
                                                                                    master strategy file
 
-Why a gate at all: both proxy models were trained through roughly January 2025,
-so a candidate pattern drawn from 2024 data may be recalled narrative rather
-than analysis.  A memorised story that does not actually predict fails Fisher's
-exact test.  The gate is what makes a graduated pattern evidence instead of an
-assertion.
+Why a gate at all: a pattern is only evidence if it predicts on data it was
+not found on.  Note what the gate does *not* do: both proxy models remember
+2024 (see ``LLM_CUTOFFS.md`` at the repository root), and a pattern recalled
+from memory scores *well* in-sample, so train-split significance alone rewards
+leakage rather than catching it.  The holdout criterion is what protects the
+gate, and it only does so when the holdout windows fall after the model
+cutoff (February 2025 onward).
 
 Status
 ------

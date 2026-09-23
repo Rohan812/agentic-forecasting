@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, and the statistics contract are NVDA**; **the agent layer is still WTI-targeted** — prompt strings, task specs, and skills all describe crude oil. Retargeting them is the work of the tasks below.
+> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, shock task spec, and master-strategy schema are NVDA**. Still WTI-targeted: the config-factory and prompt-builder *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -16,13 +16,15 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 |------|--------------------|-----------------|
 | `data.py` | WTI `DataService` wiring (`CL=F` via `YFinanceDailyAdapter`) | **done** — `NVDA_SERIES_ID` + `build_nvda_service()`; covariate panel removed |
 | `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 7%`, both directions. Cache-path constants are still energy-named |
-| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **pending** — NVDA calibration anchors |
+| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±7% shock spec with measured anchors (see [Agent layer](#agent-layer)); scenario task still WTI |
+| `shock_anchors.py` | *new* — not from energy | **done** — reproduces the shock-spec calibration anchors from 2020–2024 |
 | `analysis.py`, `viz.py`, `prophet_baseline.py` | Shared analysis, plotting, Prophet baseline | domain-neutral; `score_backtest_results` fixed to honour `mae_horizon` (see below) |
 | `baselines.py` | *new* — not from energy | **done** — runs the two numerical baselines through a spec |
 | `signals.py` | *new* — not from energy | **contract fixed, bodies pending** — the statistics gate (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard and coverage-vs-sharpness |
-| `analyst_agent/` | Stateless news-grounded analyst + its skills | **pending** — semiconductor / AI-capex / export-control instructions |
-| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **pending** — `NvdaStrategyState` with a `NewsPattern` field |
+| `analyst_agent/` | Stateless news-grounded analyst + its skills | **instructions done** — analyst role, context-retrieval supplement, and search sub-agent target NVDA; factory names and the code-exec skills still WTI |
+| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema drafted** — `nvda_strategy_state.py` (`NvdaStrategyState`, `NewsPattern`); the agent, tools, and skills still use the WTI schema |
+| `docs/` | *new* — not from energy | [`nvda_glossary.md`](docs/nvda_glossary.md) (domain terms for prompts and pattern cues), [`phase0_demo_script.md`](docs/phase0_demo_script.md) |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
 
 Deliberately **not** copied: the energy notebooks, the committed WTI prediction YAMLs under `data/`, the 52 cached curriculum news files, the trained `wti-strategy-trained/` skill state, and the oil forecast animation. Those are WTI results, not scaffolding — the equivalents are produced here from NVDA runs. The energy `specs/` were not copied either; the NVDA specs below were written fresh rather than edited down from WTI ones.
@@ -36,7 +38,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Implement `signals.py` | flagging, control sampling, splits, Fisher's exact + bootstrap, the gate, regime labels — each with tests |
-| Retarget the agent layer | NVDA analyst instructions, shock task spec, strategy-state schema |
+| Finish the agent layer | `build_nvda_news_config` and an NVDA prompt builder (renaming the `build_wti_*` factories); wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
 
@@ -161,6 +163,45 @@ Callers should record the **reason** for a rejection into the per-experiment fil
 the boolean. "Rejected: lift 2.4 but holdout lift 0.9" tells the next study session
 something; `False` does not.
 
+## Agent layer
+
+**Analyst instructions** ([`analyst_agent/agent.py`](analyst_agent/agent.py)). The analyst role,
+context-retrieval supplement, and search sub-agent instruction are rewritten for NVDA. The WTI
+drivers (OPEC+, Gulf shipping, the SPR) are replaced by the AI-accelerator demand cycle,
+hyperscaler capex, TSMC/CoWoS and HBM supply, US export controls, and competitor launches. The
+recommended search queries are cut to three, because each `search_web` call also runs a
+leakage-verifier call. Payload keys dropped the oil unit: they are now `origin_price_usd` and
+`last_close_usd`.
+
+**Shock task** ([`tasks.py`](tasks.py) `TASK_SHOCK_SPEC`). This asks for P(|next-session return|
+≥ 7%) in either direction, matching `paths.SHOCK_THRESHOLD`. The WTI version was a one-sided
+upside question with guessed anchors. The NVDA anchors are measured over 2020–2024 by
+[`shock_anchors.py`](shock_anchors.py):
+
+| Condition (trailing vol = std of prior 21 daily returns) | Sessions | Shocks | Rate |
+|---|---|---|---|
+| All sessions | 1258 | 52 | 4.1% |
+| No earnings, calm (vol < 2.5%) | 474 | 4 | 0.8% |
+| No earnings, normal (2.5–3.5%) | 303 | 11 | 3.6% |
+| No earnings, elevated (vol > 3.5%) | 461 | 29 | 6.3% |
+| Session after a ≥7% move | 52 | 4 | 7.7% |
+| **Earnings reaction session** | 20 | 8 | **40%** |
+
+Earnings are by far the largest known source of shocks: a reaction session is about ten times
+as likely to be a shock as an average one. A news pattern therefore has to beat the earnings
+calendar, not just the unconditional rate. Re-run `uv run python -m
+ai_stocks_forecasting.shock_anchors` after any change to the threshold, and update the spec
+string to match.
+
+**Master strategy schema**
+([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py), draft).
+`NvdaStrategyState` extends `AdaptiveSkillState`. Its main field is `news_patterns: list[NewsPattern]`.
+Each pattern stores the train and holdout `PatternEvidence` it was graduated on, copied
+field-for-field from `signals.PatternMetrics` via `PatternEvidence.from_metrics`, along with its
+`source_experiment`. Only graduated patterns go in this file; candidates and rejections belong
+in the per-experiment trail. The WTI `skill_state.py` stays in place until the adaptive agent
+moves over to the new schema.
+
 ## Charts
 
 [`01_leaderboard_and_calibration.ipynb`](01_leaderboard_and_calibration.ipynb) holds the
@@ -184,7 +225,9 @@ means adding a predictor never repaints the existing ones between phases.
 
 ## Cutoff discipline
 
-Both proxy models (`gemini-3.1-flash-lite-preview`, `gemini-3.5-flash`) have a training cutoff around January 2025. Any agent scored on pre-cutoff origins is being measured on recall, not forecasting. This implementation follows the same discipline as energy and S&P 500: LLM-inclusive comparisons run on a 2025 backtest and a protected 2026 evaluation, and pre-cutoff windows stay numerical-only. Pattern discovery over 2024 data is allowed precisely because every candidate pattern has to clear a statistical gate — a memorised narrative that does not actually predict fails the test.
+The cutoff was measured, not assumed; see [`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md). `gemini-3.1-flash-lite-preview` recalls NVDA prices through 2025-01 and `gemini-3.5-flash` through 2024-11. Both refuse on every later window. Any agent scored on pre-cutoff origins is measured on recall, not forecasting. LLM comparisons therefore run on the 2025 backtest (from February, since January sits on the lite model's boundary) and on the protected 2026 evaluation. Pre-cutoff windows stay numerical-only.
+
+Pattern discovery over 2024 data is allowed, but that data is **contaminated**, and the statistical gate does not clean it. A pattern recalled from memory scores *well* in-sample. What protects a graduated pattern is a holdout split that falls after the cutoff.
 
 ## Relationship to the other implementations
 
