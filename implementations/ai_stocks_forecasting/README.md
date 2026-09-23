@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, shock task spec, and master-strategy schema are NVDA**. Still WTI-targeted: the config-factory and prompt-builder *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
+> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, news-grounded agent config (`build_nvda_news_config`), shock task spec, and master-strategy schema are NVDA**. Still WTI-targeted: the other config-factory and prompt-builder *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -25,7 +25,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `signals.py` | *new* — not from energy | **contract fixed, bodies pending** — the statistics gate (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
-| `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); `build_wti_*` factory names still WTI |
+| `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema drafted** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`; the agent's own instructions and skills still WTI |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
 
@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Implement `signals.py` | flagging, control sampling, splits, Fisher's exact + bootstrap, the gate, regime labels — each with tests |
-| Finish the agent layer | `build_nvda_news_config` and an NVDA prompt builder (renaming the `build_wti_*` factories); wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
+| Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
 
@@ -203,6 +203,18 @@ hyperscaler capex, TSMC/CoWoS and HBM supply, US export controls, and competitor
 recommended search queries are cut to three, because each `search_web` call also runs a
 leakage-verifier call. Payload keys dropped the oil unit: they are now `origin_price_usd` and
 `last_close_usd`.
+
+**News-grounded config** ([`analyst_agent/agent.py`](analyst_agent/agent.py) `build_nvda_news_config`).
+It combines the NVDA analyst instruction with cutoff-fenced web search. Every `search_web` call
+searches only up to the origin's `as_of`, and an independent leakage verifier checks the result;
+it runs on the advanced model, so it doesn't share the search model's blind spots. When
+verification fails, the analyst proceeds on price history rather than fill the gap from memory.
+The agent is named `nvda_analyst_news`, which matters because `AgentPredictor` builds its
+predictor id, and so the prediction's filename in the registry, from that name. The inherited
+WTI factory would have filed NVDA forecasts as `agent_predictor_wti_analyst_news_…`. Each origin
+costs about three searches plus three to nine verifier calls. Tests in
+`implementations/tests/ai_stocks_forecasting/test_analyst_agent.py` pin down the identity and the
+fence, and run offline.
 
 **Shock task** ([`tasks.py`](tasks.py) `TASK_SHOCK_SPEC`). This asks for P(|next-session return|
 ≥ 7%) in either direction, matching `paths.SHOCK_THRESHOLD`. The WTI version was a one-sided

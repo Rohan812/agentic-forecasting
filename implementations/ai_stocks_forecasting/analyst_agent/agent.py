@@ -1,16 +1,16 @@
 """NVDA equity analyst agent configurations and prompt builder.
 
 The instruction strings are NVDA-targeted (semiconductor cycle, hyperscaler AI
-capex, export controls, supply chain). The factory and prompt-builder names
-still carry the ``wti`` prefix inherited from the energy/oil parent; renaming
-them (``build_nvda_news_config`` and friends) is a separate step so that this
-change is prompt text only.
+capex, export controls, supply chain). The news-grounded factory is
+:func:`build_nvda_news_config`; the other factories and the prompt builder still
+carry the ``wti`` prefix inherited from the energy/oil parent and are renamed as
+their own tasks come up.
 
 Provides four :class:`~aieng.forecasting.methods.agentic.agent_factory.AgentConfig`
 factories that define progressive agent capability levels:
 
 1. :func:`build_wti_basic_config` — LLM reasons from price history alone (no tools).
-2. :func:`build_wti_news_config` — Adds bounded Google Search via a
+2. :func:`build_nvda_news_config` — Adds bounded Google Search via a
    :class:`~aieng.forecasting.methods.agentic.agent_factory.ContextRetrievalConfig`
    sub-agent with strict temporal cutoffs.
 3. :func:`build_wti_code_exec_config` — Adds Gemini native code execution and
@@ -456,39 +456,58 @@ def build_wti_multitask_news_config(
     )
 
 
-def build_wti_news_config(
+def build_nvda_news_config(
     model: str = LITE_MODEL,
     search_model: str = LITE_MODEL,
     verifier_model: str = ADVANCED_MODEL,
     verifier_max_attempts: int = 3,
     verifier_confidence_threshold: int = 8,
 ) -> AgentConfig:
-    """Build an :class:`AgentConfig` with bounded Google Search.
+    """Build the news-grounded NVDA analyst: price history plus cutoff-fenced web search.
 
-    Wires a :class:`~aieng.forecasting.methods.agentic.agent_factory.ContextRetrievalConfig`
-    sub-agent that enforces a temporal cutoff on retrospective search calls
-    (``as_of`` strictly before UTC today), preventing future information
-    from contaminating historical backtests. Live origins skip the fence.
-    An independent verifier call audits each historical search result
-    against the cutoff before it reaches the analyst (see
-    :class:`ContextRetrievalConfig`).
+    The analyst reads the JSON payload from the prompt builder and, before
+    forecasting, calls ``search_web`` on three NVDA topics: the stock and its
+    next earnings date, hyperscaler capex and TSMC/CoWoS supply, and export
+    controls and competition.  Each call goes to a
+    :class:`~aieng.forecasting.methods.agentic.agent_factory.ContextRetrievalConfig`
+    sub-agent that searches only up to ``cutoff_date`` (the origin's ``as_of``)
+    and then passes the result through an **independent leakage verifier**.
+    The verifier rejects anything it cannot confidently place before the
+    cutoff, retrying up to ``verifier_max_attempts`` times.  When every attempt
+    fails, the analyst receives ``[SEARCH_VERIFICATION_FAILED]``, and its
+    instruction tells it to proceed on price history alone rather than fill the
+    gap from memory.  Live origins (``as_of`` of today or later) skip the fence.
+
+    **The agent's name is part of the result's identity.**
+    :class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor` builds
+    its ``predictor_id`` as ``agent_predictor_<name>_<model>_<modality>``, and
+    that id is the filename key in the prediction registry and the label on the
+    charts.  The WTI factory this replaces named its agent ``wti_analyst_news``,
+    which would have filed NVDA forecasts under a WTI name.
+
+    **Cost.** Each ``search_web`` call is a search plus at least one verifier
+    call on ``verifier_model``, so an origin costs roughly three searches and
+    three to nine verifier calls on top of the analyst's own turn.  That is why
+    the instruction caps the recommended queries at three.
+
+    **Where results can be scored.** Both proxy models remember NVDA prices
+    through about January 2025 (see ``LLM_CUTOFFS.md``).  Scores on origins
+    before February 2025 measure recall, not forecasting.
 
     Parameters
     ----------
     model : str
         Model for the top-level analyst agent.
     search_model : str
-        Model for the context-retrieval (web-search) sub-tool. Defaults to
-        the lite model (``gemini-3.1-flash-lite-preview``) independently of ``model`` so that Gemini
-        handles Google Search even when the analyst uses a different provider.
+        Model for the context-retrieval (web-search) sub-tool. Defaults to the
+        lite model independently of ``model``, so Gemini handles Google Search
+        even when the analyst runs on a different model.
     verifier_model : str
-        Model for the independent temporal-leakage verifier that audits each
-        ``search_web`` result against ``cutoff_date`` before it is returned.
-        Defaults to the advanced model so it doesn't share ``search_model``'s
-        blind spots.
+        Model for the independent temporal-leakage verifier. Defaults to the
+        advanced model, so it doesn't share ``search_model``'s blind spots.
     verifier_max_attempts : int
-        Maximum search-then-verify attempts before giving up and returning
-        the ``[SEARCH_VERIFICATION_FAILED]`` sentinel.
+        Maximum search-then-verify attempts before returning the
+        ``[SEARCH_VERIFICATION_FAILED]`` sentinel.
     verifier_confidence_threshold : int
         Minimum verifier confidence (1-10) required to accept a result.
 
@@ -497,7 +516,7 @@ def build_wti_news_config(
     AgentConfig
     """
     return AgentConfig(
-        name="wti_analyst_news",
+        name="nvda_analyst_news",
         model=model,
         instruction=_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT,
         context_retrieval=ContextRetrievalConfig(
@@ -664,7 +683,7 @@ def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
     ----------
     config : AgentConfig
         Any of the configs produced by :func:`build_wti_basic_config`,
-        :func:`build_wti_news_config`, or :func:`build_wti_code_exec_config`.
+        :func:`build_nvda_news_config`, or :func:`build_wti_code_exec_config`.
 
     Returns
     -------
