@@ -7,7 +7,20 @@ honest comparison ground for the news-grounded agents:
   (``last_value_naive``) — the random-walk floor.  For a liquid equity this is
   a genuinely strong baseline, not a straw man.
 - :class:`~aieng.forecasting.methods.numerical.darts_arima.DartsAutoARIMAPredictor`
-  (``darts_autoarima``) — the conventional statistical baseline.
+  with ``log_transform=True`` (``darts_autoarima_log``) — the conventional
+  statistical baseline, fitted on log prices.  AutoARIMA selects ``d = 1``
+  there, so it is a model of daily log returns: in practice a random walk with
+  drift whose forecast sits close to the naive one, but with honest,
+  price-proportional intervals.  That makes it the naive forecast *as a
+  distribution*, which the zero-width ``last_value_naive`` cannot be.
+
+  It is fitted on log prices rather than raw dollars for three reasons.  NVDA
+  rose ~3,600x over the training window, so on raw prices AutoARIMA selected
+  second differencing and extrapolated recent slopes in a straight line; raw
+  dollar errors treat a $1 move in 2003 like a $1 move in 2025; and raw-level
+  Gaussian intervals put probability on negative prices.  The raw-price run's
+  results are kept in ``data/predictions/archive/`` as evidence for the
+  root-cause notebook, not as a baseline.
 
 Both are cutoff-safe and carry no LLM, so they can be scored on *any* window,
 including pre-cutoff ones where LLM rows would only be measuring recall.
@@ -50,13 +63,16 @@ SPECS_DIR = Path(__file__).parent / "specs"
 PREDICTIONS_DIR = Path(__file__).parent / "data" / "predictions"
 """Artefact store for prediction YAMLs, keyed by ``spec_id`` then predictor."""
 
-DEFAULT_ARIMA_SAMPLES = 100
+DEFAULT_ARIMA_SAMPLES = 1000
 """Monte Carlo sample count for AutoARIMA.
 
-Kept modest so a full 51-origin backtest finishes in a coffee break.  The
-sampling is what makes AutoARIMA probabilistic, so this number does affect
-CRPS slightly — raise it for a final scored comparison if the margin between
-predictors is thin.
+The point forecast is the *median of the samples*, so too few samples make the
+point forecast itself noisy.  With honest log-return intervals the 21-day
+predictive spread is wide (~14% in price terms), and at 100 samples the median
+jittered by about 2.3% between origins — enough to make a random walk with drift
+look *worse* than naive on MAE (11.17 vs 10.67).  At 1000 samples the jitter
+falls to about 0.84%, as expected from sqrt(10), and MAE drops to 10.29, better
+than naive.  Sampling is cheap next to the fit, so this costs little.
 """
 
 
@@ -91,7 +107,7 @@ def build_baseline_predictors(num_samples: int = DEFAULT_ARIMA_SAMPLES) -> list[
     num_samples : int
         Monte Carlo sample count handed to AutoARIMA.
     """
-    return [LastValuePredictor(), DartsAutoARIMAPredictor(num_samples=num_samples)]
+    return [LastValuePredictor(), DartsAutoARIMAPredictor(num_samples=num_samples, log_transform=True)]
 
 
 def run_baselines(

@@ -13,6 +13,23 @@ For multi-horizon tasks, the model is fitted once to ``n = max(task.horizons)``
 and samples are extracted at each requested horizon index from the resulting
 trajectory. This is more efficient than fitting once per horizon.
 
+Missing dates are forward-filled before fitting.  A business-day (``"B"``)
+calendar has a slot for every weekday, so every exchange holiday arrives as a
+gap; forward-filling reads it as a no-change day, which is what a closed market
+is.  Leaving the gaps as ``NaN`` is not safe: statsforecast's Kalman filter
+accepts them silently, and a single gap near the end of the series can flip the
+selected model order and corrupt the terminal state the forecast extrapolates
+from.  On NVDA, one unscheduled closure in the second-to-last row turned a +2.7%
+forecast into a -76% one.
+
+Pass ``log_transform=True`` for strictly positive, multiplicative series such
+as equity prices.  The model is then fitted on ``log(value)`` and samples are
+mapped back with ``exp``.  AutoARIMA's differencing turns a log-price fit into a
+model of log returns (it selects ``d = 1``), errors become proportional to the
+price level rather than fixed in currency units, and forecasts cannot go
+negative.  Because ``exp`` is monotonic, quantiles and the median transform
+exactly — no bias correction is needed.
+
 Usage::
 
     from aieng.forecasting.methods.darts_arima import DartsAutoARIMAPredictor
@@ -50,6 +67,13 @@ class DartsAutoARIMAPredictor(Predictor):
         Number of Monte Carlo samples used to build the predictive distribution.
         Higher values give smoother quantile estimates at the cost of compute.
         Default: 500.
+    log_transform : bool
+        Fit on ``log(value)`` and exponentiate the samples back.  Use for
+        prices and other strictly positive series whose moves scale with their
+        level.  Raises :class:`ValueError` if the series contains a
+        non-positive value.  Default: ``False``, so existing callers are
+        unchanged.  Changes :attr:`predictor_id`, so log and raw results never
+        collide in the prediction registry.
 
     Notes
     -----
@@ -61,13 +85,14 @@ class DartsAutoARIMAPredictor(Predictor):
       instead.
     """
 
-    def __init__(self, num_samples: int = 500) -> None:
+    def __init__(self, num_samples: int = 500, log_transform: bool = False) -> None:
         self._num_samples = num_samples
+        self._log_transform = log_transform
 
     @property
     def predictor_id(self) -> str:
         """Return a stable string identifier for this predictor."""
-        return "darts_autoarima"
+        return "darts_autoarima_log" if self._log_transform else "darts_autoarima"
 
     def predict(self, task: ForecastingTask, context: ForecastContext) -> list[Prediction]:
         """Produce probabilistic AutoARIMA forecasts for every horizon in the task.
@@ -92,6 +117,14 @@ class DartsAutoARIMAPredictor(Predictor):
 
         series_df = context.get_series(task.target_series_id)
 
+        if self._log_transform:
+            if (series_df["value"] <= 0).any():
+                raise ValueError(
+                    f"log_transform=True requires strictly positive values, but "
+                    f"{task.target_series_id!r} contains a value <= 0."
+                )
+            series_df = series_df.assign(value=np.log(series_df["value"]))
+
         ts = TimeSeries.from_dataframe(
             series_df,
             time_col="timestamp",
@@ -99,6 +132,10 @@ class DartsAutoARIMAPredictor(Predictor):
             fill_missing_dates=True,
             freq=task.frequency,
         )
+        # fill_missing_dates inserts NaN for every calendar slot with no
+        # observation (exchange holidays, on a "B" calendar). Forward-fill them:
+        # see the module docstring for why leaving them in is dangerous.
+        ts = TimeSeries.from_series(ts.to_series().ffill(), freq=task.frequency)
 
         model = AutoARIMA()
         model.fit(ts)
@@ -116,6 +153,8 @@ class DartsAutoARIMAPredictor(Predictor):
 
         for h in task.horizons:
             samples: np.ndarray = forecast_ts.all_values()[h - 1, 0, :]
+            if self._log_transform:
+                samples = np.exp(samples)
             payload = ContinuousForecast(
                 point_forecast=float(np.median(samples)),
                 quantiles={q: float(np.quantile(samples, q)) for q in STANDARD_QUANTILES},

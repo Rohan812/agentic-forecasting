@@ -82,7 +82,7 @@ from aieng.forecasting.methods.agentic import (
 
 | Module | Class | Description |
 |---|---|---|
-| `numerical/darts_arima.py` | `DartsAutoARIMAPredictor` | Univariate Darts AutoARIMA with probabilistic multi-horizon output via Monte Carlo sampling. |
+| `numerical/darts_arima.py` | `DartsAutoARIMAPredictor` | Univariate Darts AutoARIMA with probabilistic multi-horizon output via Monte Carlo sampling. Calendar gaps (e.g. exchange holidays on a `"B"` calendar) are forward-filled before fitting; left as `NaN` they reached statsforecast silently, and one gap near the end could flip the selected order and wreck the forecast. `log_transform=True` fits on log values and exponentiates the samples back, for prices and other strictly positive series: it models log returns, keeps forecasts positive, and gives intervals proportional to the level. It changes `predictor_id` to `darts_autoarima_log`. Results committed before the forward-fill fix, under the plain `darts_autoarima` id, predate it; re-run with `force_refresh=True` to regenerate them. |
 | `numerical/darts_classical.py` | `DartsExponentialSmoothingPredictor` | Univariate state-space exponential smoothing (ETS); fast probabilistic baseline (non-seasonal by default, optional `seasonal_periods`). |
 | `numerical/darts_classical.py` | `DartsKalmanForecasterPredictor` | Univariate linear Gaussian state-space (Kalman) forecaster; fast probabilistic baseline with configurable latent dimension `dim_x`. |
 | `numerical/darts_regression.py` | `DartsLinearRegressionPredictor` | Darts linear regression predictor with optional past covariates and probabilistic output. |
