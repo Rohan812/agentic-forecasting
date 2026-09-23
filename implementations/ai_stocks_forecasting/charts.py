@@ -390,16 +390,17 @@ def _panel(ax: Axes, summary: pd.DataFrame, horizon: int, markers: dict[str, str
                 zorder=3,
                 label=f"{predictor} · {family}",
             )
-            # A point near the nominal line would put a label above it straight
-            # onto the dashed line, so near the line the label goes underneath.
+            # Near the nominal line, a label on the wrong side lands on the dashed
+            # line, so put it on the side facing away from the line.
             near_line = abs(row["coverage_80"] - NOMINAL_COVERAGE) < 12
+            below = near_line and row["coverage_80"] < NOMINAL_COVERAGE
             ax.annotate(
                 predictor,
                 (row["mean_width"], row["coverage_80"]),
                 textcoords="offset points",
-                xytext=(0, -18 if near_line else 14),
+                xytext=(0, -18 if below else 14),
                 ha="center",
-                va="top" if near_line else "baseline",
+                va="top" if below else "baseline",
                 fontsize=9,
                 color=INK_SECONDARY,  # text wears ink tokens, never the series colour
                 zorder=4,
