@@ -2,7 +2,8 @@
 
 Synthetic price paths with known answers.  Each test pins a property that is
 easy to get subtly wrong and that would bias the graduation gate without
-raising any error.
+raising any error.  Every magnitude is expressed relative to ``SHOCK_THRESHOLD``
+(``T``), so the tests keep meaning the same thing if the threshold changes.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from ai_stocks_forecasting.paths import SHOCK_THRESHOLD
 from ai_stocks_forecasting.signals import (
     CONTROL_EXCLUSION_DAYS,
     VOL_WINDOW_DAYS,
@@ -18,6 +20,11 @@ from ai_stocks_forecasting.signals import (
     flag_shock_windows,
     sample_matched_controls,
 )
+
+
+T = SHOCK_THRESHOLD
+CALM_VOL = 0.1 * T  # daily return std, in percent
+VOLATILE_VOL = 0.35 * T
 
 
 def _prices(returns_pct: np.ndarray, start: str = "2024-01-01") -> pd.DataFrame:
@@ -30,17 +37,20 @@ def _prices(returns_pct: np.ndarray, start: str = "2024-01-01") -> pd.DataFrame:
 def test_shocks_are_flagged_both_ways_with_the_prior_session_as_cutoff() -> None:
     """Moves past the threshold count in both directions, and the cutoff is the prior *session*.
 
-    Not tested at exactly 7.0%: a return rebuilt from prices lands a few ulps
+    Not tested at exactly ``T``: a return rebuilt from prices lands a few ulps
     either side of it, so an exact-boundary test would only test float rounding.
     """
     r = np.zeros(30)
-    r[9] = 7.5
-    r[19] = -8.0
-    r[4] = 6.9  # just below: not a shock
+    r[9] = 1.5 * T
+    r[19] = -1.6 * T
+    r[4] = 0.98 * T  # just below: not a shock
     prices = _prices(r)
 
     windows = flag_shock_windows(prices)
-    assert [(w.direction, round(w.return_pct, 6)) for w in windows] == [("up", 7.5), ("down", -8.0)]
+    assert [(w.direction, round(w.return_pct, 6)) for w in windows] == [
+        ("up", round(1.5 * T, 6)),
+        ("down", round(-1.6 * T, 6)),
+    ]
 
     dates = pd.DatetimeIndex(prices["timestamp"])
     for w in windows:
@@ -55,8 +65,8 @@ def test_a_cluster_is_one_event_whose_cutoff_precedes_the_whole_episode() -> Non
     episode's opening days inside the agent's news window.
     """
     r = np.zeros(40)
-    r[10], r[11], r[12] = 8.0, -15.0, 9.0  # one three-day episode
-    r[16] = 10.0  # three sessions later: a separate event
+    r[10], r[11], r[12] = 1.2 * T, -2.2 * T, 1.3 * T  # one three-day episode
+    r[16] = 1.4 * T  # three sessions later: a separate event
     prices = _prices(r)
     dates = pd.DatetimeIndex(prices["timestamp"])
 
@@ -64,23 +74,23 @@ def test_a_cluster_is_one_event_whose_cutoff_precedes_the_whole_episode() -> Non
     assert len(windows) == 2
 
     episode = windows[0]
-    assert episode.event_date == dates[12], "Anchor on the largest move (-15%)."
-    assert (episode.direction, round(episode.return_pct, 6)) == ("down", -15.0)
+    assert episode.event_date == dates[12], "Anchor on the largest move."
+    assert (episode.direction, round(episode.return_pct, 6)) == ("down", round(-2.2 * T, 6))
     assert episode.as_of == dates[10], "Cutoff is the session before the episode's first shock."
     assert windows[1].event_date == dates[17]
 
 
 def _regime_path(seed: int = 0) -> tuple[pd.DataFrame, list[int]]:
-    """Alternating 45-session calm (0.5% vol) and volatile (2% vol) blocks, shocks inside volatile blocks.
+    """Alternating 45-session calm and volatile blocks, with shocks planted inside volatile blocks.
 
-    Ordinary returns are clipped to ±5%, so the only shocks are the planted ones.
-    Returns the prices and the return indices of the planted shocks.
+    Ordinary returns are clipped below the threshold, so the only shocks are the
+    planted ones.  Returns the prices and the return indices of those shocks.
     """
     rng = np.random.default_rng(seed)
-    blocks = [0.5, 2.0, 0.5, 2.0, 0.5, 2.0, 0.5]
-    r = np.concatenate([np.clip(rng.normal(0.0, vol, 45), -5, 5) for vol in blocks])
+    blocks = [CALM_VOL, VOLATILE_VOL] * 3 + [CALM_VOL]
+    r = np.concatenate([np.clip(rng.normal(0.0, vol, 45), -0.8 * T, 0.8 * T) for vol in blocks])
     shock_idx = [45 + 30, 135 + 30]  # 30 sessions into volatile blocks, so trailing vol is pure
-    r[shock_idx[0]], r[shock_idx[1]] = 9.0, -9.0
+    r[shock_idx[0]], r[shock_idx[1]] = 1.8 * T, -1.8 * T
     return _prices(r), shock_idx
 
 
@@ -114,8 +124,8 @@ def test_controls_avoid_shocks_the_caller_did_not_pass_in() -> None:
     the check is deterministic.
     """
     rng = np.random.default_rng(1)
-    r = np.clip(rng.normal(0.0, 1.5, 200), -5, 5)
-    r[60], r[90] = 9.0, -9.0  # 30 sessions apart: the second lies inside the first's candidate window
+    r = np.clip(rng.normal(0.0, 0.3 * T, 200), -0.8 * T, 0.8 * T)
+    r[60], r[90] = 1.8 * T, -1.8 * T  # 30 sessions apart: the second lies inside the first's candidate window
     prices = _prices(r)
     dates = pd.DatetimeIndex(prices["timestamp"])
     shocks = flag_shock_windows(prices)
@@ -145,7 +155,7 @@ def test_controls_come_from_the_shocks_volatility_regime() -> None:
     close = prices.set_index("timestamp")["value"]
     vol_before = (close.pct_change() * 100).rolling(VOL_WINDOW_DAYS).std().shift(1)
     control_vol = vol_before.loc[[c.event_date for c in controls]]
-    midpoint = (0.5 + 2.0) / 2
+    midpoint = (CALM_VOL + VOLATILE_VOL) / 2
     assert (control_vol > midpoint).all(), f"Calm-regime controls drawn: {control_vol[control_vol <= midpoint]}"
 
 

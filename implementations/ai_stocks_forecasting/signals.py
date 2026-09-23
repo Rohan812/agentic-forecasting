@@ -85,9 +85,10 @@ MIN_MATCHES = 5
 """Minimum number of windows a pattern must match to be assessable.
 
 With fewer matches the confidence interval is so wide that a high precision
-carries no information.  This is the main reason the shock threshold was set at
-±7% rather than ±10%: at ±10% there are only 13 shock events in 2020-2024, so
-almost nothing could clear both this and :data:`MAX_P_VALUE`.
+carries no information.  Event counts drive the choice of shock threshold for
+the same reason.  At ±5% the clean post-cutoff window (Feb-Dec 2025) holds 13
+shock events.  At ±7% it held 4, too few for any holdout criterion to mean
+anything.
 """
 
 
@@ -99,20 +100,20 @@ almost nothing could clear both this and :data:`MAX_P_VALUE`.
 SHOCK_CLUSTER_GAP_DAYS = 1
 """Shocks this many trading days apart or closer are one event, not several.
 
-The default merges consecutive trading days.  Measured on 2020-2024 at ±7%, it
-turns 52 shock days into 48 events.  The only clusters are the COVID crash week
-(four shocks on 2020-03-12, 13, 16 and 17) and 2024-07-30/31.  Wider gaps merge
-more aggressively:
+The default merges consecutive trading days.  Measured on 2020-2024 at ±5%, it
+turns 151 shock days into 117 events.  23 of them are multi-day clusters; the
+longest is the COVID crash, nine consecutive shock sessions from 2020-03-09 to
+2020-03-19, which counts once.  Wider gaps merge more aggressively:
 
 ====  ======
 gap   events
 ====  ======
-0     52
-1     48
-2     44
-3     41
-5     35
-10    25
+0     151
+1     117
+2     93
+3     74
+5     53
+10    29
 ====  ======
 
 Wider is more conservative about independence, but leaves the gate fewer events.
@@ -128,18 +129,31 @@ deviation of the 21 daily returns *strictly before* the session, so it is
 something the agent could know at the origin.
 """
 
-CONTROL_WINDOW_DAYS = 63
-"""Controls are drawn within this many trading days (about a quarter) of their shock.
+CONTROL_WINDOW_DAYS = 126
+"""Controls are drawn within this many trading days (about six months) of their shock.
 
-This keeps each control in the same market era and roughly the same point in the
-earnings cycle as its shock, the "seasonal" half of the matching.
+This keeps each control in the same market era as its shock, the "seasonal"
+half of the matching.  It is wider than a quarter because at ±5% shocks are
+dense enough in volatile stretches that a quarter sometimes holds too few
+eligible, volatility-matched sessions: 2 of 117 shocks came up short at 63.
 """
 
-CONTROL_EXCLUSION_DAYS = 5
-"""No control within this many trading days (one week) of any shock, or of a window's span.
+CONTROL_EXCLUSION_DAYS = 2
+"""No control within this many trading days of any shock, or of a window's span.
 
-Otherwise a control lands inside the same news cycle as a shock, and the news
-that preceded the shock gets counted as preceding a "normal" day too.
+The buffer keeps controls out of a shock's immediate news cycle.  It is
+deliberately small because shocks are common at ±5%, 12% of sessions.  A
+one-week buffer (5) excluded almost every session in volatile periods.  Only
+calm sessions were left to be controls, the volatility match collapsed
+(control median trailing vol 2.64% against the shocks' 3.53%, no better than
+random), and 41 of 117 shocks got no control.  At 2 every shock gets its
+control and the match holds (3.51% against 3.53%).
+
+The two errors are not symmetric.  A control near a shock's news occasionally
+matches a pattern, which lowers measured lift: the gate gets more
+*conservative*.  Calm controls inflate the lift of anything that tracks
+volatility: the gate gets more *permissive*.  A small buffer is the safer side
+to err on.
 """
 
 CONTROL_POOL_MULTIPLE = 5
@@ -173,9 +187,9 @@ class Window:
         the label the gate scores patterns against.
     direction
         Sign of the move, for shocks only.  ``None`` for controls.  Present
-        because NVDA's shocks skew upward (31 up vs 21 down at ±7% over
-        2020-2024), so pooling directions inflates the apparent base rate for a
-        pattern that only predicts one of them.
+        because NVDA's shocks skew upward (87 up vs 64 down shock days at ±5%
+        over 2020-2024), so pooling directions inflates the apparent base rate
+        for a pattern that only predicts one of them.
     return_pct
         The realised move over the window, in percent, signed.
     regime
@@ -259,7 +273,7 @@ def flag_shock_windows(
         :meth:`~aieng.forecasting.data.service.DataService.get_series`.
     threshold_pct
         Absolute move, in percent, that counts as a shock.  Defaults to
-        :data:`~ai_stocks_forecasting.paths.SHOCK_THRESHOLD` (7.0).  Applied in
+        :data:`~ai_stocks_forecasting.paths.SHOCK_THRESHOLD` (5.0).  Applied in
         **both directions**.
     horizon_days
         Trading-day span the move is measured over.  Defaults to
@@ -459,9 +473,11 @@ def train_holdout_split(
     question the gate is actually asking.
 
     Both halves need enough shocks to be assessable — see :data:`MIN_MATCHES`.
-    With 52 shocks across 2020-2024 an even split leaves roughly 26 each, which
-    is workable but not generous; the implementation should refuse, loudly,
-    rather than return a holdout too small to validate anything.
+    At ±5% there are 117 shock events in 2020-2024 and 13 in Feb-Dec 2025, the
+    clean window after the model cutoff.  ``LLM_CUTOFFS.md`` explains why a
+    holdout inside the remembered period cannot catch memorised patterns.  The
+    implementation should refuse, loudly, rather than return a holdout too
+    small to validate anything.
     """
     raise NotImplementedError("Phase 1, Team Signals T2")
 

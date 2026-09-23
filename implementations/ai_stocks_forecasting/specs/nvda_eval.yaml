@@ -13,11 +13,11 @@
 # models, so this window measures forecasting rather than recall. It is the
 # honest comparison ground. See LLM_CUTOFFS.md.
 #
-# Shock coverage: the window contains one ±7% single-day move on 2026-02-06
-# (+7.9%). A second, on 2026-08-27 (+8.7%), falls inside the 21-business-day
-# horizon of the final origins rather than being an origin itself. Shocks are
-# scarce here by construction — a shock task scored on this window alone has
-# very few positives, so read Brier scores alongside the 2025 backtest.
+# Shock coverage: the window contains six ±5% single-day moves, 4 up and 2
+# down (2026-02-06 +7.9%, 02-26 -5.5%, 03-31 +5.6%, 05-06 +5.8%, 06-01 +6.3%,
+# 06-05 -6.2%). A seventh, 2026-08-27 (+8.7%), falls inside the 21-business-day
+# horizon of the final origins rather than being an origin itself. Six positives
+# are still few, so read Brier scores alongside the 2025 backtest.
 #
 # Cost note: 33 weekly origins is the full grid. Agent and LLM-Process runs are
 # priced per origin; subset the origins for exploratory runs and reserve the

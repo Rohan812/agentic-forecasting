@@ -15,8 +15,8 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | Path | Copied from energy | Retarget status |
 |------|--------------------|-----------------|
 | `data.py` | WTI `DataService` wiring (`CL=F` via `YFinanceDailyAdapter`) | **done** — `NVDA_SERIES_ID` + `build_nvda_service()`; covariate panel removed |
-| `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 7%`, both directions. Cache-path constants are still energy-named |
-| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±7% shock spec with measured anchors (see [Agent layer](#agent-layer)); scenario task still WTI |
+| `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 5%`, both directions. Cache-path constants are still energy-named |
+| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±5% shock spec with measured anchors (see [Agent layer](#agent-layer)); scenario task still WTI |
 | `shock_anchors.py` | *new* — not from energy | **done** — reproduces the shock-spec calibration anchors from 2020–2024 |
 | `analysis.py` | Shared scoring helpers | **fixed** — true 80% interval (q10–q90) and `mae_horizon` honoured; see *Two scoring fixes* |
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
@@ -62,27 +62,34 @@ It is idempotent, overwrites the cache with a fresh download, and prints the sho
 
 ## Shock definition
 
-A **shock is a single-day move of at least ±7%, in either direction** — `SHOCK_THRESHOLD = 7.0`, `SHOCK_HORIZON = 1` in [`paths.py`](paths.py). One day rather than five, because a single-day move isolates the reaction to a discrete news event; a multi-day window blends several events together and makes pattern attribution ambiguous.
+A **shock is a single-day move of at least ±5%, in either direction**: `SHOCK_THRESHOLD = 5.0`, `SHOCK_HORIZON = 1` in [`paths.py`](paths.py). One day rather than five, because a single-day move isolates the reaction to a discrete news event; a multi-day window blends several events together and makes pattern attribution ambiguous.
 
-The threshold is a balance between how unusual an event is and how many of them exist to learn from, measured over 2020–2024:
+The threshold was first set at ±7% and **lowered to ±5% to give the holdout enough events.** Both proxy models remember prices through about January 2025 ([`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md)), so a pattern only counts as evidence once it holds up after the cutoff. The clean window before the protected 2026 evaluation is Feb–Dec 2025, and after merging consecutive-day clusters it holds:
 
-| Threshold (1 day, both directions) | 2020–24 events | % of days | 2025 | 2026 YTD |
-|---|---|---|---|---|
-| ±5% | 151 (87 up / 64 down) | 12.0% | 19 | 7 |
-| **±7%** (committed) | **52 (31 up / 21 down)** | **4.1%** | **7** | **2** |
-| ±8% | 29 (19 up / 10 down) | 2.3% | 5 | 1 |
-| ±10% | 13 (10 up / 3 down) | 1.0% | 2 | **0** |
+| Threshold (1 day, both directions) | 2020–24 shock days | % of days | 2020–24 events | **Feb–Dec 2025 events (clean holdout)** | 2026 YTD events |
+|---|---|---|---|---|---|
+| **±5%** (committed) | **151 (87 up / 64 down)** | **12.0%** | **117** | **13** | **7** |
+| ±6% | 94 (53 up / 41 down) | 7.5% | 79 | 6 | 4 |
+| ±7% (previous) | 52 (31 up / 21 down) | 4.1% | 48 | 4 | 2 |
+| ±8% | 29 (19 up / 10 down) | 2.3% | 26 | 3 | 1 |
+| ±10% | 13 (10 up / 3 down) | 1.0% | 10 | 1 | 0 |
 
-NVDA's daily return standard deviation over 2020–24 is 3.39%, so ±7% is a 2.1σ day and ±10% a 2.9σ day. ±10% is the more intuitive "shock" but leaves 13 events to discover from and none at all in the 2026 evaluation window — the graduation gate would reject essentially everything, and a shock task scored on 2026 would have no positives. ±5% is the fallback if the gate still turns out to be starved of positives; switching is a one-line change to `SHOCK_THRESHOLD` plus a re-run.
+"Events" merge shocks on consecutive trading days (see *Shock windows* below). Only ±5% gives a double-digit holdout. At ±7%, four events could not support a holdout-lift criterion, since a single hit swings the lift enormously.
 
-Shocks are **asymmetric**: upside outnumbers downside roughly 3:2 at ±7% and 3:1 at ±10%. Pattern precision should be compared against a direction-aware base rate rather than a pooled one.
+**The cost is a milder "shock".** NVDA's daily return standard deviation over 2020–24 is 3.39%, so ±5% is about a 1.5σ day, and 12% of sessions qualify, against 4% at ±7%. The discovery loop is looking for news that precedes an *unusually large* day, not only a rare one.
+
+Shocks are **asymmetric**: upside outnumbers downside about 4:3 at ±5% and 3:1 at ±10%. Pattern precision should be compared against a direction-aware base rate rather than a pooled one.
+
+**Changing the threshold ripples out**, and the order matters:
+1. Re-run `uv run python -m ai_stocks_forecasting.shock_anchors` and update the anchors in `tasks.TASK_SHOCK_SPEC`.
+2. Re-check that `signals.sample_matched_controls` still finds volatility-matched controls. At ±5% its exclusion buffer had to shrink from 5 sessions to 2; see *Matched controls* below.
 
 ## Specs
 
 | Spec | Window | Origins | Purpose |
 |---|---|---|---|
-| [`specs/nvda_backtest.yaml`](specs/nvda_backtest.yaml) | 2025-01-06 → 2025-12-22, weekly | 51 | Model selection. 7 shock days (2 up / 5 down), clustered Jan–Apr. |
-| [`specs/nvda_eval.yaml`](specs/nvda_eval.yaml) | 2026-01-05 → 2026-08-17, weekly | 33 | Protected prospective evaluation. 1 shock day (2026-02-06, +7.9%). |
+| [`specs/nvda_backtest.yaml`](specs/nvda_backtest.yaml) | 2025-01-06 → 2025-12-22, weekly | 51 | Model selection. 19 shock days at ±5% (8 up / 11 down), 15 events after merging. The first origins sit on the model-cutoff boundary. |
+| [`specs/nvda_eval.yaml`](specs/nvda_eval.yaml) | 2026-01-05 → 2026-08-17, weekly | 33 | Protected prospective evaluation. 6 shock days at ±5% (4 up / 2 down). |
 
 Both use `task_id: nvda_price_forecast`, `target_series_id: nvda_stock_price`, horizons `[5, 10, 21]` business days, `warmup: 250`, and load as `MultiTargetBacktestSpec` (matching the energy/oil specs, not the single-task `BacktestSpec`).
 
@@ -128,7 +135,7 @@ Per horizon (USD/share):
 
 *Its intervals are too wide, not too narrow.* The 80% interval covers 90% of outcomes overall and 98% at 21 days. The likely cause is that volatility is estimated from all history since 1999, including the dot-com era, which was far more volatile than 2025. **So there is room to move left on the coverage chart:** a forecaster can tighten these intervals, keep coverage near 80%, and improve CRPS. Widening them can't win. Fitting the baseline on a shorter window is the cheap numerical version of that move, and is worth doing first, so the agents are measured against the best honest floor.
 
-*The headroom is in shock windows.* The floor's CRPS is 7.36 in quiet windows and 11.45 in windows that contain a ±7% day. Anticipating those moves is what news grounding is meant to buy.
+*The headroom is in shock windows.* The floor's CRPS is 6.83 in quiet windows and 10.31 in the 56 of 145 forecast windows that contain a ±5% day. Anticipating those moves is what news grounding is meant to buy.
 
 *The drift is also fitted on the whole history.* Every forecast leans about +2.5% upward over 21 days, reflecting NVDA's long-run average return, and outcomes land below the forecast median 43% of the time. A shorter window addresses this too.
 
@@ -177,25 +184,37 @@ label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 `sample_matched_controls` are implemented and tested**; the other functions keep their final
 signatures and raise `NotImplementedError` until their own tasks land.
 
-**Shock windows.** A session is a shock when its simple return reaches ±7%, the same definition
+**Shock windows.** A session is a shock when its simple return reaches ±5%, the same definition
 the shock task's prompt anchors use, so "shock" means one thing everywhere. Shocks on
-consecutive trading days are merged into **one event** (`SHOCK_CLUSTER_GAP_DAYS = 1`), so the
-four-day COVID crash in March 2020 counts once, not four times. A merged window is anchored on
-its largest move, but its news cutoff (`as_of`) is the session before the episode's *first*
-shock. Anchoring the cutoff on the largest move would let the agent read coverage of a crash
-already under way. On 2020–2024 this gives **48 events** (29 up / 19 down) from 52 shock days.
-Wider merge gaps are more conservative about independence but leave the gate fewer events: 44
-at a 2-day gap, 35 at 5, 25 at 10.
+consecutive trading days are merged into **one event** (`SHOCK_CLUSTER_GAP_DAYS = 1`). The COVID
+crash, nine consecutive shock sessions from 9 to 19 March 2020, therefore counts once, not nine
+times. A merged window is anchored on its largest move, but its news cutoff (`as_of`) is the
+session before the episode's *first* shock. Anchoring the cutoff on the largest move would let
+the agent read coverage of a crash already under way. On 2020–2024 this gives **117 events**
+(71 up / 46 down) from 151 shock days. Wider merge gaps are more conservative about
+independence but leave the gate fewer events: 93 at a 2-day gap, 53 at 5, 29 at 10.
 
-**Matched controls.** Each shock's controls are ordinary sessions that are (1) at least a week
-away from *every* shock in the price history, including shocks the caller didn't pass in,
-which matters when sampling controls for a training split while the holdout's shocks are
-still in the data; (2) within about a quarter of the shock; and (3) closest to it in
-**trailing 21-day volatility**. That last rule matters most. Shocks cluster in volatile markets,
-so random controls come disproportionately from calm ones, and any headline that merely tracks
-volatility would then look predictive. On 2020–2024 the matched controls' median trailing
-volatility is 3.61% against the shocks' 3.58%; random non-shock days sit at 3.35%, with a far
-calmer lower quartile (2.26% against 3.11%). Draws are seeded and never reuse a session.
+**Matched controls.** Each shock's controls are ordinary sessions that are:
+
+1. **At least two sessions away from *every* shock in the price history**, including shocks the
+   caller didn't pass in. That matters when sampling controls for a training split while the
+   holdout's shocks are still in the data.
+2. **Within about six months of the shock.**
+3. **Closest to it in trailing 21-day volatility.**
+
+The volatility rule matters most. Shocks cluster in volatile markets, so random controls come
+disproportionately from calm ones, and any headline that merely tracks volatility would then
+look predictive. On 2020–2024 all 117 events get a control. The matched controls' median
+trailing volatility is 3.51% against the shocks' 3.53%. Random non-shock days sit at 2.95%,
+with a far calmer lower quartile (2.20% against 3.05%). Draws are seeded and never reuse a
+session.
+
+**The buffer is two sessions because shocks are common at ±5%.** A one-week buffer excluded
+nearly every session in volatile stretches. That left only calm days to choose from, so the
+volatility match collapsed and 41 of 117 events got no control. A small buffer also errs on
+the safe side. A control near a shock's news occasionally matches a pattern and *lowers*
+measured lift, which makes the gate conservative. Calm controls *inflate* the lift of anything
+volatility-correlated, which makes it permissive.
 
 A pattern graduates to the master strategy file only if *all five* criteria hold:
 
@@ -207,9 +226,9 @@ A pattern graduates to the master strategy file only if *all five* criteria hold
 | `ci_low` | > 1.0 | the bootstrap interval on lift must exclude "no effect" |
 | `lift` (holdout) | ≥ 1.5 (`MIN_HOLDOUT_LIFT`) | some shrinkage is honest; a pattern that exists only where it was found is not |
 
-The conjunction is the point — each criterion alone is gameable. This is also the reason the
-shock threshold is ±7% and not ±10%: at ±10% there are 13 shock events in 2020–2024, so
-almost nothing could clear `MIN_MATCHES` and `MAX_P_VALUE` together.
+The conjunction is the point — each criterion alone is gameable. Event counts are also why the
+shock threshold is ±5%: the clean post-cutoff holdout (Feb–Dec 2025) holds 13 events at ±5%
+but only 4 at ±7%.
 
 Callers should record the **reason** for a rejection into the per-experiment file, not just
 the boolean. "Rejected: lift 2.4 but holdout lift 0.9" tells the next study session
@@ -238,21 +257,26 @@ costs about three searches plus three to nine verifier calls. Tests in
 fence, and run offline.
 
 **Shock task** ([`tasks.py`](tasks.py) `TASK_SHOCK_SPEC`). This asks for P(|next-session return|
-≥ 7%) in either direction, matching `paths.SHOCK_THRESHOLD`. The WTI version was a one-sided
+≥ 5%) in either direction, matching `paths.SHOCK_THRESHOLD`. The WTI version was a one-sided
 upside question with guessed anchors. The NVDA anchors are measured over 2020–2024 by
 [`shock_anchors.py`](shock_anchors.py):
 
 | Condition (trailing vol = std of prior 21 daily returns) | Sessions | Shocks | Rate |
 |---|---|---|---|
-| All sessions | 1258 | 52 | 4.1% |
-| No earnings, calm (vol < 2.5%) | 474 | 4 | 0.8% |
-| No earnings, normal (2.5–3.5%) | 303 | 11 | 3.6% |
-| No earnings, elevated (vol > 3.5%) | 461 | 29 | 6.3% |
-| Session after a ≥7% move | 52 | 4 | 7.7% |
-| **Earnings reaction session** | 20 | 8 | **40%** |
+| All sessions | 1258 | 151 | 12.0% |
+| No earnings, calm (vol < 2.5%) | 474 | 18 | 3.8% |
+| No earnings, normal (2.5–3.5%) | 303 | 38 | 12.5% |
+| No earnings, elevated (vol > 3.5%) | 461 | 85 | 18.4% |
+| Session after a ≥5% move | 151 | 34 | 22.5% |
+| **Earnings reaction session** | 20 | 10 | **50%** |
 
-Earnings are by far the largest known source of shocks: a reaction session is about ten times
-as likely to be a shock as an average one. A news pattern therefore has to beat the earnings
+These were regenerated at ±5% with `shock_anchors.py`; at ±7% the same script reproduces the
+original 4% / 1% / 4% / 6% / 8% / 40%. The prompt's rule that a probability needs a named
+catalyst moved from above ~15% to above ~30%. The old cap sat below several ordinary anchors
+at ±5%, so it now sits above the highest non-earnings anchor (22%).
+
+Earnings are by far the largest known source of shocks: a reaction session is about four times
+as likely to be a shock as an average one (50% against 12%). A news pattern therefore has to beat the earnings
 calendar, not just the unconditional rate. Re-run `uv run python -m
 ai_stocks_forecasting.shock_anchors` after any change to the threshold, and update the spec
 string to match.
