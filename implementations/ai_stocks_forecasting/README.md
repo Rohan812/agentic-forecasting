@@ -22,7 +22,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
-| `signals.py` | *new* — not from energy | **everything but regime labels done**: flagging, control sampling, the train/holdout split, pattern scoring and the gate (see below) |
+| `signals.py` | *new* — not from energy | **done** — flagging, control sampling, the train/holdout split, pattern scoring, the gate and regime labels, all tested (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
@@ -39,7 +39,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Finish `signals.py` | regime labels (`label_regimes`), with tests; decide whether to tighten the holdout rule (see *The gate*) |
+| Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
 | Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
@@ -182,9 +182,7 @@ gate_reasons(metrics, holdout_metrics)                           -> list[str]
 label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 ```
 
-`Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows`,
-`sample_matched_controls`, `train_holdout_split`, `evaluate_pattern` and `gate_pass` are implemented and tested**; the other
-functions keep their final signatures and raise `NotImplementedError` until their own tasks land.
+`Window` and `PatternMetrics` are frozen dataclasses. **Every function in the contract is implemented and tested.**
 
 **Shock windows.** A session is a shock when its simple return reaches ±5%, the same definition
 the shock task's prompt anchors use, so "shock" means one thing everywhere. Shocks on
@@ -334,6 +332,33 @@ real patterns now pass 71% of the time, and weaker ones about a quarter of the t
 pattern is only useful if it can be trusted, so rejecting some real patterns is the better
 error. The level is 0.10, looser than training's 0.05, because 0.05 on a 13-shock holdout
 would reject most real patterns too.
+
+**Regimes.** `label_regimes(prices)` adds two columns:
+
+- `realized_vol`: the standard deviation of the last 21 daily returns, known at the close.
+- `regime`: `low`, `normal` or `high`, relative to the 33rd and 67th percentiles of all
+  volatility *up to that day*.
+
+Because the percentiles only ever look backwards, a day's label never changes when later data
+arrives. Labels up to 2020 are identical whether or not 2021–2026 exists; a whole-series cut
+point would silently relabel the past. There is no label until a year of volatility history
+exists.
+
+Pass the **full history since 1999**. The extreme dot-com years and the calm 2004–2019 years
+balance out, so by the end of 2024 the cut points are **2.27% / 3.54%** daily volatility,
+almost exactly the 2.5% / 3.5% bands the shock-task anchors use. Over 2020–2024:
+
+| Regime | Share of days | Chance the next session is a ±5% shock | Shock events starting here |
+|---|---|---|---|
+| Low | 23% | 5.5% | 14 |
+| Normal | 41% | 9.7% | 45 |
+| High | 36% | 18.8% | 58 |
+
+Starting the history in 2015 instead would label half of 2020–2024 "high", because 2015–2019
+was unusually calm. The gate doesn't use regimes. They're for spotting degradation: a pattern
+that works in calm markets and stops working in volatile ones shows up in a per-regime split
+long before it shows up in pooled precision. `Window.regime` is left `None` by the flagging and
+sampling functions; look it up at `as_of` when a split is needed.
 
 ## Agent layer
 

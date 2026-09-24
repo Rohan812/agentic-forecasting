@@ -24,6 +24,7 @@ from ai_stocks_forecasting.signals import (
     MIN_HOLDOUT_LIFT,
     MIN_LIFT,
     MIN_MATCHES,
+    REGIME_MIN_HISTORY,
     VOL_WINDOW_DAYS,
     PatternMetrics,
     Window,
@@ -31,6 +32,7 @@ from ai_stocks_forecasting.signals import (
     flag_shock_windows,
     gate_pass,
     gate_reasons,
+    label_regimes,
     sample_matched_controls,
     train_holdout_split,
 )
@@ -447,3 +449,60 @@ def test_undefined_values_fail_instead_of_slipping_through() -> None:
     assert gate_reasons(_metrics(), never_tested) == [
         "matched no holdout windows, so it was never tested on data the models cannot remember"
     ]
+
+
+# ── Regimes ───────────────────────────────────────────────────────────────────
+
+
+def _vol_blocks(levels: list[float], block: int, seed: int = 4) -> np.ndarray:
+    """Daily returns in blocks of ``block`` sessions, each block at the given volatility level (percent)."""
+    rng = np.random.default_rng(seed)
+    return np.concatenate([rng.normal(0.0, vol, block) for vol in levels])
+
+
+def test_regime_labels_never_use_future_volatility() -> None:
+    """Labelling a prefix gives the same answer as labelling the whole series, over that prefix.
+
+    The series ends in a far more volatile stretch.  Full-sample cut points
+    would absorb it and relabel the calmer past; expanding cut points cannot
+    see it.
+    """
+    r = np.concatenate([_vol_blocks([1.0, 2.0, 3.0] * 4, block=50), _vol_blocks([9.0], block=150, seed=5)])
+    prices = _prices(r)
+    prefix = prices.iloc[:600]
+
+    whole, part = label_regimes(prices).iloc[:600], label_regimes(prefix)
+    assert part["regime"].notna().any(), "Precondition: the prefix is long enough to be labelled."
+    assert whole["regime"].tolist() == part["regime"].tolist()
+    np.testing.assert_allclose(whole["realized_vol"], part["realized_vol"])
+
+
+def test_regimes_track_volatility() -> None:
+    """After a mixed history, a very calm stretch is "low", a middling one "normal", a violent one "high".
+
+    Only sessions well inside each stretch are checked, once the 21-session
+    window holds nothing but that stretch.
+    """
+    warmup = _vol_blocks([1.0, 2.0, 3.0] * 5, block=50)  # 750 sessions of mixed history
+    tail = _vol_blocks([0.3, 2.0, 8.0], block=60, seed=6)
+    labels = label_regimes(_prices(np.concatenate([warmup, tail])))["regime"].tolist()
+
+    def stretch(k: int) -> list[str]:
+        start = 1 + len(warmup) + 60 * k  # +1: the price series starts one session before the returns
+        return labels[start + VOL_WINDOW_DAYS + 3 : start + 60]
+
+    assert set(stretch(0)) == {"low"}
+    assert stretch(1).count("normal") > len(stretch(1)) / 2
+    assert set(stretch(2)) == {"high"}
+
+
+def test_regimes_need_a_year_of_history_and_sane_cut_points() -> None:
+    """No label until a year of volatility exists, then every day is labelled; bad cut points are refused."""
+    labelled = label_regimes(_prices(_vol_blocks([1.0, 2.0], block=200)))
+    first = VOL_WINDOW_DAYS + REGIME_MIN_HISTORY - 1  # first price row with enough volatility history
+    assert labelled["regime"].iloc[:first].isna().all()
+    assert labelled["regime"].iloc[first:].notna().all()
+
+    for low, high in ((0.5, 0.5), (0.7, 0.3), (0.0, 0.6)):
+        with pytest.raises(ValueError, match="0 < low_quantile < high_quantile < 1"):
+            label_regimes(_prices(np.zeros(10)), low_quantile=low, high_quantile=high)

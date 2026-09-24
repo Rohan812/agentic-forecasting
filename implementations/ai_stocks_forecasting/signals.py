@@ -32,12 +32,10 @@ cutoff (February 2025 onward).
 
 Status
 ------
-**Partly implemented.**  :func:`flag_shock_windows`,
-:func:`sample_matched_controls`, :func:`train_holdout_split`,
-:func:`evaluate_pattern` and :func:`gate_pass` are implemented and tested;
-only :func:`label_regimes` remains.  The remaining
-functions keep their final signatures and raise :class:`NotImplementedError`
-until their own tasks land.
+**Implemented.**  Every function in the contract is implemented and tested:
+:func:`flag_shock_windows`, :func:`sample_matched_controls`,
+:func:`train_holdout_split`, :func:`evaluate_pattern`, :func:`gate_pass` (with
+:func:`gate_reasons`) and :func:`label_regimes`.
 """
 
 from __future__ import annotations
@@ -229,6 +227,17 @@ BOOTSTRAP_SEED = 0
 """Fixed so that a graduated pattern's interval is reproducible from its inputs."""
 
 
+# ── Regimes ───────────────────────────────────────────────────────────────────
+
+REGIME_MIN_HISTORY = 252
+"""Sessions of realised volatility needed before a day gets a regime label.
+
+About a year.  Cut points estimated from a few weeks of history would swing
+with every new session; before this much history, :func:`label_regimes` leaves
+the regime empty rather than guess.
+"""
+
+
 @dataclass(frozen=True)
 class Window:
     """One labelled observation window — either a shock or a matched control.
@@ -257,8 +266,10 @@ class Window:
     return_pct
         The realised move over the window, in percent, signed.
     regime
-        Volatility regime on :attr:`as_of`, from :func:`label_regimes`.  ``None``
-        until the regime labeller is wired in.  The gate does not use it, but
+        Volatility regime on :attr:`as_of`, looked up from
+        :func:`label_regimes`.  :func:`flag_shock_windows` and
+        :func:`sample_matched_controls` leave it ``None``; attach it when a
+        per-regime split is needed.  The gate does not use it, but
         per-regime precision splits are how the evaluation agent later decides
         whether a pattern is degrading.
     """
@@ -877,9 +888,12 @@ def label_regimes(
     Parameters
     ----------
     prices_df
-        Price history with ``timestamp`` and ``value`` columns.
+        Price history with ``timestamp`` and ``value`` columns.  Pass the
+        whole available history, not just the period of interest: the cut
+        points are relative to everything before each day (see Notes).
     window_days
-        Rolling window for realised volatility.
+        Rolling window, in sessions, for realised volatility.  The default of
+        21 matches :data:`VOL_WINDOW_DAYS` and the shock-task anchors.
     low_quantile, high_quantile
         Cut points, as quantiles of the realised-volatility distribution,
         separating ``"low"`` / ``"normal"`` / ``"high"``.
@@ -887,13 +901,40 @@ def label_regimes(
     Returns
     -------
     pd.DataFrame
-        ``prices_df`` plus ``realized_vol`` and ``regime`` columns.
+        A copy of ``prices_df`` with two columns added:
+
+        - ``realized_vol``: the standard deviation of the last ``window_days``
+          daily returns up to and including that day, in percent.  It is known
+          at that day's close.  For a session ``d`` it equals the
+          ``vol_before`` that :func:`sample_matched_controls` uses for the
+          session after it, so a window's regime at ``as_of`` describes the
+          same volatility its controls were matched on.
+        - ``regime``: ``"low"``, ``"normal"`` or ``"high"``, or ``None`` until
+          :data:`REGIME_MIN_HISTORY` sessions of volatility exist.
+
+    Raises
+    ------
+    ValueError
+        If the quantiles are not ``0 < low_quantile < high_quantile < 1``, or
+        ``window_days < 2``.
 
     Notes
     -----
-    Quantiles must be computed on an **expanding** basis, not over the whole
-    series: bucketing today against the full-sample distribution uses future
-    volatility to label the past, which leaks into anything scored per regime.
+    **Cut points are expanding, never full-sample.**  Each day is bucketed
+    against the volatility of every day up to and including it.  Bucketing
+    against the whole series would use future volatility to label the past,
+    and that leaks into anything scored per regime.  The consequence is that a
+    day's label never changes when later data arrives.
+
+    **The reference history matters.**  NVDA's history starts in the extreme
+    dot-com period (daily vol quantiles about 4.0% / 5.9% in 1999-2003),
+    followed by calm years (about 1.9% / 2.6% in 2015-2019).  Over the full
+    history since 1999 they balance out.  By the end of 2024 the cut points
+    are 2.27% / 3.54%, close to the 2.5% / 3.5% bands the shock-task anchors
+    use, and 2020-2024 splits 23% / 41% / 36% low / normal / high.  The
+    chance that the next session is a ±5% shock rises from 5.5% to 9.7% to
+    18.8% across them.  Starting the history in 2015 instead labels half of
+    2020-2024 "high".
 
     This is realised volatility from the price series itself, not VIX. A VIX
     covariate is a later addition and would be registered as its own series
@@ -904,7 +945,26 @@ def label_regimes(
     stopped working in a volatile one shows up as a regime split long before it
     shows up in pooled precision.
     """
-    raise NotImplementedError("Phase 1, Team Signals T5")
+    if not 0.0 < low_quantile < high_quantile < 1.0:
+        raise ValueError(
+            f"Quantiles must satisfy 0 < low_quantile < high_quantile < 1; got {low_quantile} and {high_quantile}."
+        )
+    if window_days < 2:
+        raise ValueError(f"window_days must be at least 2 to measure volatility; got {window_days}.")
+
+    close = _close_series(prices_df)
+    vol = (close.pct_change() * 100.0).rolling(window_days).std()
+    history = vol.expanding(min_periods=REGIME_MIN_HISTORY)
+    low_cut, high_cut = history.quantile(low_quantile), history.quantile(high_quantile)
+    regime = pd.Series(
+        np.where(vol < low_cut, "low", np.where(vol > high_cut, "high", "normal")), index=vol.index, dtype=object
+    ).where(low_cut.notna() & vol.notna(), None)
+
+    out = prices_df.copy()
+    stamps = pd.to_datetime(out["timestamp"])
+    out["realized_vol"] = stamps.map(vol).to_numpy()
+    out["regime"] = stamps.map(regime).to_numpy()
+    return out
 
 
 __all__ = [
@@ -922,6 +982,7 @@ __all__ = [
     "MIN_LIFT",
     "MIN_MATCHES",
     "MIN_SPLIT_SHOCKS",
+    "REGIME_MIN_HISTORY",
     "SHOCK_CLUSTER_GAP_DAYS",
     "VOL_WINDOW_DAYS",
     "Direction",
