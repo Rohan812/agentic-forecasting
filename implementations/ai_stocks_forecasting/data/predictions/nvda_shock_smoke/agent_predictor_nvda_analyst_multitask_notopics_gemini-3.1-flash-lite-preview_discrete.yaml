@@ -26,9 +26,9 @@ spec:
   - '2025-12-01T00:00:00'
   warmup: 250
   description: 'NVDA shock smoke: 5 holdout shocks + 5 matched controls'
-predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 predictions:
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:37:33.966963'
   as_of: '2025-02-04T00:00:00'
@@ -54,7 +54,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: ce01e0086b4461fd64a860409c76427e
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/ce01e0086b4461fd64a860409c76427e
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:37:44.574034'
   as_of: '2025-02-07T00:00:00'
@@ -79,7 +79,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: 3192f636cca18624b0fdf2002b413df9
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/3192f636cca18624b0fdf2002b413df9
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:37:59.002363'
   as_of: '2025-03-05T00:00:00'
@@ -105,7 +105,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: c0b86b4e4e89db9f07ea02e6d4ee05dd
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/c0b86b4e4e89db9f07ea02e6d4ee05dd
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:38:10.886508'
   as_of: '2025-03-13T00:00:00'
@@ -131,7 +131,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: d0754555928b9ef434bff84d00593d10
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/d0754555928b9ef434bff84d00593d10
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:38:28.832412'
   as_of: '2025-03-18T00:00:00'
@@ -155,7 +155,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: fa26ac2bba2ca002822cf5fcf59b2d4c
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/fa26ac2bba2ca002822cf5fcf59b2d4c
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:38:41.187641'
   as_of: '2025-04-08T00:00:00'
@@ -183,7 +183,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: f4c8aa1f10b735d29cedef776511ea9b
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/f4c8aa1f10b735d29cedef776511ea9b
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:38:51.335753'
   as_of: '2025-05-16T00:00:00'
@@ -207,7 +207,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: 109cc6100d739043a1321d96d867c265
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/109cc6100d739043a1321d96d867c265
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:39:03.389266'
   as_of: '2025-06-02T00:00:00'
@@ -232,7 +232,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: 945f621dc33d5b70ba2007bc0184f9c1
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/945f621dc33d5b70ba2007bc0184f9c1
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:39:14.253714'
   as_of: '2025-11-07T00:00:00'
@@ -260,7 +260,7 @@ predictions:
     confidence: medium
     langfuse_trace_id: e34c02dc7f96f195b1851aac9a6870fc
     langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/e34c02dc7f96f195b1851aac9a6870fc
-- predictor_id: agent_predictor_nvda_analyst_multitask_gemini-3.1-flash-lite-preview_discrete
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
   task_id: nvda_shock_1d
   issued_at: '2026-09-24T16:39:25.435029'
   as_of: '2025-12-01T00:00:00'

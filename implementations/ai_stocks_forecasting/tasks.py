@@ -186,6 +186,30 @@ TASK_TRAJECTORY_SPEC = (
     "Required JSON format:\n" + ContinuousAgentForecastOutput.prompt_schema_json()
 )
 
+_SHOCK_SEARCH_TOPICS = (
+    "Research before answering. Call `search_web` once per topic below, always "
+    "with `cutoff_date` equal to `as_of`:\n"
+    '  1. `search_web(query="NVIDIA stock move on <as_of> and what drove it", '
+    "cutoff_date=<as_of>)` — the session your price history does not show.\n"
+    '  2. `search_web(query="NVIDIA next earnings date and events scheduled for the '
+    "next trading session: US CPI, jobs report, FOMC, export-control rulings, major "
+    'product or hyperscaler earnings", cutoff_date=<as_of>)` — dated catalysts '
+    "inside the horizon.\n"
+    '  3. `search_web(query="breaking news on AI chip export controls, tariffs, '
+    'hyperscaler AI capex, or AMD and custom-silicon competition affecting NVIDIA", '
+    "cutoff_date=<as_of>)` — unscheduled catalysts.\n"
+    "Each search also runs a leakage-verifier call, so keep to these three unless "
+    "a result names a specific event inside the horizon that needs one follow-up. "
+    "If a result begins with `[SEARCH_VERIFICATION_FAILED]`, treat that topic as "
+    "unknown and do not fill it from memory.\n\n"
+)
+"""The three fenced search topics in :data:`TASK_SHOCK_SPEC`.
+
+Without them the agent ran one search per origin and stayed on the volatility
+anchor (``nvda_shock_smoke``).  Kept as its own constant so the no-topics arm of
+:func:`build_nvda_shock_predictor` is exactly the earlier prompt.
+"""
+
 TASK_SHOCK_SPEC = (
     f"Estimate P(shock) — the probability that NVDA's close {SHOCK_HORIZON} "
     f"trading day(s) after `as_of` differs from the `as_of` close by at least "
@@ -208,22 +232,8 @@ TASK_SHOCK_SPEC = (
     f"  - Session right after a >={SHOCK_THRESHOLD:g}% move                -> ~22%\n"
     "  - Next session is the reaction to NVDA's own quarterly results "
     "(reported after the close) -> ~50%\n\n"
-    "Research before answering. Call `search_web` once per topic below, always "
-    "with `cutoff_date` equal to `as_of`:\n"
-    '  1. `search_web(query="NVIDIA stock move on <as_of> and what drove it", '
-    "cutoff_date=<as_of>)` — the session your price history does not show.\n"
-    '  2. `search_web(query="NVIDIA next earnings date and events scheduled for the '
-    "next trading session: US CPI, jobs report, FOMC, export-control rulings, major "
-    'product or hyperscaler earnings", cutoff_date=<as_of>)` — dated catalysts '
-    "inside the horizon.\n"
-    '  3. `search_web(query="breaking news on AI chip export controls, tariffs, '
-    'hyperscaler AI capex, or AMD and custom-silicon competition affecting NVIDIA", '
-    "cutoff_date=<as_of>)` — unscheduled catalysts.\n"
-    "Each search also runs a leakage-verifier call, so keep to these three unless "
-    "a result names a specific event inside the horizon that needs one follow-up. "
-    "If a result begins with `[SEARCH_VERIFICATION_FAILED]`, treat that topic as "
-    "unknown and do not fill it from memory.\n\n"
-    "Start from the anchor that matches the price history and the calendar, then "
+    + _SHOCK_SEARCH_TOPICS
+    + "Start from the anchor that matches the price history and the calendar, then "
     "move away from it only for a specific, dated catalyst inside the horizon "
     "(e.g. an announced export-control ruling, a hyperscaler capex guidance "
     "change, a major competitor launch). Generic AI enthusiasm or a strong "
@@ -240,6 +250,9 @@ The anchors come from :func:`ai_stocks_forecasting.shock_anchors.anchor_table`
 over 2020-2024 at the committed ``SHOCK_THRESHOLD`` / ``SHOCK_HORIZON``; re-run
 that module and update these numbers if either constant changes.
 """
+
+TASK_SHOCK_SPEC_NO_TOPICS = TASK_SHOCK_SPEC.replace(_SHOCK_SEARCH_TOPICS, "")
+""":data:`TASK_SHOCK_SPEC` as it was before the search topics: the ablation arm."""
 
 TASK_SCENARIOS_SPEC = (
     "Identify the three scenarios that oil market analysts and experts are most "
@@ -297,6 +310,26 @@ def build_nvda_news_predictor(
         agent_config=build_nvda_multitask_news_config(model=model),
         prompt_builder=NvdaMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
         output_schema=TASK_OUTPUT_SCHEMAS[task],
+    )
+
+
+def build_nvda_shock_predictor(model: str = LITE_MODEL, *, search_topics: bool = True) -> AgentPredictor:
+    """Build the news-grounded shock predictor, with or without the named search topics.
+
+    ``search_topics=False`` is the ablation arm: the same identity and payload
+    with :data:`TASK_SHOCK_SPEC_NO_TOPICS`.  Its agent is named
+    ``nvda_analyst_multitask_notopics`` so the two arms get different predictor
+    ids and never share a cache file.
+    """
+    config = build_nvda_multitask_news_config(model=model)
+    if not search_topics:
+        config = config.model_copy(update={"name": f"{config.name}_notopics"})
+    return AgentPredictor(
+        agent_config=config,
+        prompt_builder=NvdaMultitaskPromptBuilder(
+            task_spec=TASK_SHOCK_SPEC if search_topics else TASK_SHOCK_SPEC_NO_TOPICS
+        ),
+        output_schema=DiscreteAgentForecastOutput,
     )
 
 
@@ -415,6 +448,7 @@ __all__ = [
     "SHOCK_TASK_ID",
     "TASK_SCENARIOS_SPEC",
     "TASK_SHOCK_SPEC",
+    "TASK_SHOCK_SPEC_NO_TOPICS",
     "TASK_SPECS",
     "TASK_TRAJECTORY_SPEC",
     "ScenarioAgentForecastOutput",
@@ -423,6 +457,7 @@ __all__ = [
     "NvdaMultitaskPromptBuilder",
     "build_nvda_agent_predictor_for_task",
     "build_nvda_news_predictor",
+    "build_nvda_shock_predictor",
     "nvda_shock_task",
     "register_shock_series",
     "shock_indicator_frame",

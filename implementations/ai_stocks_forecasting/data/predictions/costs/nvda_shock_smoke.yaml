@@ -2,39 +2,49 @@
   cost_usd: 0.007091774999
   latency_s: 12.902
   as_of: '2025-02-04'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: 3192f636cca18624b0fdf2002b413df9
   cost_usd: 0.01125975
   latency_s: 10.279
   as_of: '2025-02-07'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: c0b86b4e4e89db9f07ea02e6d4ee05dd
   cost_usd: 0.011854299997
   latency_s: 14.1
   as_of: '2025-03-05'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: d0754555928b9ef434bff84d00593d10
   cost_usd: 0.00971405
   latency_s: 11.57
   as_of: '2025-03-13'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: fa26ac2bba2ca002822cf5fcf59b2d4c
   cost_usd: 0.0107058
   latency_s: 17.628
   as_of: '2025-03-18'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: f4c8aa1f10b735d29cedef776511ea9b
   cost_usd: 0.0126198
   latency_s: 12.017
   as_of: '2025-04-08'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: 109cc6100d739043a1321d96d867c265
   cost_usd: 0.0099463
   latency_s: 9.822
   as_of: '2025-05-16'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: 945f621dc33d5b70ba2007bc0184f9c1
   cost_usd: 0.0103773
   latency_s: 11.718
   as_of: '2025-06-02'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: e34c02dc7f96f195b1851aac9a6870fc
   cost_usd: 0.009967725
   latency_s: 10.546
   as_of: '2025-11-07'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
 - trace_id: 79112941a92ad19645841ebff4f28834
   cost_usd: 0.010559975
   latency_s: 10.85
   as_of: '2025-12-01'
+  predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete

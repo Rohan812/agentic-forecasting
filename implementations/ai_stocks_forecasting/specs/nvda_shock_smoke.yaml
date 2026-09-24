@@ -26,6 +26,14 @@
 
 spec_id: nvda_shock_smoke
 warmup: 250
+summary: "NVDA shock smoke: 5 holdout shocks + 5 matched controls"
+
+# The agent ran here before the shock spec named search topics, so its arm is
+# agent_notopics (the exact earlier prompt; see tasks.TASK_SHOCK_SPEC_NO_TOPICS).
+# Do not add the `agent` arm: these are gate holdout windows, and scoring a
+# prompt change on them tunes on the holdout. The fresh re-score is
+# nvda_shock_fresh.yaml.
+arms: [climatology, agent_notopics]
 
 origins:
   # as_of       expected outcome on the next session (1 = |move| >= 5%)

@@ -1,11 +1,16 @@
-"""The shock smoke report scores every predictor on the same origins.  Offline."""
+"""Shock backtest contracts: identical origins across predictors, and no agent scoring on holdout windows.  Offline."""
 
 from __future__ import annotations
 
 from datetime import datetime
 
 import pandas as pd
-from ai_stocks_forecasting.shock_smoke import SmokeSpec, scored_frame
+import pytest
+from ai_stocks_forecasting.data import NVDA_SERIES_ID
+from ai_stocks_forecasting.shock_smoke import SmokeSpec, check_agent_origins_are_fresh, scored_frame
+from aieng.forecasting.data import DataService
+from aieng.forecasting.data.features import StaticFrameAdapter
+from aieng.forecasting.data.models import SeriesMetadata
 from aieng.forecasting.evaluation.backtest import BacktestResult
 from aieng.forecasting.evaluation.prediction import BinaryForecast, Prediction
 
@@ -44,3 +49,25 @@ def test_an_origin_one_predictor_skipped_is_dropped_for_all() -> None:
     frame, dropped = scored_frame(results, spec)
     assert dropped == 1
     assert frame.groupby("predictor_id")["as_of"].apply(set).tolist() == [set(origins[:2])] * 2
+
+
+def test_agent_arm_is_refused_on_a_holdout_shock_window() -> None:
+    """A spec that scores the with-topics agent on a gate-holdout shock origin must not run."""
+    dates = pd.bdate_range("2020-01-02", "2025-06-30")
+    values = pd.Series(100.0, index=dates)
+    values[values.index >= pd.Timestamp("2025-03-04")] = 110.0  # a +10% shock on 2025-03-04
+    service = DataService()
+    service.register(
+        NVDA_SERIES_ID,
+        StaticFrameAdapter(
+            pd.DataFrame({"timestamp": dates, "value": values.to_numpy(), "released_at": dates + pd.offsets.BDay(1)})
+        ),
+        SeriesMetadata(series_id=NVDA_SERIES_ID, description="t", source="t", units="USD/share", frequency="B"),
+    )
+    shock_origin = pd.Timestamp("2025-03-03")  # the window's as_of: the session before the shock
+    fresh_origin = pd.Timestamp("2025-04-01")
+
+    check_agent_origins_are_fresh(SmokeSpec("t", 0, {fresh_origin: 0}, ("agent",)), service)
+    check_agent_origins_are_fresh(SmokeSpec("t", 0, {shock_origin: 1}, ("agent_notopics",)), service)
+    with pytest.raises(ValueError, match="2025-03-03"):
+        check_agent_origins_are_fresh(SmokeSpec("t", 0, {shock_origin: 1}, ("agent",)), service)

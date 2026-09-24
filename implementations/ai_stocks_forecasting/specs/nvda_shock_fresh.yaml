@@ -1,0 +1,46 @@
+# NVDA shock re-score on fresh origins: every post-cutoff session that follows a shock.
+#
+# Why this set. The search topics were added after the first smoke
+# (nvda_shock_smoke) showed one search per origin. Re-scoring on those origins
+# would tune on the gate holdout, so these origins must be fresh: after both
+# models' cutoff (Feb 2025 on), before the protected 2026 evaluation, and not a
+# holdout window or smoke target.
+#
+# That pool is small. The gate holdout already uses every independent 2025 shock
+# event, and only three 2025 shock sessions fall outside it. All three are the
+# second day of an episode. So the set conditions on "the previous session was a
+# shock", the task spec's ~22% anchor. It holds every Feb-Dec 2025 session whose
+# previous session was a >=5% move and which is not a holdout or smoke target:
+# 16 origins, 3 of which continued with a second shock (19%, close to the 22%
+# anchor, so the sample is not enriched).
+#
+# Each origin's as_of is itself a shock session the agent's price history does
+# not show (closes are released a day late). Search topic 1 asks about exactly
+# that session, so this set is where the topics should matter most.
+#
+# Three positives cannot establish skill. Read it as a same-origin A/B of the
+# search topics (agent vs agent_notopics), with climatology as the floor.
+
+spec_id: nvda_shock_fresh
+warmup: 250
+summary: "NVDA shock re-score: 16 post-cutoff sessions after a shock, 3 continued"
+arms: [climatology, agent_notopics, agent]
+
+origins:
+  # as_of (the shock session)   next session          outcome
+  - {as_of: "2025-02-05", outcome: 0}  # +5.2% -> 02-06 +3.1%
+  - {as_of: "2025-02-27", outcome: 0}  # -8.5% -> 02-28 +4.0%
+  - {as_of: "2025-03-03", outcome: 0}  # -8.7% -> 03-04 +1.7%
+  - {as_of: "2025-03-06", outcome: 0}  # -5.7% -> 03-07 +1.9%
+  - {as_of: "2025-03-10", outcome: 0}  # -5.1% -> 03-11 +1.7%
+  - {as_of: "2025-03-12", outcome: 0}  # +6.4% -> 03-13 -0.1%
+  - {as_of: "2025-03-14", outcome: 0}  # +5.3% -> 03-17 -1.8%
+  - {as_of: "2025-03-26", outcome: 0}  # -5.7% -> 03-27 -2.0%
+  - {as_of: "2025-04-03", outcome: 1}  # -7.8% -> 04-04 -7.4%
+  - {as_of: "2025-04-04", outcome: 0}  # -7.4% -> 04-07 +3.5%
+  - {as_of: "2025-04-09", outcome: 1}  # +18.7% -> 04-10 -5.9%
+  - {as_of: "2025-04-10", outcome: 0}  # -5.9% -> 04-11 +3.1%
+  - {as_of: "2025-04-16", outcome: 0}  # -6.9% -> 04-17 -2.9%
+  - {as_of: "2025-05-12", outcome: 1}  # +5.4% -> 05-13 +5.6%
+  - {as_of: "2025-05-13", outcome: 0}  # +5.6% -> 05-14 +4.2%
+  - {as_of: "2025-11-10", outcome: 0}  # +5.8% -> 11-11 -3.0%
