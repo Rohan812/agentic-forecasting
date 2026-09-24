@@ -585,8 +585,13 @@ above are contaminated and should not be read as agent skill.** The after-close 
 `as_of` close legitimately and is unaffected, although its fence had the same gap. `search_web` now
 drops, after the verifier passes a result, every sentence that names a day or month that is not
 entirely before the cutoff. The verifier is also told that facts about the cutoff day itself fail.
-Undated leaks still depend on the verifier. These arms were not re-run: their origins are closed to
-further iterations, so a clean re-run would measure the fence, not a new prompt.
+Undated leaks still depend on the verifier. Removing the leaked origins from every arm of their
+spec, neither midnight arm beats climatology on the fresh set: on 14 clean origins, with one shock
+left, skill is −0.26 without topics and −0.35 with them. The midnight arms are to be re-run with the
+new fence. That re-run measures the fence, not a new prompt, so it does not spend the closed
+origins on another iteration. The first attempt, on 2026-09-24, failed because the proxy's Google
+Search quota was exhausted (HTTP 429 on every search call; plain model calls still worked). It
+was stopped before it wrote anything.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).
@@ -628,6 +633,17 @@ price, error and CRPS, ready to display or save with `to_csv`. And it draws
 **`predicted_vs_actual`** (section 4): the actual daily close as a line, each predictor's
 forecasts plotted at the date they were forecasting, with 80% bands, one panel per horizon.
 On the 21-day panel the naive forecast visibly lags every turn.
+
+Section 5 covers the **shock task**. `load_shock_frame` loads every committed shock backtest
+(`SHOCK_SPECS`: smoke, fresh and fresh after-close). It scores each arm on the origins all arms
+of a spec share, and flags midnight forecasts that quote the `as_of` close they cannot know.
+`shock_leaderboard` gives Brier, Brier skill against that spec's climatology, the separation
+between mean P before shocks and before calm sessions, and a 90% paired-bootstrap interval on
+the Brier difference. With `exclude_leaked=True` it drops a leaked origin from every arm of its
+spec. `shock_separation` plots every forecast by arm, with shocks as filled triangles, calm
+sessions as hollow circles and leaked forecasts ringed in grey. A forecaster that adds
+information puts the triangles above the circles. None does yet. Tests are in
+`implementations/tests/ai_stocks_forecasting/test_charts.py`.
 
 [`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) is the root-cause analysis of the
 original raw-price baseline's −77% forecast, described above. It reads the archived results
