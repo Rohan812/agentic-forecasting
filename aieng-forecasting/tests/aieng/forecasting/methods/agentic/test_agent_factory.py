@@ -17,6 +17,7 @@ from aieng.forecasting.methods.agentic.agent_factory import (
     CodeExecutionConfig,
     ContextRetrievalConfig,
     _build_search_tool,
+    _drop_sentences_dated_on_or_after,
     _is_retrospective_cutoff,
     _usage_from_litellm,
     _verification_skip_reason,
@@ -500,6 +501,44 @@ class TestSearchToolLeakageVerification:
         assert never.startswith("[SEARCH_VERIFICATION_FAILED]")
 
     @pytest.mark.asyncio
+    async def test_verifier_passed_same_day_fact_is_dropped(self) -> None:
+        """A sentence dated on the cutoff never reaches the agent, even verified clean.
+
+        The text is from a real trace: for an NVDA origin of 2025-04-03 the
+        verifier returned it ``clean`` at confidence 10, and the agent used the
+        as_of close ($101.54, a -7.8% day) to forecast the next session.  When
+        dropping leaves nothing, the retry names the dropped sentence.
+        """
+        leaked = (
+            "On April 3, 2025, NVIDIA (NVDA) stock experienced a decline, closing at $101.54 "
+            "compared to its previous close of $110.14 on April 2, 2025."
+        )
+
+        async def _run(texts: list[str]) -> tuple[str, list[dict]]:
+            config = ContextRetrievalConfig(enabled=True, instruction="Search assistant.")
+            tool = _build_search_tool(config, openai_base_url="https://proxy.example.com/v1", openai_api_key="test-key")
+            calls: list[dict] = []
+            remaining = list(texts)
+
+            async def _fake_acompletion(**kwargs):  # type: ignore[override]
+                calls.append(kwargs)
+                if kwargs["model"] == f"openai/{config.verifier_model}":
+                    return self._verify_response(clean=True, confidence=10, filtered_text=remaining.pop(0))
+                return self._search_response("Raw.")
+
+            with patch("litellm.acompletion", new=AsyncMock(side_effect=_fake_acompletion)):
+                return await tool(query="NVDA move", cutoff_date="2025-04-03"), calls
+
+        mixed, calls = await _run([f"By late December 2024, the stock traded near $140. {leaked}"])
+        assert mixed == "By late December 2024, the stock traded near $140."
+        assert len(calls) == 2
+
+        recovered, calls = await _run([leaked, "Earlier tariff news weighed on chips."])
+        assert recovered == "Earlier tariff news weighed on chips."
+        retry_prompt = next(m for m in calls[2]["messages"] if m["role"] == "user")["content"]
+        assert "closing at $101.54" in retry_prompt
+
+    @pytest.mark.asyncio
     async def test_verifier_skipped_when_no_cutoff_date(self) -> None:
         """No cutoff_date means nothing to verify against — single search call only."""
         config = ContextRetrievalConfig(enabled=True, instruction="Search assistant.")
@@ -675,6 +714,27 @@ class TestSearchToolLeakageVerification:
 
         assert len(calls) == 2
         assert result == "Clean summary."
+
+
+class TestDropSentencesDatedOnOrAfter:
+    """The deterministic date backstop behind the leakage verifier."""
+
+    def test_months_count_if_any_day_reaches_the_cutoff_and_abbreviations_do_not_split(self) -> None:
+        """A month overlapping the cutoff is dropped; "Feb." or "U.S." ends no sentence.
+
+        Splitting "Feb. 4, 2025" at the dot would leave "4, 2025, ..." with no
+        month, so the dated fact would survive.
+        """
+        text = (
+            "In April 2025, NVIDIA faced export curbs. March 2025 was volatile.\n"
+            "- The U.S. Commerce Dept. on Apr. 3, 2025 set rules. Shares fell on 27 January 2025."
+        )
+        kept, dropped = _drop_sentences_dated_on_or_after(text, "2025-04-03")
+        assert kept == "March 2025 was volatile.\n- Shares fell on 27 January 2025."
+        assert dropped == [
+            "In April 2025, NVIDIA faced export curbs.",
+            "The U.S. Commerce Dept. on Apr. 3, 2025 set rules.",
+        ]
 
 
 class TestRetrospectiveCutoff:

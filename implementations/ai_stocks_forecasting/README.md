@@ -564,12 +564,29 @@ no-topics arm.
 `as_of` move correctly (−8.5%, −8.7%, +18.7%, +5.4%) and applies the "after a ≥5% move" anchor.
 The "no catalysts on March 3" error is gone. But the agent lifts every origin to about 0.2 without
 separating the sessions that continued from those that calmed down (0.227 against 0.212), and
-lands on climatology's Brier. The no-topics arm's lead rests largely on one guess, 0.45 on the day
-after the tariff-pause rally, made without seeing that rally in its history. With three positives
-none of these differences is evidence. **The honest summary for this task: across three variants,
+lands on climatology's Brier. The no-topics arm's lead rests largely on one origin, 0.45 on the day
+after the tariff-pause rally. The rally was not in its price history, but a later review of the
+traces showed it saw the rally through search anyway (see the fence leak below). With three
+positives none of these differences is evidence. **The honest summary for this task: across three variants,
 no shock agent has shown it can tell a continuing shock from a calm-down better than climatology.**
 `nvda_shock_fresh`'s 16 sessions are now closed to further iterations. The next measurement is the
 protected 2026 run.
+
+**Search fence leak (found in review, fixed in core `search_web`).** At midnight origins the
+agent is not meant to see anything from the `as_of` session. Langfuse traces show the LLM leakage
+verifier sometimes passed that session anyway, marked clean at confidence 9–10. Examples: "On
+February 4, 2025, NVIDIA (NVDA) stock ... closing the session at $118.34" for a 2025-02-04 origin,
+and "On April 3, 2025, NVIDIA (NVDA) stock experienced a decline, closing at $101.54" for
+2025-04-03. One midnight origin per agent arm quotes the exact `as_of` close in its forecast
+record: smoke 2025-02-04, topics 2025-04-03, and no-topics 2025-04-09. The 2025-04-09 rationale
+cites the $96.06 → $114.04 rally and the H20 export notice, which was not public until 2025-04-15.
+That origin is the one that gave the no-topics arm its lead, so **the midnight-arm Brier scores
+above are contaminated and should not be read as agent skill.** The after-close arm sees the
+`as_of` close legitimately and is unaffected, although its fence had the same gap. `search_web` now
+drops, after the verifier passes a result, every sentence that names a day or month that is not
+entirely before the cutoff. The verifier is also told that facts about the cutoff day itself fail.
+Undated leaks still depend on the verifier. These arms were not re-run: their origins are closed to
+further iterations, so a clean re-run would measure the fence, not a new prompt.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).

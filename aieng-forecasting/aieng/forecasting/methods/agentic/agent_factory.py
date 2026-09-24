@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import warnings
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -291,6 +292,129 @@ def _utc_today() -> date:
     return datetime.now(timezone.utc).date()
 
 
+_MONTH_NUMBERS = {
+    name: number
+    for number, names in enumerate(
+        (
+            ("Jan", "January"),
+            ("Feb", "February"),
+            ("Mar", "March"),
+            ("Apr", "April"),
+            ("May",),
+            ("Jun", "June"),
+            ("Jul", "July"),
+            ("Aug", "August"),
+            ("Sep", "Sept", "September"),
+            ("Oct", "October"),
+            ("Nov", "November"),
+            ("Dec", "December"),
+        ),
+        start=1,
+    )
+    for name in names
+}
+_MONTH = "(" + "|".join(sorted(_MONTH_NUMBERS, key=len, reverse=True)) + r")\.?"
+_DAY = r"(\d{1,2})(?:st|nd|rd|th)?"
+_MONTH_DAY_YEAR = re.compile(rf"\b{_MONTH}\s+{_DAY},?\s+(\d{{4}})\b")
+_DAY_MONTH_YEAR = re.compile(rf"\b{_DAY}\s+(?:of\s+)?{_MONTH},?\s+(\d{{4}})\b")
+_ISO_DATE = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
+_MONTH_YEAR = re.compile(rf"\b{_MONTH}\s+(\d{{4}})\b")
+# Indent plus any Markdown list, heading or quote marker; kept when the
+# line's first sentence is dropped.
+_LINE_PREFIX = re.compile(r"\s*(?:[-*+]\s+|\d+[.)]\s+|#+\s+|>\s+)?")
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+(?=\S)")
+# A break after these is an abbreviation ("U.S.", "Inc.", "Feb. 4"), not a sentence end.
+_ABBREVIATION_END = re.compile(
+    r"(?:\b[A-Z]\.|\b(?:Inc|Corp|Co|Ltd|Jr|Sr|Mr|Mrs|Ms|Dr|St|Dept|Gov|Sen|Rep|vs|No|approx|est|"
+    + "|".join(_MONTH_NUMBERS)
+    + r")\.)$"
+)
+
+
+def _named_dates_reach_cutoff(sentence: str, cutoff: date) -> bool:
+    """Return True if *sentence* names a day or month not entirely before *cutoff*.
+
+    A month counts when any of its days is on or after the cutoff, so "in
+    April 2025" is caught for a cutoff of 2025-04-03: the month's facts may
+    come from after the fence.  Impossible dates ("February 30") are ignored.
+    """
+    days: list[tuple[int, int, int]] = []
+    days += [(int(y), _MONTH_NUMBERS[m], int(d)) for m, d, y in _MONTH_DAY_YEAR.findall(sentence)]
+    days += [(int(y), _MONTH_NUMBERS[m], int(d)) for d, m, y in _DAY_MONTH_YEAR.findall(sentence)]
+    days += [(int(y), int(m), int(d)) for y, m, d in _ISO_DATE.findall(sentence)]
+    for y, m, d in days:
+        try:
+            if date(y, m, d) >= cutoff:
+                return True
+        except ValueError:
+            continue
+    return any((int(y), _MONTH_NUMBERS[m]) >= (cutoff.year, cutoff.month) for m, y in _MONTH_YEAR.findall(sentence))
+
+
+def _split_sentences(line: str) -> list[str]:
+    """Split one line into sentences, rejoining breaks that follow an abbreviation."""
+    sentences: list[str] = []
+    for piece in _SENTENCE_BREAK.split(line):
+        if sentences and _ABBREVIATION_END.search(sentences[-1]):
+            sentences[-1] += " " + piece
+        else:
+            sentences.append(piece)
+    return sentences
+
+
+def _drop_sentences_dated_on_or_after(text: str, cutoff: str) -> tuple[str, list[str]]:
+    """Remove every sentence naming a date on or after *cutoff*.
+
+    Returns the remaining text and the removed sentences.
+
+    A deterministic backstop behind the LLM leakage verifier, which has passed
+    text such as "On April 3, 2025, NVIDIA (NVDA) stock ... closing at $101.54"
+    for a cutoff of 2025-04-03.  It catches only facts that carry an explicit
+    day or month (with a year); undated leaks are still the verifier's job.
+    Line structure and Markdown markers are kept, and a line emptied by the
+    filter is dropped.  An unparseable *cutoff* returns the text unchanged.
+    """
+    try:
+        cutoff_d = date.fromisoformat(cutoff.strip()[:10])
+    except ValueError:
+        return text, []
+    kept_lines: list[str] = []
+    dropped: list[str] = []
+    for line in text.splitlines():
+        if not line.strip():
+            kept_lines.append(line)
+            continue
+        prefix = _LINE_PREFIX.match(line).group(0)  # type: ignore[union-attr]
+        kept: list[str] = []
+        for sentence in _split_sentences(line[len(prefix) :].strip()):
+            (dropped if _named_dates_reach_cutoff(sentence, cutoff_d) else kept).append(sentence)
+        if kept:
+            kept_lines.append(prefix + " ".join(kept))
+    return "\n".join(kept_lines), dropped
+
+
+def _flagged_claims_guidance(cutoff: str, claims: list[str]) -> str:
+    """Retry feedback: the claims the previous search must not repeat."""
+    return (
+        f"Your previous search result may have included information published on or after "
+        f"{cutoff}. Do not repeat or rely on these claims:\n- "
+        + "\n- ".join(claims or ["(unspecified — be more conservative)"])
+    )
+
+
+def _screen_verified_text(text: str, cutoff: str) -> tuple[str, str]:
+    """Apply the date backstop to verifier-passed text.
+
+    The verifier is an LLM and has passed explicitly dated same-day facts, so
+    those are dropped here deterministically.  Returns the surviving text and
+    the guidance to retry with if nothing usable survives.
+    """
+    kept, dated = _drop_sentences_dated_on_or_after(text, cutoff)
+    if dated:
+        logger.warning("search_web: dropped %d verifier-passed sentence(s) dated on or after %s.", len(dated), cutoff)
+    return kept, _flagged_claims_guidance(cutoff, dated) if dated else _EMPTY_SUMMARY_GUIDANCE
+
+
 def _is_retrospective_cutoff(cutoff: str) -> bool:
     """Return True when *cutoff* is a calendar date strictly before UTC today.
 
@@ -359,7 +483,9 @@ described developments) could only be known on or after the cutoff date. \
 Do NOT trust a source's claimed publish date, byline timestamp, or URL — \
 page metadata and timestamps are frequently updated after original \
 publication and are not reliable evidence of when the underlying facts \
-became known. Reason from the substance of the claim itself.
+became known. Reason from the substance of the claim itself. Facts about the cutoff \
+date itself (that day's prices, closing level, trading range or move, and \
+anything announced that day) are on the cutoff date, so they fail the test.
 
 Remove every claim that fails this test and produce `filtered_text`: the \
 original text with only the surviving, pre-cutoff claims. Report the removed \
@@ -601,20 +727,16 @@ def _build_search_tool(
                 len(verdict.flagged_claims),
             )
             if verdict.clean and verdict.confidence >= config.verifier_confidence_threshold:
-                if verdict.filtered_text.strip():
-                    return _format_result(verdict.filtered_text, sources)
+                kept, negative_guidance = _screen_verified_text(verdict.filtered_text, effective_cutoff)  # type: ignore[arg-type]
+                if kept.strip():
+                    return _format_result(kept, sources)
                 # Clean but empty: returned, it would reach the agent as a
                 # "successful" result of bare source URLs, read as "no news"
                 # when the search failed.  Spend an attempt instead; running
                 # out of attempts returns the failure sentinel.
-                negative_guidance = _EMPTY_SUMMARY_GUIDANCE
                 continue
             logger.warning("search_web attempt %d flagged %d claim(s); retrying.", attempt, len(verdict.flagged_claims))
-            negative_guidance = (
-                f"Your previous search result may have included information published on or after "
-                f"{effective_cutoff}. Do not repeat or rely on these claims:\n- "
-                + "\n- ".join(verdict.flagged_claims or ["(unspecified — be more conservative)"])
-            )
+            negative_guidance = _flagged_claims_guidance(effective_cutoff, verdict.flagged_claims)  # type: ignore[arg-type]
 
         logger.error("search_web exhausted %d attempts without a verified clean result.", config.verifier_max_attempts)
         return (
