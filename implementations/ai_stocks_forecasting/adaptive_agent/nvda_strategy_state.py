@@ -201,7 +201,7 @@ class NvdaStrategyState(AdaptiveSkillState):
                 lines.append(
                     f"| {p.id} | {_cell(p.cue)} | {p.direction} | {h.precision:.2f} ({h.n_hits}/{h.n_matches}) "
                     f"| {h.lift:.1f}x | {t.lift:.1f}x ({t.ci_low:.1f}-{t.ci_high:.1f}) | {t.p_value:.3f} "
-                    f"| {p.source_experiment} |"
+                    f"| {_cell(p.source_experiment)} |"
                 )
             lines.append("")
             guided = [p for p in self.news_patterns if p.forecast_guidance.strip()]

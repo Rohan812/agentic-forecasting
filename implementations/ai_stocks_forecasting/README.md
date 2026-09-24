@@ -452,7 +452,7 @@ a gate constant in `signals.py` therefore makes any previously graduated pattern
 clears it fail to load, by name. That is deliberate: every pattern in the master file meets the
 current standard, and a change to the standard shows up rather than being grandfathered in. Pattern
 ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by id, and
-agent-written text is escaped so a `|` in a cue can't shift the `SKILL.md` table. Tests are in
+agent-written text is escaped, so a `|` or a line break in a cue or a source experiment can't shift or split the `SKILL.md` table. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
 
 ## Charts
