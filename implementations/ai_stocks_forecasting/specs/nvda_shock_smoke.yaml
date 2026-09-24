@@ -1,0 +1,41 @@
+# NVDA shock smoke backtest: 10 origins, 5 before a shock and 5 before a matched control.
+#
+# Purpose: prove the news-grounded shock agent runs end to end through the
+# harness, is scored on the same origins as the climatology baseline, and cost
+# what we think it costs. Ten origins cannot rank predictors. Read the output as
+# a pipeline and cost check, and a first look at whether the agent's probability
+# is higher before real shocks than before volatile quiet days.
+#
+# Why not ten random origins: a shock is ~2% of the Tuesdays after the weekly
+# 2025 Monday origins, so ten random origins almost surely hold none, and Brier
+# would only measure how low the agent goes.
+#
+# How the origins were chosen, reproducibly: signals.flag_shock_windows on NVDA
+# from 2020 -> sample_matched_controls(seed=0) -> train_holdout_split. The holdout
+# (Feb-Dec 2025, after both models' cutoff) has 13 shocks and 13 volatility-matched
+# controls. Taking indices 0, 3, 6, 9, 12 of each, sorted by date, gives these.
+# Each origin is the window's as_of; the session scored is the next business day,
+# and every one is a trading day.
+#
+# The sample is 50% shocks by design, so its Brier is not a market Brier. The base
+# rate is ~12% of sessions. Compare predictors with each other, never with a
+# market-level number.
+#
+# These are gate holdout windows. Scoring a forecaster on them is fine; iterating
+# a prompt against them is not, because it tunes on the discovery holdout.
+
+spec_id: nvda_shock_smoke
+warmup: 250
+
+origins:
+  # as_of       expected outcome on the next session (1 = |move| >= 5%)
+  - {as_of: "2025-02-04", outcome: 1}  # 02-05 +5.2%
+  - {as_of: "2025-02-07", outcome: 0}
+  - {as_of: "2025-03-05", outcome: 1}  # 03-06 -5.7%
+  - {as_of: "2025-03-13", outcome: 1}  # 03-14 +5.3%
+  - {as_of: "2025-03-18", outcome: 0}
+  - {as_of: "2025-04-08", outcome: 1}  # 04-09 +18.7%, the tariff-pause rally
+  - {as_of: "2025-05-16", outcome: 0}
+  - {as_of: "2025-06-02", outcome: 0}
+  - {as_of: "2025-11-07", outcome: 1}  # 11-10 +5.8%
+  - {as_of: "2025-12-01", outcome: 0}

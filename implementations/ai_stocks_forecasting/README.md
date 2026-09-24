@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; resolve shock outcomes for scoring; move the adaptive agent onto `NvdaStrategyState` |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; give the shock task recommended search topics (it runs one search per origin today); move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -90,6 +90,7 @@ Shocks are **asymmetric**: upside outnumbers downside about 4:3 at ±5% and 3:1 
 |---|---|---|---|
 | [`specs/nvda_backtest.yaml`](specs/nvda_backtest.yaml) | 2025-01-06 → 2025-12-22, weekly | 51 | Model selection. 19 shock days at ±5% (8 up / 11 down), 15 events after merging. The first origins sit on the model-cutoff boundary. |
 | [`specs/nvda_eval.yaml`](specs/nvda_eval.yaml) | 2026-01-05 → 2026-08-17, weekly | 33 | Protected prospective evaluation. 6 shock days at ±5% (4 up / 2 down). |
+| [`specs/nvda_shock_smoke.yaml`](specs/nvda_shock_smoke.yaml) | Feb–Dec 2025, fixed | 10 | Shock-agent smoke: 5 holdout shocks + 5 volatility-matched controls, each with its expected outcome frozen. See *Shock smoke backtest*. |
 
 Both use `task_id: nvda_price_forecast`, `target_series_id: nvda_stock_price`, horizons `[5, 10, 21]` business days, `warmup: 250`, and load as `MultiTargetBacktestSpec` (matching the energy/oil specs, not the single-task `BacktestSpec`).
 
@@ -434,6 +435,42 @@ resolve against, so choose shock origins with a trading day after them. Offline 
 `implementations/tests/ai_stocks_forecasting/test_tasks.py` pin the id, the output schema, and
 the payload against the instruction's input list. Writing that test turned up an undocumented
 `task` key, which the instruction now lists.
+
+**Scoring shock forecasts.** The harness resolves a binary forecast by reading the task's target
+series at `forecast_date`, so the outcome is a series of its own. `register_shock_series(service)`
+adds `nvda_shock_1d`, which is 1 on a session whose close moved at least 5% from the prior close.
+That is the `signals.flag_shock_windows` definition before cluster merging, and it reproduces the
+151 shock days of 2020–2024. Each value is released with its close, one business day late, and a
+test checks that an outcome is hidden on its own session. `nvda_shock_task()` targets this series
+with `payload_type="binary"`, and the prompt builder reads price history from `price_series_id`
+rather than from the task's target.
+
+**Shock smoke backtest** ([`shock_smoke.py`](shock_smoke.py), `uv run python -m
+ai_stocks_forecasting.shock_smoke`). The news-grounded shock agent and `HistoricalFrequencyPredictor`
+run on the ten origins in `specs/nvda_shock_smoke.yaml`: five holdout shocks and five of their
+volatility-matched controls from `signals`. Ten *random* origins would not work: only 2% of the
+sessions after the weekly 2025 origins were shocks, so a random ten almost surely holds none. Both
+predictors are scored on the intersection of their origins, and the report prints how many were
+dropped. The agent loses an origin whenever the proxy fails after retries, and the harness does not
+line those up across predictors. Resolved outcomes are checked against the labels frozen in the
+spec before scoring. Cost and latency are read back from each prediction's Langfuse trace into
+`data/predictions/costs/nvda_shock_smoke.yaml`. First run (lite model, 2026-09-24):
+
+| Predictor | Brier (50% shock sample) | Mean P before shock | Mean P before control |
+|---|---|---|---|
+| Shock agent (news-grounded) | 0.353 | 0.174 | 0.154 |
+| Climatology | 0.388 | 0.128 | 0.129 |
+
+No origins dropped. **$0.104 in total, $0.0104 per origin** (maximum $0.0126), 12 s mean latency.
+The leakage verifier on the advanced model is about 60% of each origin's cost. Read these numbers
+as a pipeline and cost check. Ten origins in a sample built to be half shocks can't rank
+predictors, and that Brier is not a market Brier. What they do show is that **the agent barely
+separates shocks from volatile quiet days.** It answered 0.14, 0.15 or 0.18 at every origin, which
+is the trailing-volatility anchor from the task spec. It gave 0.18 the day before the +18.7%
+tariff-pause rally. The traces show why news added little: **every origin ran exactly one search.**
+The multitask instruction says to search but, unlike `build_nvda_news_config`, names no topics.
+Fix this on origins that are not the gate holdout. These ten are holdout windows, and iterating the
+prompt against them would tune on the holdout.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).

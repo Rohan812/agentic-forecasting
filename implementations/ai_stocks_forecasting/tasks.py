@@ -18,7 +18,7 @@ says so rather than let the agent assume its price history is current.  See
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, ClassVar, Literal
 
 import pandas as pd
@@ -28,7 +28,10 @@ from ai_stocks_forecasting.analyst_agent import (
 )
 from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
+from aieng.forecasting.data import DataService
+from aieng.forecasting.data.adapters.base import BaseAdapter
 from aieng.forecasting.data.context import ForecastContext
+from aieng.forecasting.data.models import SeriesMetadata
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES, BinaryForecast, Prediction
 from aieng.forecasting.evaluation.task import ForecastingTask
 from aieng.forecasting.methods.agentic import (
@@ -55,11 +58,14 @@ class NvdaMultitaskPromptBuilder(BaseModel):
     """
 
     task_spec: str
+    price_series_id: str = NVDA_SERIES_ID
+    """Series the price history is read from.  Not ``task.target_series_id``:
+    the shock task's target is the 0/1 indicator series, not the price."""
 
     model_config = {"extra": "forbid"}
 
     def __call__(self, *, task: ForecastingTask, context: ForecastContext) -> str:
-        df = context.get_series(task.target_series_id)
+        df = context.get_series(self.price_series_id)
         last_row = df.iloc[-1]
         payload: dict[str, Any] = {
             "task": task.task_id,
@@ -294,6 +300,74 @@ def build_nvda_agent_predictor_for_task(config: AgentConfig, task: TaskKind) -> 
 
 SHOCK_TASK_ID = "nvda_shock_1d"
 
+NVDA_SHOCK_SERIES_ID = "nvda_shock_1d"
+"""0/1 series: 1 on a session whose close moved at least ``SHOCK_THRESHOLD``% from the prior close.
+
+The shock task's target.  The harness resolves a binary forecast by reading
+the target series at ``forecast_date``, so the outcome has to exist as a series.
+"""
+
+
+def shock_indicator_frame(prices: pd.DataFrame) -> pd.DataFrame:
+    """Turn a canonical price frame into the 0/1 shock series, one row per session.
+
+    Uses the same definition as :func:`~ai_stocks_forecasting.signals.flag_shock_windows`
+    before cluster merging: a simple ``SHOCK_HORIZON``-session return of at least
+    ``SHOCK_THRESHOLD`` percent in absolute value.  Each row keeps the price
+    row's ``released_at``, since a session's outcome is known exactly when its
+    close is.  The first ``SHOCK_HORIZON`` sessions have no prior close and are
+    dropped rather than labelled 0.
+
+    Parameters
+    ----------
+    prices : pd.DataFrame
+        Canonical ``(timestamp, value, released_at)`` price frame.
+
+    Returns
+    -------
+    pd.DataFrame
+        Canonical frame with ``value`` in ``{0.0, 1.0}``.
+    """
+    frame = prices.sort_values("timestamp").reset_index(drop=True)
+    returns_pct = frame["value"].astype(float).pct_change(SHOCK_HORIZON) * 100.0
+    out = frame.loc[returns_pct.notna(), ["timestamp", "released_at"]].copy()
+    out["value"] = (returns_pct[returns_pct.notna()].abs() >= SHOCK_THRESHOLD).astype(float)
+    return out[["timestamp", "value", "released_at"]].reset_index(drop=True)
+
+
+class _ShockIndicatorAdapter(BaseAdapter):
+    """Derive the shock series from the price series already registered on a service."""
+
+    def __init__(self, service: DataService, price_series_id: str) -> None:
+        self._service = service
+        self._price_series_id = price_series_id
+
+    def fetch(self) -> pd.DataFrame:
+        now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+        return shock_indicator_frame(self._service.get_series(self._price_series_id, as_of=now))
+
+
+def register_shock_series(service: DataService, price_series_id: str = NVDA_SERIES_ID) -> DataService:
+    """Register :data:`NVDA_SHOCK_SERIES_ID` on a service that already holds the NVDA price.
+
+    Kept here rather than in ``data.py`` so the price service stays a plain
+    price service; call it on the output of
+    :func:`~ai_stocks_forecasting.data.build_nvda_service`.  Returns the same
+    service for chaining.
+    """
+    service.register(
+        NVDA_SHOCK_SERIES_ID,
+        _ShockIndicatorAdapter(service, price_series_id),
+        SeriesMetadata(
+            series_id=NVDA_SHOCK_SERIES_ID,
+            description=f"1 if NVDA's {SHOCK_HORIZON}-session close-to-close move was >= {SHOCK_THRESHOLD:g}%",
+            source="derived",
+            units="indicator",
+            frequency="B",
+        ),
+    )
+    return service
+
 
 def nvda_shock_task() -> ForecastingTask:
     """Return the binary shock task the shock predictor answers: one horizon of ``SHOCK_HORIZON`` sessions.
@@ -305,12 +379,16 @@ def nvda_shock_task() -> ForecastingTask:
     pandas ``BDay``, not the NYSE calendar: an origin whose next business day
     is a market holiday has no session to resolve against, so choose shock
     origins with a trading day after them.
+
+    The target is :data:`NVDA_SHOCK_SERIES_ID`, so a service must have it
+    registered (:func:`register_shock_series`) before this task is scored.
     """
     return ForecastingTask(
         task_id=SHOCK_TASK_ID,
-        target_series_id=NVDA_SERIES_ID,
+        target_series_id=NVDA_SHOCK_SERIES_ID,
         horizons=[SHOCK_HORIZON],
         frequency="B",
+        payload_type="binary",
         description=(
             f"P(|NVDA close-to-close return| >= {SHOCK_THRESHOLD:g}%) over the {SHOCK_HORIZON} session(s) after as_of"
         ),
@@ -318,6 +396,7 @@ def nvda_shock_task() -> ForecastingTask:
 
 
 __all__ = [
+    "NVDA_SHOCK_SERIES_ID",
     "SHOCK_TASK_ID",
     "TASK_SCENARIOS_SPEC",
     "TASK_SHOCK_SPEC",
@@ -330,4 +409,6 @@ __all__ = [
     "build_nvda_agent_predictor_for_task",
     "build_nvda_news_predictor",
     "nvda_shock_task",
+    "register_shock_series",
+    "shock_indicator_frame",
 ]
