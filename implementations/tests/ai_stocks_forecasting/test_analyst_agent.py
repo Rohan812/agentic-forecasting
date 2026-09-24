@@ -1,15 +1,28 @@
 """Wiring contracts for the NVDA news-grounded analyst config.
 
 Both run offline: building the ADK agent and the predictor makes no LLM call.
-They pin the two properties a refactor could break silently. One is the
-registry identity, because the agent's name becomes the predictor id and so
-the prediction filename. The other is the leakage fence around web search.
+They pin the properties a refactor could break silently: the registry
+identity, because the agent's name becomes the predictor id and so the
+prediction filename; the leakage fence around web search; and the prompt
+payload, which must carry what the instruction promises and nothing unbounded.
 """
 
 from __future__ import annotations
 
+import json
+import re
+from collections.abc import Callable
+
 import pytest
-from ai_stocks_forecasting.analyst_agent import build_nvda_news_config, build_wti_agent_predictor
+from ai_stocks_forecasting.analyst_agent import (
+    NvdaPriceForecastPromptBuilder,
+    build_nvda_news_config,
+    build_wti_agent_predictor,
+)
+from ai_stocks_forecasting.analyst_agent.agent import _NVDA_ANALYST_INSTRUCTION
+from ai_stocks_forecasting.data import NVDA_SERIES_ID
+from aieng.forecasting.data.context import ForecastContext
+from aieng.forecasting.evaluation.task import ForecastingTask
 from aieng.forecasting.methods.agentic import build_adk_agent
 
 
@@ -46,3 +59,35 @@ def test_web_search_is_fenced_and_independently_verified() -> None:
     assert "The ``cutoff_date`` MUST always equal ``as_of``" in config.instruction
     assert "[SEARCH_VERIFICATION_FAILED]" in config.instruction
     assert "Do not use your own background knowledge to fill the gap" in config.instruction
+
+
+def test_payload_delivers_the_keys_the_instruction_promises(
+    nvda_like_context: Callable[[str], ForecastContext],
+) -> None:
+    """Every backticked payload key in the forecasting contract must exist in the payload.
+
+    The instruction and the builder live in different places; a renamed key
+    leaves the agent reasoning about a field it never receives, with no error.
+    """
+    task = ForecastingTask(
+        task_id="nvda_price_forecast",
+        target_series_id=NVDA_SERIES_ID,
+        horizons=[5, 10, 21],
+        frequency="B",
+        description="NVDA close",
+    )
+    payload = json.loads(NvdaPriceForecastPromptBuilder()(task=task, context=nvda_like_context("2025-03-03")))
+
+    contract = _NVDA_ANALYST_INSTRUCTION.split("## Forecasting contract")[1].split("Rules:")[0]
+    promised = set(re.findall(r"^- `(\w+)`", contract, flags=re.MULTILINE))
+    assert promised == set(payload), f"instruction promises {sorted(promised)}, payload has {sorted(payload)}"
+
+
+def test_payload_history_is_bounded_not_back_to_1999(nvda_like_context: Callable[[str], ForecastContext]) -> None:
+    """Weekly history stops five years before the daily window; 1999 penny prices never reach the prompt."""
+    task = ForecastingTask(
+        task_id="nvda_price_forecast", target_series_id=NVDA_SERIES_ID, horizons=[5], frequency="B", description="x"
+    )
+    payload = json.loads(NvdaPriceForecastPromptBuilder()(task=task, context=nvda_like_context("2025-03-03")))
+    first_date = payload["target_history_csv"].splitlines()[1].split(",")[0]
+    assert first_date >= "2019-08-01", first_date

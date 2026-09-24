@@ -2,9 +2,10 @@
 
 The instruction strings are NVDA-targeted (semiconductor cycle, hyperscaler AI
 capex, export controls, supply chain). The news-grounded factory is
-:func:`build_nvda_news_config`; the other factories and the prompt builder still
-carry the ``wti`` prefix inherited from the energy/oil parent and are renamed as
-their own tasks come up.
+:func:`build_nvda_news_config` and the prompt builder is
+:class:`NvdaPriceForecastPromptBuilder`; the other factories still carry the
+``wti`` prefix inherited from the energy/oil parent and are renamed as their own
+tasks come up.
 
 Provides four :class:`~aieng.forecasting.methods.agentic.agent_factory.AgentConfig`
 factories that define progressive agent capability levels:
@@ -22,7 +23,7 @@ factories that define progressive agent capability levels:
 
 Also provides:
 
-- :class:`WtiPriceForecastPromptBuilder`: Pydantic ``BaseModel`` that serialises
+- :class:`NvdaPriceForecastPromptBuilder`: Pydantic ``BaseModel`` that serialises
   the task and history into a structured JSON payload for the agent.
 - :func:`build_wti_agent_predictor`: convenience factory that wires a config to
   an :class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.
@@ -73,11 +74,14 @@ semiconductor complex.
 ## Input
 
 You will receive a JSON payload containing:
+- `task`: the task identifier
 - `task_spec`: the exact question and required JSON output schema
 - `as_of`: the forecast origin date (temporal cutoff)
 - `horizons`: integer horizon steps (business days ahead)
 - `standard_quantiles`: quantile levels for continuous forecasts (when applicable)
-- `origin_price_usd`: NVDA split-adjusted close on the origin date, USD per share
+- `origin_price_usd`: NVDA split-adjusted close on `last_close_date`, USD per share
+- `last_close_date`: date of the latest close in the history — normally the \
+session before `as_of`, because each close is published the next day
 - `target_history_csv`: compressed NVDA daily close history (split-adjusted)
 
 When context retrieval is enabled, call ``search_web`` BEFORE answering.
@@ -283,16 +287,30 @@ _SKILLS_ROOT = Path(__file__).parent / "skills"
 # ---------------------------------------------------------------------------
 
 
-def compress_history(df: pd.DataFrame) -> str:
+WEEKLY_HISTORY_YEARS = 5
+"""Years of weekly averages kept before the six-month daily window.
+
+NVDA's split-adjusted history starts in 1999 at about $0.04 a share. Unbounded,
+the weekly section was ~1,300 rows, 900 of them printing as ``0.0x`` at two
+decimals: about two thirds of a ~26K-character payload carrying no information,
+paid for on every agent turn.  Five years still spans a full semiconductor
+cycle (the 2022 drawdown and the 2023-24 AI rally).
+"""
+
+
+def compress_history(df: pd.DataFrame, weekly_years: int | None = WEEKLY_HISTORY_YEARS) -> str:
     """Compress NVDA daily history to stay within context limits.
 
     Returns daily bars for the most recent 6 months and weekly averages for
-    older history.  The CSV header is ``date,close``.
+    the ``weekly_years`` before that.  The CSV header is ``date,close``.
 
     Parameters
     ----------
     df : pd.DataFrame
         DataFrame with columns ``timestamp`` and ``value``.
+    weekly_years : int or None, default=WEEKLY_HISTORY_YEARS
+        How many years of weekly averages to keep before the daily window.
+        ``None`` keeps the full history.
 
     Returns
     -------
@@ -305,6 +323,8 @@ def compress_history(df: pd.DataFrame) -> str:
 
     recent = df[df["timestamp"] >= cutoff].copy()
     old = df[df["timestamp"] < cutoff].copy()
+    if weekly_years is not None:
+        old = old[old["timestamp"] >= cutoff - pd.DateOffset(years=weekly_years)]
 
     rows: list[str] = ["date,close"]
 
@@ -325,13 +345,18 @@ def compress_history(df: pd.DataFrame) -> str:
 # ---------------------------------------------------------------------------
 
 
-class WtiPriceForecastPromptBuilder(BaseModel):
+class NvdaPriceForecastPromptBuilder(BaseModel):
     """Prompt builder for NVDA share-price forecasting tasks.
 
     Produces a structured JSON payload for the analyst agent containing the
     task specification, compressed price history, and a data summary.
     The payload includes ``standard_quantiles`` explicitly so the agent knows
-    the exact grid it must produce.
+    the exact grid it must produce.  Its keys are the ones the analyst
+    instruction's forecasting contract lists; a test pins the two together.
+
+    ``last_date`` in ``target_summary`` can precede ``as_of``: the adapter
+    releases a session's close the next day, so an origin sees the prior
+    session's close as its latest point.
 
     Implements the
     :class:`~aieng.forecasting.methods.agentic.predictor.ForecastPromptBuilder`
@@ -410,7 +435,7 @@ def build_wti_basic_config(model: str = LITE_MODEL) -> AgentConfig:
     )
 
 
-def build_wti_multitask_news_config(
+def build_nvda_multitask_news_config(
     model: str = LITE_MODEL,
     search_model: str = LITE_MODEL,
     verifier_model: str = ADVANCED_MODEL,
@@ -420,7 +445,7 @@ def build_wti_multitask_news_config(
     """News-grounded config for the one-agent-three-tasks demo (NB3).
 
     Uses a task-agnostic analyst instruction; the task schema is supplied in
-    the user prompt payload via :class:`~ai_stocks_forecasting.tasks.WtiMultitaskPromptBuilder`.
+    the user prompt payload via :class:`~ai_stocks_forecasting.tasks.NvdaMultitaskPromptBuilder`.
 
     Parameters
     ----------
@@ -442,7 +467,7 @@ def build_wti_multitask_news_config(
         Minimum verifier confidence (1-10) required to accept a result.
     """
     return AgentConfig(
-        name="wti_analyst_multitask",
+        name="nvda_analyst_multitask",
         model=model,
         instruction=_NVDA_MULTITASK_ANALYST_INSTRUCTION,
         context_retrieval=ContextRetrievalConfig(
@@ -675,7 +700,7 @@ def build_wti_tool_config(
 def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
     """Wrap an :class:`AgentConfig` in an :class:`AgentPredictor`.
 
-    Uses :class:`WtiPriceForecastPromptBuilder` and
+    Uses :class:`NvdaPriceForecastPromptBuilder` and
     :class:`~aieng.forecasting.methods.agentic.outputs.ContinuousAgentForecastOutput`
     as the output schema.
 
@@ -691,7 +716,7 @@ def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
     """
     return AgentPredictor(
         agent_config=config,
-        prompt_builder=WtiPriceForecastPromptBuilder(),
+        prompt_builder=NvdaPriceForecastPromptBuilder(),
         output_schema=ContinuousAgentForecastOutput,
     )
 
@@ -706,7 +731,7 @@ def __getattr__(name: str) -> Any:
     if name == "root_agent":
         # return build_adk_agent(build_wti_basic_config())
         return build_adk_agent(
-            build_wti_multitask_news_config(
+            build_nvda_multitask_news_config(
                 model=ADVANCED_MODEL, search_model=ADVANCED_MODEL, verifier_model=ADVANCED_MODEL
             )
         )
