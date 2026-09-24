@@ -9,11 +9,11 @@ still carry the ``wti`` prefix inherited from the energy/oil parent.
 
 from ai_stocks_forecasting.analyst_agent.agent import (
     NvdaPriceForecastPromptBuilder,
+    build_nvda_multitask_news_config,
     build_nvda_news_config,
     build_wti_agent_predictor,
     build_wti_basic_config,
     build_wti_code_exec_config,
-    build_wti_multitask_news_config,
     build_wti_tool_config,
     compress_history,
 )
@@ -25,7 +25,7 @@ __all__ = [
     "build_wti_agent_predictor",
     "build_wti_basic_config",
     "build_wti_code_exec_config",
-    "build_wti_multitask_news_config",
+    "build_nvda_multitask_news_config",
     "build_wti_tool_config",
     "compress_history",
 ]

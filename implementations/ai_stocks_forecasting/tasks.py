@@ -1,8 +1,18 @@
-"""Task specifications and agent predictor wiring for the WTI experiment.
+"""Task specifications and agent predictor wiring for the NVDA experiment.
 
 Implements the "one agent, three tasks" pattern: a single :class:`AgentConfig`
 identity with task-specific prompt builders and output schemas supplied via
-:class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.
+:class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.  The
+trajectory and shock tasks are NVDA; the scenario task is still WTI.
+
+**Which session the shock task asks about.**  ``YFinanceDailyAdapter`` releases
+each close one business day after the session, so a context at ``as_of`` ends
+at the *previous* session's close.  The shock question, like
+:class:`~ai_stocks_forecasting.signals.Window`, is about the session after
+``as_of``: its close against the ``as_of`` close, which the agent has not seen.
+News fenced at ``as_of`` may describe the ``as_of`` session, so the payload
+says so rather than let the agent assume its price history is current.  See
+:func:`nvda_shock_task`.
 """
 
 from __future__ import annotations
@@ -13,9 +23,10 @@ from typing import Any, ClassVar, Literal
 
 import pandas as pd
 from ai_stocks_forecasting.analyst_agent import (
-    build_wti_multitask_news_config,
+    build_nvda_multitask_news_config,
     compress_history,
 )
+from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES, BinaryForecast, Prediction
@@ -34,7 +45,7 @@ from pydantic import BaseModel, Field
 TaskKind = Literal["trajectory", "shock", "scenario"]
 
 
-class WtiMultitaskPromptBuilder(BaseModel):
+class NvdaMultitaskPromptBuilder(BaseModel):
     """Prompt builder for task-spec-driven agent calls (NB3).
 
     The system instruction is task-agnostic; the ask lives in ``task_spec``.
@@ -57,6 +68,7 @@ class WtiMultitaskPromptBuilder(BaseModel):
             "horizons": list(task.horizons),
             "standard_quantiles": list(STANDARD_QUANTILES),
             "origin_price_usd": float(last_row["value"]),
+            "last_close_date": str(pd.Timestamp(last_row["timestamp"]).date()),
             "target_history_csv": compress_history(df),
         }
         return json.dumps(payload, indent=2)
@@ -172,6 +184,12 @@ TASK_SHOCK_SPEC = (
     f"Estimate P(shock) — the probability that NVDA's close {SHOCK_HORIZON} "
     f"trading day(s) after `as_of` differs from the `as_of` close by at least "
     f"{SHOCK_THRESHOLD:g}% in EITHER direction (|return| >= {SHOCK_THRESHOLD:g}%).\n\n"
+    "Timing: the price history ends at `last_close_date`, normally the session "
+    "BEFORE `as_of` (each close is published the next day). So you have not seen "
+    "the `as_of` session's own close or return; `origin_price_usd` is the "
+    "`last_close_date` close. Retrieved news may describe the `as_of` session — "
+    "use it to judge whether that session was itself a large move. Do not assume "
+    "it was quiet because the history does not show it.\n\n"
     "This is a two-sided magnitude question: a large drop counts exactly like a "
     "large rally. Report which way you lean in `direction_bias`, but the "
     "probability is for a move of either sign.\n\n"
@@ -234,14 +252,14 @@ TASK_OUTPUT_SCHEMAS: dict[TaskKind, type[AgentForecastOutput]] = {
 }
 
 
-def build_wti_news_predictor(
+def build_nvda_news_predictor(
     task: TaskKind,
     model: str = LITE_MODEL,
 ) -> AgentPredictor:
     """Build a news-grounded agent predictor for the given task kind.
 
     All three task kinds share the same multitask news identity
-    (:func:`~ai_stocks_forecasting.analyst_agent.build_wti_multitask_news_config`);
+    (:func:`~ai_stocks_forecasting.analyst_agent.build_nvda_multitask_news_config`);
     only the user-payload ``task_spec`` and output schema change.
 
     Parameters
@@ -255,26 +273,52 @@ def build_wti_news_predictor(
         advanced model (``"gemini-3.5-flash"``) when more capability is needed.
     """
     return AgentPredictor(
-        agent_config=build_wti_multitask_news_config(model=model),
-        prompt_builder=WtiMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
+        agent_config=build_nvda_multitask_news_config(model=model),
+        prompt_builder=NvdaMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
         output_schema=TASK_OUTPUT_SCHEMAS[task],
     )
 
 
-def build_wti_agent_predictor_for_task(config: AgentConfig, task: TaskKind) -> AgentPredictor:
-    """Wire any WTI agent config to a task-specific predictor.
+def build_nvda_agent_predictor_for_task(config: AgentConfig, task: TaskKind) -> AgentPredictor:
+    """Wire any NVDA agent config to a task-specific predictor.
 
     Uses the multitask prompt builder for every task kind so the ask rides in
     ``task_spec`` rather than in the system instruction.
     """
     return AgentPredictor(
         agent_config=config,
-        prompt_builder=WtiMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
+        prompt_builder=NvdaMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
         output_schema=TASK_OUTPUT_SCHEMAS[task],
     )
 
 
+SHOCK_TASK_ID = "nvda_shock_1d"
+
+
+def nvda_shock_task() -> ForecastingTask:
+    """Return the binary shock task the shock predictor answers: one horizon of ``SHOCK_HORIZON`` sessions.
+
+    ``DiscreteAgentForecastOutput`` requires exactly one horizon and stamps
+    ``forecast_date = as_of + SHOCK_HORIZON`` business days: the session whose
+    move against the ``as_of`` close decides the outcome, the same event
+    :func:`~ai_stocks_forecasting.signals.flag_shock_windows` labels.  That is
+    pandas ``BDay``, not the NYSE calendar: an origin whose next business day
+    is a market holiday has no session to resolve against, so choose shock
+    origins with a trading day after them.
+    """
+    return ForecastingTask(
+        task_id=SHOCK_TASK_ID,
+        target_series_id=NVDA_SERIES_ID,
+        horizons=[SHOCK_HORIZON],
+        frequency="B",
+        description=(
+            f"P(|NVDA close-to-close return| >= {SHOCK_THRESHOLD:g}%) over the {SHOCK_HORIZON} session(s) after as_of"
+        ),
+    )
+
+
 __all__ = [
+    "SHOCK_TASK_ID",
     "TASK_SCENARIOS_SPEC",
     "TASK_SHOCK_SPEC",
     "TASK_SPECS",
@@ -282,7 +326,8 @@ __all__ = [
     "ScenarioAgentForecastOutput",
     "ScenarioCard",
     "TaskKind",
-    "WtiMultitaskPromptBuilder",
-    "build_wti_agent_predictor_for_task",
-    "build_wti_news_predictor",
+    "NvdaMultitaskPromptBuilder",
+    "build_nvda_agent_predictor_for_task",
+    "build_nvda_news_predictor",
+    "nvda_shock_task",
 ]

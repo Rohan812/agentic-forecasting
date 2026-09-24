@@ -74,11 +74,14 @@ semiconductor complex.
 ## Input
 
 You will receive a JSON payload containing:
+- `task`: the task identifier
 - `task_spec`: the exact question and required JSON output schema
 - `as_of`: the forecast origin date (temporal cutoff)
 - `horizons`: integer horizon steps (business days ahead)
 - `standard_quantiles`: quantile levels for continuous forecasts (when applicable)
-- `origin_price_usd`: NVDA split-adjusted close on the origin date, USD per share
+- `origin_price_usd`: NVDA split-adjusted close on `last_close_date`, USD per share
+- `last_close_date`: date of the latest close in the history — normally the \
+session before `as_of`, because each close is published the next day
 - `target_history_csv`: compressed NVDA daily close history (split-adjusted)
 
 When context retrieval is enabled, call ``search_web`` BEFORE answering.
@@ -432,7 +435,7 @@ def build_wti_basic_config(model: str = LITE_MODEL) -> AgentConfig:
     )
 
 
-def build_wti_multitask_news_config(
+def build_nvda_multitask_news_config(
     model: str = LITE_MODEL,
     search_model: str = LITE_MODEL,
     verifier_model: str = ADVANCED_MODEL,
@@ -442,7 +445,7 @@ def build_wti_multitask_news_config(
     """News-grounded config for the one-agent-three-tasks demo (NB3).
 
     Uses a task-agnostic analyst instruction; the task schema is supplied in
-    the user prompt payload via :class:`~ai_stocks_forecasting.tasks.WtiMultitaskPromptBuilder`.
+    the user prompt payload via :class:`~ai_stocks_forecasting.tasks.NvdaMultitaskPromptBuilder`.
 
     Parameters
     ----------
@@ -464,7 +467,7 @@ def build_wti_multitask_news_config(
         Minimum verifier confidence (1-10) required to accept a result.
     """
     return AgentConfig(
-        name="wti_analyst_multitask",
+        name="nvda_analyst_multitask",
         model=model,
         instruction=_NVDA_MULTITASK_ANALYST_INSTRUCTION,
         context_retrieval=ContextRetrievalConfig(
@@ -728,7 +731,7 @@ def __getattr__(name: str) -> Any:
     if name == "root_agent":
         # return build_adk_agent(build_wti_basic_config())
         return build_adk_agent(
-            build_wti_multitask_news_config(
+            build_nvda_multitask_news_config(
                 model=ADVANCED_MODEL, search_model=ADVANCED_MODEL, verifier_model=ADVANCED_MODEL
             )
         )
