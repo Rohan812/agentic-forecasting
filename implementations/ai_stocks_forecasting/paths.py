@@ -56,20 +56,30 @@ SHOCK_ORIGINS: list[pd.Timestamp] = [
 ]
 SCENARIO_ORIGIN = pd.Timestamp("2026-03-02")
 
-SHOCK_THRESHOLD = 7.0
+SHOCK_THRESHOLD = 5.0
 """Single-day move, in percent, that counts as an NVDA shock.
 
-Applies in **both directions**: a shock is ``abs(1-day return) >= 7%``.
+Applies in **both directions**: a shock is ``abs(1-day return) >= 5%``.
 
-Measured over 2020-2024 (the discovery window), this fires on 52 days — 31 up,
-21 down, 4.1% of trading days — which is roughly a 2.1-sigma day against NVDA's
-3.39% daily return standard deviation. The threshold is a deliberate balance:
-tighter thresholds are more clearly "shocks" but leave too few events for the
-graduation gate to ever reach significance (at 10% there are only 13 events in
-2020-2024 and *none* in 2026), while looser ones stop describing anything
-unusual (at 5%, 12% of all days qualify). 5.0 is the reasonable alternative if
-the gate turns out to be starved of positives; changing this constant and
-re-running is the whole switch.
+Why 5% and not the earlier 7%: **the holdout needs events.**  Both proxy models
+remember prices through about January 2025 (``LLM_CUTOFFS.md``), so a pattern
+only counts as evidence once it holds up on a holdout after the cutoff, and the
+clean window before the protected 2026 evaluation is Feb-Dec 2025.  After
+merging consecutive-day clusters, that window holds **13 shock events at 5%
+but only 4 at 7%**.  Four events cannot support a holdout-lift criterion, since
+a single hit swings the lift enormously.
+
+The cost is a milder definition of "shock".  Over 2020-2024 it fires on 151
+days (87 up, 64 down), **12% of trading days**, roughly a 1.5-sigma day against
+NVDA's 3.39% daily return standard deviation.  At 7% it fired on 4%.  The
+discovery loop is therefore looking for news that precedes an unusually large
+day, not only a rare one.
+
+Changing this constant ripples out.  Re-run
+``python -m ai_stocks_forecasting.shock_anchors`` and update the anchors in
+``tasks.TASK_SHOCK_SPEC``, and re-check that ``signals.sample_matched_controls``
+still finds volatility-matched controls.  At 5% its exclusion buffer had to
+shrink from 5 sessions to 2.
 """
 
 SHOCK_HORIZON = 1
