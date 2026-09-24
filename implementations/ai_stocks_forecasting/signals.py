@@ -84,6 +84,22 @@ existed in the data it was discovered on.
 MAX_P_VALUE = 0.05
 """Maximum Fisher's exact p-value on the training split."""
 
+MAX_HOLDOUT_P_VALUE = 0.10
+"""Maximum Fisher's exact p-value on the holdout split.
+
+The holdout is the only protection against memorised patterns, which pass
+the training criteria by construction (``LLM_CUTOFFS.md``).  On a holdout of 13
+shocks and 13 controls, :data:`MIN_HOLDOUT_LIFT` alone is mostly luck.
+Simulated, a pattern with no real effect cleared it 23-33% of the time.
+Requiring holdout significance as well cuts that to 1-4%.  The cost is power:
+a strong real pattern (in half the shocks, a tenth of the controls) now passes
+71% of the time instead of 95%, and weaker real patterns far less often.
+
+The level is looser than :data:`MAX_P_VALUE` because the holdout is small.
+0.05 would reject most real patterns there, while 0.10 still keeps false passes
+near 1 in 30.
+"""
+
 MIN_MATCHES = 5
 """Minimum number of windows a pattern must match to be assessable.
 
@@ -787,8 +803,14 @@ def gate_reasons(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> li
         reasons.append(f"training lift interval starts at {metrics.ci_low:.2f}, which does not exclude 1 (no effect)")
     if holdout_metrics.n_matches == 0:
         reasons.append("matched no holdout windows, so it was never tested on data the models cannot remember")
-    elif not holdout_metrics.lift >= MIN_HOLDOUT_LIFT:
-        reasons.append(f"holdout lift {holdout_metrics.lift:.2f} is below {MIN_HOLDOUT_LIFT:g}")
+    else:
+        if not holdout_metrics.lift >= MIN_HOLDOUT_LIFT:
+            reasons.append(f"holdout lift {holdout_metrics.lift:.2f} is below {MIN_HOLDOUT_LIFT:g}")
+        if not holdout_metrics.p_value < MAX_HOLDOUT_P_VALUE:
+            reasons.append(
+                f"holdout p-value {holdout_metrics.p_value:.3g} is not below {MAX_HOLDOUT_P_VALUE:g}, "
+                "so the holdout result could be luck"
+            )
     return reasons
 
 
@@ -805,6 +827,7 @@ def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     - ``metrics.p_value <`` :data:`MAX_P_VALUE`
     - ``metrics.ci_low > 1.0`` — the confidence interval excludes "no effect"
     - ``holdout_metrics.lift >=`` :data:`MIN_HOLDOUT_LIFT`
+    - ``holdout_metrics.p_value <`` :data:`MAX_HOLDOUT_P_VALUE`
 
     An undefined (``nan``) value fails its criterion, as does a pattern that
     matched no holdout window: it was never tested on post-cutoff data.
@@ -826,21 +849,19 @@ def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     -----
     The conjunction is the point.  Each criterion alone is gameable: lift is
     high on tiny samples, p-values fall as windows are added, and a training
-    result says nothing about a later period.  Requiring all five together is
+    result says nothing about a later period.  Requiring all six together is
     what makes graduation mean something.
 
-    **Known weakness: the holdout criterion is lenient.**  A memorised pattern
-    passes the four training criteria by construction (``LLM_CUTOFFS.md``),
-    so the holdout is the only protection against memorisation.  With a
-    holdout of 13 shocks and 13 controls, lift from a few matches is mostly
-    luck.  Simulated on that holdout, a pattern with **no** real effect clears
-    ``holdout lift >= 1.5`` 23-33% of the time, while a strong real pattern
-    (in half the shocks, a tenth of the controls) clears it 95% of the time.
-    Adding ``holdout_metrics.p_value < 0.10`` would cut the false passes to
-    1-4%, at the cost of passing that strong pattern 71% of the time and
-    weaker real ones far less often.  That trade-off between memorised
-    patterns getting through and real ones being rejected is the gate owner's
-    call, so the rule stays as specified until it is made.
+    **Why the holdout needs a significance test, not just a lift.**  A
+    memorised pattern passes the four training criteria by construction
+    (``LLM_CUTOFFS.md``), so the holdout is the only protection against
+    memorisation.  On a holdout of 13 shocks and 13 controls, lift from a few
+    matches is mostly luck.  Simulated on that shape, the specified rule
+    (``holdout lift >= 1.5`` alone) let a no-effect pattern through 23-33% of
+    the time.  With the p-value rule added, that falls to 1-4%.  The price is
+    power: a strong real pattern passes 71% of the time instead of 95%, and
+    weaker real patterns much less often.  That trade was made deliberately.
+    A graduated pattern is only useful if it can be trusted.
     """
     return not gate_reasons(metrics, holdout_metrics)
 
@@ -895,6 +916,7 @@ __all__ = [
     "CONTROL_WINDOW_DAYS",
     "HOLDOUT_END",
     "HOLDOUT_START",
+    "MAX_HOLDOUT_P_VALUE",
     "MAX_P_VALUE",
     "MIN_HOLDOUT_LIFT",
     "MIN_LIFT",

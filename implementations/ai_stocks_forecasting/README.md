@@ -290,7 +290,7 @@ looks highly significant, which is the false discovery the matching exists to pr
 earnings calendar clears every training criterion of the gate, consistent with the shock
 anchors (50% of reaction sessions against 12% overall).
 
-A pattern graduates to the master strategy file only if *all five* criteria hold:
+A pattern graduates to the master strategy file only if *all six* criteria hold:
 
 | Criterion | Threshold | Why |
 |---|---|---|
@@ -299,6 +299,7 @@ A pattern graduates to the master strategy file only if *all five* criteria hold
 | `p_value` (train) | < 0.05 (`MAX_P_VALUE`) | Fisher's exact, not chi-squared — cell counts are small by construction |
 | `ci_low` | > 1.0 | the bootstrap interval on lift must exclude "no effect" |
 | `lift` (holdout) | ≥ 1.5 (`MIN_HOLDOUT_LIFT`) | some shrinkage is honest; a pattern that exists only where it was found is not |
+| `p_value` (holdout) | < 0.10 (`MAX_HOLDOUT_P_VALUE`) | a big holdout lift from one or two lucky matches is not evidence; see below |
 
 The conjunction is the point — each criterion alone is gameable. Event counts are also why the
 shock threshold is ±5%: the clean post-cutoff holdout (Feb–Dec 2025) holds 13 events at ±5%
@@ -311,23 +312,28 @@ graduates. An undefined value fails its criterion rather than slipping through: 
 compares false against everything, so a naive `lift < 2` check would wave it past. A pattern
 that matched no holdout window is rejected as never tested on post-cutoff data.
 
-**Known weakness: the holdout rule is lenient.** A memorised pattern passes the four training
-criteria by construction ([`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md)), so the holdout is the only
-real protection against memorisation. With 13 shocks and 13 controls, lift from a handful of
-matches is mostly luck. Simulated on that holdout:
+**Why the holdout needs its own significance test.** A memorised pattern passes the four
+training criteria by construction ([`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md)), so the holdout is
+the only real protection against memorisation. With 13 shocks and 13 controls, lift from a
+handful of matches is mostly luck: one lucky hit gives a lift of 1 ÷ base rate, about 14, on no
+evidence at all. Simulated on that holdout:
 
 | Holdout rule | No effect, rarely fires | No effect, often fires | Real, strong | Real, weaker |
 |---|---|---|---|---|
-| lift ≥ 1.5 (**as specified, current**) | 33% pass | 23% | 95% | 68% |
+| lift ≥ 1.5 alone (original spec) | 33% pass | 23% | 95% | 68% |
 | + at least 5 holdout matches | 2% | 21% | 91% | 63% |
-| + holdout p < 0.10 | 1% | 4% | 71% | 26% |
+| **+ holdout p < 0.10 (adopted)** | **1%** | **4%** | **71%** | **26%** |
 | + holdout CI low > 1 | 18% | 3% | 64% | 19% |
 
 "Strong" means the pattern appears in half the shocks and a tenth of the controls, like the
-earnings calendar. "Weaker" means 40% against 20%. As specified, roughly one memorised
-pattern in three or four would graduate. Adding a holdout p-value cuts that to 1–4% but rejects
-more real patterns. The gate stays as specified until its owner makes that trade-off; adding
-the rule is a one-line change in `gate_reasons`.
+earnings calendar. "Weaker" means 40% against 20%.
+
+With the lift rule alone, roughly one memorised pattern in three or four would have graduated.
+The holdout p-value rule cuts that to about 1 in 30, **at a deliberate cost in power**: strong
+real patterns now pass 71% of the time, and weaker ones about a quarter of the time. A graduated
+pattern is only useful if it can be trusted, so rejecting some real patterns is the better
+error. The level is 0.10, looser than training's 0.05, because 0.05 on a 13-shock holdout
+would reject most real patterns too.
 
 ## Agent layer
 

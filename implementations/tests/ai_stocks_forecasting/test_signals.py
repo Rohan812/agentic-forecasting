@@ -19,6 +19,7 @@ from ai_stocks_forecasting.signals import (
     CONTROL_EXCLUSION_DAYS,
     HOLDOUT_END,
     HOLDOUT_START,
+    MAX_HOLDOUT_P_VALUE,
     MAX_P_VALUE,
     MIN_HOLDOUT_LIFT,
     MIN_LIFT,
@@ -403,6 +404,7 @@ def test_gate_passes_a_pattern_on_every_inclusive_threshold() -> None:
         ({"p_value": MAX_P_VALUE}, {}, "training p-value"),  # the p-value bound is strict
         ({"ci_low": 1.0}, {}, "does not exclude 1"),  # so is the interval's
         ({}, {"lift": MIN_HOLDOUT_LIFT - 0.01}, "holdout lift"),
+        ({}, {"p_value": MAX_HOLDOUT_P_VALUE}, "holdout p-value"),  # strict, like the training bound
     ],
 )
 def test_failing_any_single_criterion_blocks_graduation(
@@ -414,6 +416,21 @@ def test_failing_any_single_criterion_blocks_graduation(
     assert not gate_pass(train, holdout)
     reasons = gate_reasons(train, holdout)
     assert len(reasons) == 1 and reason in reasons[0], reasons
+
+
+def test_one_lucky_holdout_hit_does_not_graduate_a_memorised_pattern() -> None:
+    """A pattern that aces training and then matches a single holdout shock must not graduate.
+
+    This is the memorised-pattern case the holdout exists to catch.  One lucky
+    hit on a 13-shock holdout gives an enormous lift (1 / base rate) on no
+    evidence at all.  The lift rule alone waved it through; the holdout p-value
+    rule stops it.
+    """
+    train = evaluate_pattern(*_labelled(hits=30, n_shocks=60, false_matches=6, n_controls=60), base_rate=0.12)
+    holdout = evaluate_pattern(*_labelled(hits=1, n_shocks=13, false_matches=0, n_controls=13), base_rate=0.07)
+    assert holdout.lift >= MIN_HOLDOUT_LIFT, "Precondition: the lift rule alone would pass it."
+    assert not gate_pass(train, holdout)
+    assert any("holdout p-value" in r for r in gate_reasons(train, holdout))
 
 
 def test_undefined_values_fail_instead_of_slipping_through() -> None:
