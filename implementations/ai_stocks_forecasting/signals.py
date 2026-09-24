@@ -33,8 +33,8 @@ cutoff (February 2025 onward).
 Status
 ------
 **Partly implemented.**  :func:`flag_shock_windows`,
-:func:`sample_matched_controls` and :func:`train_holdout_split` are implemented
-and tested.  The remaining
+:func:`sample_matched_controls`, :func:`train_holdout_split` and
+:func:`evaluate_pattern` are implemented and tested.  The remaining
 functions keep their final signatures and raise :class:`NotImplementedError`
 until their own tasks land.
 """
@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from math import comb
 from typing import Literal
 
 import numpy as np
@@ -199,6 +200,18 @@ little room below 13 for events a caller filters out.
 """
 
 
+# ── Scoring ───────────────────────────────────────────────────────────────────
+
+BOOTSTRAP_RESAMPLES = 2000
+"""Bootstrap resamples behind the confidence interval on lift."""
+
+CI_LEVEL = 0.95
+"""Two-sided coverage of the interval on lift; ``ci_low`` is its lower end."""
+
+BOOTSTRAP_SEED = 0
+"""Fixed so that a graduated pattern's interval is reproducible from its inputs."""
+
+
 @dataclass(frozen=True)
 class Window:
     """One labelled observation window — either a shock or a matched control.
@@ -254,19 +267,30 @@ class PatternMetrics:
     n_hits
         Windows where the pattern matched **and** a shock occurred.
     precision
-        ``n_hits / n_matches`` — P(shock | pattern matched).  ``nan`` when the
-        pattern matched nothing.
+        P(shock | pattern matched) **in the population**, not in the sample.
+        The windows are a matched sample, one or more controls per shock, so
+        their own shock share is set by the design, not by the market.
+        Precision is therefore rebuilt from how often the pattern appears among
+        shocks and among controls, weighted by :attr:`base_rate`.  It equals
+        ``n_hits / n_matches`` only when ``base_rate`` equals the sample's own
+        shock share.  ``nan`` when the pattern matched nothing.
     base_rate
-        P(shock) over the same windows, the thing precision has to beat.
+        The population shock rate the pattern has to beat: the share of all
+        sessions in the split's period that were shocks.  See
+        :func:`shock_base_rate`.
     lift
-        ``precision / base_rate``.  The headline number.
+        ``precision / base_rate``: how many times more likely a shock is when
+        the pattern is present.  The headline number, and what
+        :data:`MIN_LIFT` and :data:`MIN_HOLDOUT_LIFT` are thresholds on.
     p_value
-        Fisher's exact test on the 2x2 table of matched/unmatched against
-        shock/no-shock.  One-sided, testing precision above base rate.
+        One-sided Fisher's exact test on the 2x2 table of matched/unmatched
+        against shock/control: is the pattern more common among shocks than
+        among controls?  Unlike precision it needs no correction, because the
+        odds ratio it tests does not depend on how many controls were sampled.
     ci_low, ci_high
-        Bootstrap confidence interval on :attr:`lift`.  The gate requires this
-        interval to exclude 1.0, which is a stricter and more informative
-        statement than the p-value alone.
+        Stratified bootstrap confidence interval (:data:`CI_LEVEL`) on
+        :attr:`lift`.  The gate requires ``ci_low > 1``, a stricter and more
+        informative statement than the p-value alone.
     """
 
     n_windows: int
@@ -572,10 +596,57 @@ def train_holdout_split(windows: list[Window]) -> tuple[list[Window], list[Windo
     return train, holdout
 
 
+def shock_base_rate(
+    prices_df: pd.DataFrame,
+    start: str | pd.Timestamp,
+    end: str | pd.Timestamp,
+    threshold_pct: float = SHOCK_THRESHOLD,
+) -> float:
+    """Return the share of sessions in ``[start, end]`` whose move reached the shock threshold.
+
+    This is the ``base_rate`` :func:`evaluate_pattern` needs: the rate a pattern
+    has to beat in the market, not in the matched sample.  Compute it per
+    split, because the periods differ.  At ±5% it is 12.0% of sessions in
+    2020-2024 and 7.0% in the Feb-Dec 2025 holdout.
+
+    It counts sessions, not merged events, because it answers "how often is the
+    next session a shock?", the question a forecaster using the pattern faces.
+    It is the same quantity as the shock task's unconditional anchor.
+    """
+    returns = _close_series(prices_df).pct_change() * 100.0
+    window = returns.loc[pd.Timestamp(start) : pd.Timestamp(end)].dropna()
+    if window.empty:
+        raise ValueError(f"No sessions between {start} and {end}.")
+    return float((window.abs() >= threshold_pct).mean())
+
+
+def _fisher_greater(hits: int, n_shocks: int, n_controls: int, n_matches: int) -> float:
+    """One-sided Fisher's exact p-value: P(at least ``hits`` shocks among ``n_matches`` matched windows).
+
+    The hypergeometric upper tail, summed exactly in integers, so there is no
+    scipy dependency to carry into the sandbox.  ``math.comb`` returns 0 for
+    impossible terms, so the sum needs no bounds bookkeeping.
+    """
+    total = comb(n_shocks + n_controls, n_matches)
+    tail = sum(comb(n_shocks, k) * comb(n_controls, n_matches - k) for k in range(hits, n_matches + 1))
+    return tail / total
+
+
+def _lift(sensitivity: np.ndarray, false_match_rate: np.ndarray, base_rate: float) -> np.ndarray:
+    """Compute population lift from match rates: ``P(match | shock) / P(match)``.
+
+    ``P(match) = sensitivity * base_rate + false_match_rate * (1 - base_rate)``.
+    It is ``nan`` where the pattern would match nothing at all.
+    """
+    matched = sensitivity * base_rate + false_match_rate * (1.0 - base_rate)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(matched > 0, sensitivity / matched, np.nan)
+
+
 def evaluate_pattern(
     pattern_matches: list[bool],
     shock_labels: list[bool],
-    base_rate: float | None = None,
+    base_rate: float,
 ) -> PatternMetrics:
     """Score one candidate pattern against labelled windows.
 
@@ -584,32 +655,101 @@ def evaluate_pattern(
     pattern_matches
         Per window, whether the pattern's news signature was present.
     shock_labels
-        Per window, whether a shock occurred.  Same length and order as
-        ``pattern_matches``.
+        Per window, whether it is a shock (``True``) or a control (``False``).
+        Same length and order as ``pattern_matches``.
     base_rate
-        P(shock) to compare precision against.  When ``None``, computed from
-        ``shock_labels``.  Pass an explicit value to score a directional pattern
-        against a directional base rate — pooling up and down shocks flatters a
-        pattern that only predicts one direction, and NVDA's shocks are
-        asymmetric enough for this to matter.
+        The population shock rate for the windows' period, from
+        :func:`shock_base_rate`.  For a directional pattern, pass directional
+        labels and the directional rate.  **Required, and not the sample's own
+        shock share**: with one control per shock that share is 50%, lift can
+        then never exceed 2.0, and ``MIN_LIFT = 2.0`` would demand a perfect
+        pattern.
 
     Returns
     -------
     PatternMetrics
-        Precision, lift, Fisher's exact p-value, and a bootstrap CI on lift.
+        Population precision and lift, Fisher's exact p-value, and a bootstrap
+        interval on lift.  A pattern that matched nothing scores ``nan``
+        precision and lift, ``p_value = 1.0`` and a ``nan`` interval.  That is a
+        normal, informative outcome for the per-experiment file, not an error.
+
+    Raises
+    ------
+    ValueError
+        If the inputs differ in length, ``base_rate`` is outside (0, 1), or
+        the windows lack either shocks or controls.
 
     Notes
     -----
-    Fisher's exact rather than a chi-squared test because the cell counts are
-    small by construction: a pattern matching 8 windows of which 5 are shocks is
-    a typical case, and chi-squared is unreliable there.
+    **Why precision is rebuilt instead of counted.**  The windows are a matched
+    sample: every shock plus a chosen number of controls.  Counting
+    ``n_hits / n_matches`` measures precision in that artificial mix.  What a
+    forecaster needs is precision in the market.  So the pattern's rate among
+    shocks (``n_hits / n_shocks``) and among controls are combined with the
+    real base rate.  This is the standard correction for a case-control
+    design, and it recovers ``n_hits / n_matches`` when ``base_rate`` equals
+    the sample's shock share.
 
-    The implementation must handle ``n_matches == 0`` (return ``nan`` precision
-    and lift, ``p_value = 1.0``) rather than dividing by zero — the discovery
-    agent will propose patterns that match nothing, and that is a normal,
-    informative outcome to record in the per-experiment file.
+    **Why Fisher's exact test, and why it isn't corrected.**  Cell counts are
+    small by construction; a holdout of 13 shocks is typical, and chi-squared
+    is unreliable there.  The test asks whether the pattern is more common
+    among shocks than among controls.  Its odds ratio does not depend on how
+    many controls were sampled, so the p-value is valid for this design as it
+    stands, and it is the same whatever ``base_rate`` is passed.
+
+    **Why a stratified bootstrap.**  The sample fixes how many shocks and how
+    many controls there are, so each resample draws shocks from shocks and
+    controls from controls.  Resamples in which the pattern matches nothing
+    have no lift and are left out.  The seed is fixed, so the same inputs
+    always give the same interval.
     """
-    raise NotImplementedError("Phase 1, Team Signals T3")
+    matches = np.asarray(pattern_matches, dtype=bool)
+    shocks = np.asarray(shock_labels, dtype=bool)
+    if matches.ndim != 1 or matches.shape != shocks.shape:
+        raise ValueError(
+            f"pattern_matches and shock_labels must be flat and equal in length; got {matches.shape} and {shocks.shape}."
+        )
+    if not 0.0 < base_rate < 1.0:
+        raise ValueError(f"base_rate must lie strictly between 0 and 1; got {base_rate}.")
+    n_shocks, n_controls = int(shocks.sum()), int((~shocks).sum())
+    if n_shocks == 0 or n_controls == 0:
+        raise ValueError(
+            f"A pattern needs both shocks and controls to be scored; got {n_shocks} shock(s) and "
+            f"{n_controls} control(s). Draw controls with sample_matched_controls."
+        )
+
+    hits = int((matches & shocks).sum())
+    n_matches = int(matches.sum())
+    # A pattern that matches nothing needs no special case: the tail sum is 1,
+    # _lift is nan when nothing matches, and so is every bootstrap resample.
+    p_value = _fisher_greater(hits, n_shocks, n_controls, n_matches)
+
+    sensitivity = np.array(hits / n_shocks)
+    false_match_rate = np.array((n_matches - hits) / n_controls)
+    lift = float(_lift(sensitivity, false_match_rate, base_rate))
+
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    shock_matches, control_matches = matches[shocks], matches[~shocks]
+    sens_b = shock_matches[rng.integers(0, n_shocks, (BOOTSTRAP_RESAMPLES, n_shocks))].mean(axis=1)
+    fmr_b = control_matches[rng.integers(0, n_controls, (BOOTSTRAP_RESAMPLES, n_controls))].mean(axis=1)
+    lift_b = _lift(sens_b, fmr_b, base_rate)
+    tail = 100 * (1 - CI_LEVEL) / 2
+    if np.isnan(lift_b).all():
+        ci_low = ci_high = np.nan
+    else:
+        ci_low, ci_high = (float(v) for v in np.nanpercentile(lift_b, [tail, 100 - tail]))
+
+    return PatternMetrics(
+        n_windows=len(matches),
+        n_matches=n_matches,
+        n_hits=hits,
+        precision=lift * base_rate,
+        base_rate=base_rate,
+        lift=lift,
+        p_value=p_value,
+        ci_low=ci_low,
+        ci_high=ci_high,
+    )
 
 
 def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
@@ -694,6 +834,9 @@ def label_regimes(
 
 
 __all__ = [
+    "BOOTSTRAP_RESAMPLES",
+    "BOOTSTRAP_SEED",
+    "CI_LEVEL",
     "CONTROL_EXCLUSION_DAYS",
     "CONTROL_POOL_MULTIPLE",
     "CONTROL_WINDOW_DAYS",
@@ -715,5 +858,6 @@ __all__ = [
     "gate_pass",
     "label_regimes",
     "sample_matched_controls",
+    "shock_base_rate",
     "train_holdout_split",
 ]

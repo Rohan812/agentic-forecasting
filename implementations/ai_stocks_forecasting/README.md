@@ -22,7 +22,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
-| `signals.py` | *new* — not from energy | **flagging, control sampling and the train/holdout split done**; scoring, gate and regime labels pending (see below) |
+| `signals.py` | *new* — not from energy | **flagging, control sampling, the train/holdout split and pattern scoring done**; the gate and regime labels pending (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
@@ -39,7 +39,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Finish `signals.py` | Fisher's exact + bootstrap, the gate, regime labels — each with tests |
+| Finish `signals.py` | the gate (`gate_pass`) and regime labels — each with tests |
 | Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
@@ -175,13 +175,14 @@ imports these functions and nothing else from the statistics layer.
 flag_shock_windows(prices_df, threshold_pct=7.0, horizon_days=1) -> list[Window]
 sample_matched_controls(windows, prices_df, n_each=1, seed=None, *, threshold_pct=7.0) -> list[Window]
 train_holdout_split(windows)                                     -> tuple[list[Window], list[Window]]
-evaluate_pattern(pattern_matches, shock_labels, base_rate=None)  -> PatternMetrics
+evaluate_pattern(pattern_matches, shock_labels, base_rate)       -> PatternMetrics
+shock_base_rate(prices_df, start, end, threshold_pct=5.0)        -> float
 gate_pass(metrics, holdout_metrics)                              -> bool
 label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 ```
 
 `Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows`,
-`sample_matched_controls` and `train_holdout_split` are implemented and tested**; the other
+`sample_matched_controls`, `train_holdout_split` and `evaluate_pattern` are implemented and tested**; the other
 functions keep their final signatures and raise `NotImplementedError` until their own tasks land.
 
 **Shock windows.** A session is a shock when its simple return reaches ±5%, the same definition
@@ -257,6 +258,36 @@ Two details worth knowing:
 pattern graduated because it held up in Feb–Dec 2025 will flatter any 2025 backtest of a
 forecaster that uses it. The honest measure of a pattern-using forecaster is the protected
 2026 evaluation.
+
+**Scoring a pattern.** `evaluate_pattern(matches, labels, base_rate)` returns precision, lift,
+a one-sided Fisher's exact p-value, and a 95% bootstrap interval on lift.
+
+**`base_rate` is required, and it has to be the *market* rate, not the sample's.** Our windows
+are a matched sample, one control per shock, so they are 50% shocks by design. Lift measured
+inside that mix is precision ÷ 0.5, which can never exceed 2.0, and `MIN_LIFT = 2.0` would then
+demand a perfect pattern. So lift is rebuilt from how often the pattern appears among shocks
+versus among controls, weighted by the real rate. That rate comes from
+`shock_base_rate(prices, start, end)`: 12.0% of sessions in 2020–2024, and 7.0% in the Feb–Dec
+2025 holdout, so compute it per split.
+
+The p-value needs no correction, because the test compares shocks with controls directly. It's
+computed as an exact sum rather than through scipy, which keeps `signals.py` dependency-light
+for the sandbox, and it's cross-checked against scipy in the tests. The bootstrap resamples
+shocks and controls separately, with a fixed seed, so the same inputs always give the same
+interval.
+
+On the real training split, two stand-in patterns show the statistics doing their job:
+
+| Stand-in pattern | Scored against | Lift | 95% CI | p |
+|---|---|---|---|---|
+| Elevated volatility beforehand (trailing vol > 3.5%) | our matched controls | **1.02** | 0.82 – 1.25 | 0.5 |
+| Elevated volatility beforehand | random controls | 1.91 | 1.46 – 2.54 | 0.000008 |
+| Earnings reaction session | our matched controls | **4.63** | 1.98 – 8.33 | 0.009 |
+
+Against our controls the volatility proxy correctly shows no effect. Against random controls it
+looks highly significant, which is the false discovery the matching exists to prevent. The
+earnings calendar clears every training criterion of the gate, consistent with the shock
+anchors (50% of reaction sessions against 12% overall).
 
 A pattern graduates to the master strategy file only if *all five* criteria hold:
 

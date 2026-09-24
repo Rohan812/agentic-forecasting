@@ -9,9 +9,11 @@ raising any error.  Every magnitude is expressed relative to ``SHOCK_THRESHOLD``
 from __future__ import annotations
 
 import warnings
+from math import comb
 
 import numpy as np
 import pandas as pd
+import pytest
 from ai_stocks_forecasting.paths import SHOCK_THRESHOLD
 from ai_stocks_forecasting.signals import (
     CONTROL_EXCLUSION_DAYS,
@@ -19,6 +21,7 @@ from ai_stocks_forecasting.signals import (
     HOLDOUT_START,
     VOL_WINDOW_DAYS,
     Window,
+    evaluate_pattern,
     flag_shock_windows,
     sample_matched_controls,
     train_holdout_split,
@@ -257,3 +260,98 @@ def test_controls_stay_on_their_shocks_side_of_the_holdout_boundary() -> None:
 
     assert before and all(c.event_date < HOLDOUT_START for c in before)
     assert inside and all(c.as_of >= HOLDOUT_START and c.event_date <= HOLDOUT_END for c in inside)
+
+
+# ── Pattern scoring ───────────────────────────────────────────────────────────
+
+
+def _labelled(hits: int, n_shocks: int, false_matches: int, n_controls: int) -> tuple[list[bool], list[bool]]:
+    """Build match/label vectors for a pattern hitting ``hits`` shocks and ``false_matches`` controls."""
+    matches = (
+        [True] * hits + [False] * (n_shocks - hits) + [True] * false_matches + [False] * (n_controls - false_matches)
+    )
+    labels = [True] * n_shocks + [False] * n_controls
+    return matches, labels
+
+
+def test_p_value_is_an_exact_one_sided_fisher_test() -> None:
+    """Hand-computed on one table, and identical to scipy's implementation on many random ones.
+
+    ``evaluate_pattern`` sums the hypergeometric tail itself so ``signals.py``
+    carries no scipy dependency; scipy here is an independent reference.
+    """
+    matches, labels = _labelled(hits=6, n_shocks=10, false_matches=2, n_controls=10)
+    by_hand = (comb(10, 6) * comb(10, 2) + comb(10, 7) * comb(10, 1) + comb(10, 8)) / comb(20, 8)
+    assert evaluate_pattern(matches, labels, base_rate=0.12).p_value == pytest.approx(by_hand, rel=1e-12)
+
+    stats = pytest.importorskip("scipy.stats")
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        n_s, n_c = int(rng.integers(3, 40)), int(rng.integers(3, 40))
+        hits, false = int(rng.integers(0, n_s + 1)), int(rng.integers(0, n_c + 1))
+        if hits + false == 0:
+            continue
+        matches, labels = _labelled(hits, n_s, false, n_c)
+        expected = stats.fisher_exact([[hits, false], [n_s - hits, n_c - false]], alternative="greater").pvalue
+        assert evaluate_pattern(matches, labels, base_rate=0.12).p_value == pytest.approx(expected, rel=1e-9)
+
+
+def test_lift_is_measured_against_the_population_rate_not_the_sample() -> None:
+    """The same pattern scores its market lift, not the lift inside a 50/50 matched sample.
+
+    With one control per shock the sample's shock share is 50%, so even a perfect
+    pattern would score lift 2.0 in-sample.  ``MIN_LIFT = 2.0`` would then demand
+    perfection.  Against the real rate the same perfect pattern scores 1 / rate.
+    The p-value tests shocks against controls and must not depend on the rate.
+    """
+    matches, labels = _labelled(hits=6, n_shocks=10, false_matches=2, n_controls=10)
+    in_sample = evaluate_pattern(matches, labels, base_rate=0.5)
+    in_market = evaluate_pattern(matches, labels, base_rate=0.12)
+    assert (in_sample.precision, in_sample.lift) == pytest.approx((6 / 8, 1.5))
+    sens, false_rate = 0.6, 0.2
+    expected_lift = sens / (sens * 0.12 + false_rate * 0.88)
+    assert (in_market.precision, in_market.lift) == pytest.approx((expected_lift * 0.12, expected_lift))
+    assert in_market.p_value == in_sample.p_value
+
+    perfect, labels = _labelled(hits=10, n_shocks=10, false_matches=0, n_controls=10)
+    assert evaluate_pattern(perfect, labels, base_rate=0.5).lift == pytest.approx(2.0)
+    assert evaluate_pattern(perfect, labels, base_rate=0.12).lift == pytest.approx(1 / 0.12)
+
+
+def test_a_pattern_matching_nothing_is_no_evidence_not_an_error() -> None:
+    """Proposals that match no window are normal; they score ``nan`` lift and ``p_value = 1``."""
+    matches, labels = _labelled(hits=0, n_shocks=8, false_matches=0, n_controls=8)
+    metrics = evaluate_pattern(matches, labels, base_rate=0.12)
+    assert metrics.n_matches == 0 and metrics.p_value == 1.0
+    assert np.isnan(metrics.lift) and np.isnan(metrics.precision) and np.isnan(metrics.ci_low)
+
+
+def test_interval_separates_a_real_pattern_from_a_null_one() -> None:
+    """A pattern five times more common among shocks clears 1; one equally common in both does not.
+
+    The interval must also bracket the point estimate and be reproducible.
+    """
+    real = evaluate_pattern(*_labelled(hits=30, n_shocks=60, false_matches=6, n_controls=60), base_rate=0.12)
+    null = evaluate_pattern(*_labelled(hits=18, n_shocks=60, false_matches=18, n_controls=60), base_rate=0.12)
+
+    assert real.ci_low > 1.0 and real.ci_low <= real.lift <= real.ci_high
+    assert null.ci_low < 1.0 < null.ci_high and null.lift == pytest.approx(1.0)
+    again = evaluate_pattern(*_labelled(hits=30, n_shocks=60, false_matches=6, n_controls=60), base_rate=0.12)
+    assert (again.ci_low, again.ci_high) == (real.ci_low, real.ci_high)
+
+
+@pytest.mark.parametrize(
+    ("matches", "labels", "base_rate", "message"),
+    [
+        ([True, False], [True, False, False], 0.12, "equal in length"),
+        ([True, False], [True, False], 0.0, "strictly between 0 and 1"),
+        ([True, False], [True, False], 1.2, "strictly between 0 and 1"),
+        ([True, False], [True, True], 0.12, "both shocks and controls"),
+    ],
+)
+def test_scoring_rejects_malformed_input(
+    matches: list[bool], labels: list[bool], base_rate: float, message: str
+) -> None:
+    """Malformed input fails with a message that says what is wrong."""
+    with pytest.raises(ValueError, match=message):
+        evaluate_pattern(matches, labels, base_rate=base_rate)
