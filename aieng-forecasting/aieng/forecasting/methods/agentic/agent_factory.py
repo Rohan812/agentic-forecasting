@@ -87,6 +87,12 @@ SMR_STATE_KEY = "__smr_output__"
 # see or influence this key, so it can't be silently omitted or spoofed.
 AS_OF_STATE_KEY = "__as_of__"
 
+# Retry guidance after a clean verdict on an empty summary (see ``search_web``).
+_EMPTY_SUMMARY_GUIDANCE = (
+    "Your previous search returned no summary text. Write the summary itself, "
+    "grounded in the results, not only a list of sources."
+)
+
 
 def _build_set_model_response_tool() -> FunctionTool:
     """Return a proxy-compatible ``set_model_response`` shim.
@@ -595,7 +601,14 @@ def _build_search_tool(
                 len(verdict.flagged_claims),
             )
             if verdict.clean and verdict.confidence >= config.verifier_confidence_threshold:
-                return _format_result(verdict.filtered_text, sources)
+                if verdict.filtered_text.strip():
+                    return _format_result(verdict.filtered_text, sources)
+                # Clean but empty: returned, it would reach the agent as a
+                # "successful" result of bare source URLs, read as "no news"
+                # when the search failed.  Spend an attempt instead; running
+                # out of attempts returns the failure sentinel.
+                negative_guidance = _EMPTY_SUMMARY_GUIDANCE
+                continue
             logger.warning("search_web attempt %d flagged %d claim(s); retrying.", attempt, len(verdict.flagged_claims))
             negative_guidance = (
                 f"Your previous search result may have included information published on or after "
