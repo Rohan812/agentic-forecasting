@@ -467,6 +467,39 @@ class TestSearchToolLeakageVerification:
         assert "2024-01-15" in result
 
     @pytest.mark.asyncio
+    async def test_empty_summary_is_not_returned_as_a_result(self) -> None:
+        """A clean verdict on an empty summary spends an attempt, never returned.
+
+        Seen in production: two NVDA shock origins received a result that was
+        only a "Sources:" list of URLs, accepted as a success, and the agent
+        read it as "no news".
+        """
+
+        async def _run(texts: list[str]) -> tuple[str, list[dict]]:
+            config = ContextRetrievalConfig(enabled=True, instruction="Search assistant.")
+            tool = _build_search_tool(config, openai_base_url="https://proxy.example.com/v1", openai_api_key="test-key")
+            calls: list[dict] = []
+            remaining = list(texts)
+
+            async def _fake_acompletion(**kwargs):  # type: ignore[override]
+                calls.append(kwargs)
+                if kwargs["model"] == f"openai/{config.verifier_model}":
+                    return self._verify_response(clean=True, confidence=9, filtered_text=remaining.pop(0))
+                return self._search_response("Raw.")
+
+            with patch("litellm.acompletion", new=AsyncMock(side_effect=_fake_acompletion)):
+                return await tool(query="NVDA move", cutoff_date="2025-04-09"), calls
+
+        recovered, calls = await _run(["  \n", "Real summary."])
+        assert recovered == "Real summary."
+        assert len(calls) == 4
+        retry_prompt = next(m for m in calls[2]["messages"] if m["role"] == "user")["content"]
+        assert "no summary text" in retry_prompt
+
+        never, _ = await _run(["", "", ""])
+        assert never.startswith("[SEARCH_VERIFICATION_FAILED]")
+
+    @pytest.mark.asyncio
     async def test_verifier_skipped_when_no_cutoff_date(self) -> None:
         """No cutoff_date means nothing to verify against — single search call only."""
         config = ContextRetrievalConfig(enabled=True, instruction="Search assistant.")
