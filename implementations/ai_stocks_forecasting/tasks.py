@@ -208,6 +208,21 @@ TASK_SHOCK_SPEC = (
     f"  - Session right after a >={SHOCK_THRESHOLD:g}% move                -> ~22%\n"
     "  - Next session is the reaction to NVDA's own quarterly results "
     "(reported after the close) -> ~50%\n\n"
+    "Research before answering. Call `search_web` once per topic below, always "
+    "with `cutoff_date` equal to `as_of`:\n"
+    '  1. `search_web(query="NVIDIA stock move on <as_of> and what drove it", '
+    "cutoff_date=<as_of>)` — the session your price history does not show.\n"
+    '  2. `search_web(query="NVIDIA next earnings date and events scheduled for the '
+    "next trading session: US CPI, jobs report, FOMC, export-control rulings, major "
+    'product or hyperscaler earnings", cutoff_date=<as_of>)` — dated catalysts '
+    "inside the horizon.\n"
+    '  3. `search_web(query="breaking news on AI chip export controls, tariffs, '
+    'hyperscaler AI capex, or AMD and custom-silicon competition affecting NVIDIA", '
+    "cutoff_date=<as_of>)` — unscheduled catalysts.\n"
+    "Each search also runs a leakage-verifier call, so keep to these three unless "
+    "a result names a specific event inside the horizon that needs one follow-up. "
+    "If a result begins with `[SEARCH_VERIFICATION_FAILED]`, treat that topic as "
+    "unknown and do not fill it from memory.\n\n"
     "Start from the anchor that matches the price history and the calendar, then "
     "move away from it only for a specific, dated catalyst inside the horizon "
     "(e.g. an announced export-control ruling, a hyperscaler capex guidance "

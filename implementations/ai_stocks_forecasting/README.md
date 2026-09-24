@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; give the shock task recommended search topics (it runs one search per origin today); move the adaptive agent onto `NvdaStrategyState` |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; re-score the shock agent now that it has search topics, on origins that are not the gate holdout; move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -469,8 +469,16 @@ separates shocks from volatile quiet days.** It answered 0.14, 0.15 or 0.18 at e
 is the trailing-volatility anchor from the task spec. It gave 0.18 the day before the +18.7%
 tariff-pause rally. The traces show why news added little: **every origin ran exactly one search.**
 The multitask instruction says to search but, unlike `build_nvda_news_config`, names no topics.
-Fix this on origins that are not the gate holdout. These ten are holdout windows, and iterating the
-prompt against them would tune on the holdout.
+
+**Search topics added (after the run above).** `TASK_SHOCK_SPEC` now names three fenced queries.
+The first asks how NVDA moved on the `as_of` session, which is the session its price history does
+not show. The second covers scheduled catalysts for the next session: earnings, CPI, jobs, FOMC,
+export-control rulings. The third covers unscheduled ones: export controls, tariffs, hyperscaler
+capex, competition. The topics live in the task spec, not the shared multitask instruction, because
+the trajectory task uses that instruction too. A one-origin mechanics check on 2025-07-14, which is
+not a holdout window, ran three searches instead of one, for $0.0092. The table above predates the
+change and was **deliberately not re-run** on the same ten origins: they are gate holdout windows,
+and re-scoring a prompt change on them would tune on the holdout. Re-score on a fresh origin set.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).

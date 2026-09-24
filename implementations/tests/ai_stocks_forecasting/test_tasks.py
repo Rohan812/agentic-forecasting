@@ -88,3 +88,15 @@ def test_shock_outcome_is_not_visible_on_its_own_session() -> None:
 
     seen_next_day = service.context(as_of=pd.Timestamp("2025-03-05")).get_series(NVDA_SHOCK_SERIES_ID)
     assert seen_next_day.set_index("timestamp").loc[shock_day, "value"] == 1.0
+
+
+def test_shock_spec_names_fenced_search_topics() -> None:
+    """The shock ask must name its search topics, each fenced at ``as_of``.
+
+    The multitask instruction only says to search.  Without topics in the spec,
+    the first smoke backtest ran one search per origin and the agent never left
+    the volatility anchor.
+    """
+    queries = re.findall(r"search_web\(query=\"[^\"]+\", cutoff_date=<as_of>\)", TASK_SHOCK_SPEC)
+    assert len(queries) == 3, queries
+    assert "[SEARCH_VERIFICATION_FAILED]" in TASK_SHOCK_SPEC
