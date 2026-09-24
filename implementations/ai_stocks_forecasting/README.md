@@ -26,7 +26,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, multitask, code-execution and tool factories are still `build_wti_*` |
-| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema drafted** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`; the agent's own instructions and skills still WTI |
+| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
 
 Deliberately **not** copied: the energy notebooks, the committed WTI prediction YAMLs under `data/`, the 52 cached curriculum news files, the trained `wti-strategy-trained/` skill state, and the oil forecast animation. Those are WTI results, not scaffolding — the equivalents are produced here from NVDA runs. The energy `specs/` were not copied either; the NVDA specs below were written fresh rather than edited down from WTI ones.
@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -419,13 +419,24 @@ ai_stocks_forecasting.shock_anchors` after any change to the threshold, and upda
 string to match.
 
 **Master strategy schema**
-([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py), draft).
+([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).
 `NvdaStrategyState` extends `AdaptiveSkillState`. Its main field is `news_patterns: list[NewsPattern]`.
 Each pattern stores the train and holdout `PatternEvidence` it was graduated on, copied
 field-for-field from `signals.PatternMetrics` via `PatternEvidence.from_metrics`, along with its
 `source_experiment`. Only graduated patterns go in this file; candidates and rejections belong
 in the per-experiment trail. The WTI `skill_state.py` stays in place until the adaptive agent
 moves over to the new schema.
+
+**The schema enforces the gate itself.** A `NewsPattern` re-runs `signals.gate_reasons` on its own
+train and holdout evidence when it is built, and refuses to exist if any criterion fails; the error
+lists which ones. `AdaptiveSkillStore.load` validates `skill_state.yaml` through the same model, so a
+hand-edited file with weakened evidence fails to load instead of reaching the forecaster. Tightening
+a gate constant in `signals.py` therefore makes any previously graduated pattern that no longer
+clears it fail to load, by name. That is deliberate: every pattern in the master file meets the
+current standard, and a change to the standard shows up rather than being grandfathered in. Pattern
+ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by id, and
+agent-written text is escaped so a `|` in a cue can't shift the `SKILL.md` table. Tests are in
+`implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
 
 ## Charts
 
