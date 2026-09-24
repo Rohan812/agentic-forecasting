@@ -6,6 +6,14 @@ resolves to, and the **arms** it runs:
 - ``climatology``: :class:`~aieng.forecasting.methods.baselines.historical_frequency.HistoricalFrequencyPredictor`
 - ``agent``: :func:`~ai_stocks_forecasting.tasks.build_nvda_shock_predictor`, with search topics
 - ``agent_notopics``: the same agent without the named search topics (the ablation arm)
+- ``agent_close``: :func:`~ai_stocks_forecasting.tasks.build_nvda_shock_predictor_after_close`,
+  which sees the ``as_of`` close; requires ``origin_time: after_close``
+
+A spec with ``origin_time: after_close`` places each origin at 20:00 on its
+date, after the close, and every arm is wrapped in
+:class:`~ai_stocks_forecasting.tasks.SessionDatePredictor` so its forecast
+resolves against the session date.  The wrapper changes no forecast, so specs
+at midnight get it too.
 
 Specs:
 
@@ -56,7 +64,10 @@ from ai_stocks_forecasting.baselines import PREDICTIONS_DIR, SPECS_DIR
 from ai_stocks_forecasting.data import NVDA_SERIES_ID, build_nvda_service
 from ai_stocks_forecasting.tasks import (
     NVDA_SHOCK_SERIES_ID,
+    SessionDatePredictor,
+    after_close,
     build_nvda_shock_predictor,
+    build_nvda_shock_predictor_after_close,
     nvda_shock_task,
     register_shock_series,
 )
@@ -69,7 +80,11 @@ from aieng.forecasting.methods.baselines.historical_frequency import HistoricalF
 
 SPEC_NAME = "nvda_shock_smoke"
 
-Arm = Literal["climatology", "agent", "agent_notopics"]
+Arm = Literal["climatology", "agent", "agent_notopics", "agent_close"]
+OriginTime = Literal["midnight", "after_close"]
+
+_UNSCORED_BEFORE: frozenset[str] = frozenset({"agent", "agent_close"})
+"""Arms written after the smoke results were seen: never scored on holdout or smoke origins."""
 
 
 def build_arm(arm: Arm) -> Predictor:
@@ -80,7 +95,9 @@ def build_arm(arm: Arm) -> Predictor:
         return build_nvda_shock_predictor()
     if arm == "agent_notopics":
         return build_nvda_shock_predictor(search_topics=False)
-    raise ValueError(f"Unknown arm {arm!r}; expected climatology, agent or agent_notopics.")
+    if arm == "agent_close":
+        return build_nvda_shock_predictor_after_close()
+    raise ValueError(f"Unknown arm {arm!r}; expected climatology, agent, agent_notopics or agent_close.")
 
 
 @dataclass(frozen=True)
@@ -92,10 +109,19 @@ class SmokeSpec:
     expected: dict[pd.Timestamp, int]
     arms: tuple[Arm, ...] = ("climatology", "agent")
     description: str = ""
+    origin_time: OriginTime = "midnight"
+
+    def __post_init__(self) -> None:
+        if "agent_close" in self.arms and self.origin_time != "after_close":
+            raise ValueError(f"{self.spec_id}: the agent_close arm needs origin_time: after_close.")
+
+    def origin(self, day: pd.Timestamp) -> pd.Timestamp:
+        """Return the origin timestamp for a session date listed in the spec."""
+        return after_close(day) if self.origin_time == "after_close" else pd.Timestamp(day)
 
     def backtest_spec(self) -> BacktestSpec:
         """Build the harness spec for :func:`nvda_shock_task` over these origins."""
-        origins = sorted(self.expected)
+        origins = sorted(self.origin(day) for day in self.expected)
         return BacktestSpec(
             task=nvda_shock_task(),
             start=origins[0].to_pydatetime(),
@@ -116,6 +142,7 @@ def load_smoke_spec(name: str = SPEC_NAME) -> SmokeSpec:
         expected=expected,
         arms=tuple(raw["arms"]),
         description=str(raw.get("summary", "")),
+        origin_time=raw.get("origin_time", "midnight"),
     )
 
 
@@ -132,7 +159,7 @@ def check_expected_outcomes(spec: SmokeSpec, service: DataService) -> None:
 
 
 def check_agent_origins_are_fresh(spec: SmokeSpec, service: DataService) -> None:
-    """Refuse to run the ``agent`` arm on a gate-holdout shock window or a smoke origin.
+    """Refuse to run the ``agent`` or ``agent_close`` arm on a gate-holdout shock window or a smoke origin.
 
     The search topics were written after looking at the smoke results, so
     scoring them there, or on any other holdout window, would tune the prompt
@@ -140,7 +167,7 @@ def check_agent_origins_are_fresh(spec: SmokeSpec, service: DataService) -> None
     from 2020); the matched controls depend on a sampling seed, so they are not
     checked here.  Spec authors exclude them, as ``nvda_shock_fresh.yaml`` records.
     """
-    if "agent" not in spec.arms:
+    if not _UNSCORED_BEFORE & set(spec.arms):
         return
     prices = service.get_series(NVDA_SERIES_ID, as_of=datetime.now())
     prices = prices[pd.to_datetime(prices["timestamp"]) >= pd.Timestamp("2020-01-01")]
@@ -152,7 +179,7 @@ def check_agent_origins_are_fresh(spec: SmokeSpec, service: DataService) -> None
     clashes = sorted(a for a in spec.expected if a in forbidden)
     if clashes:
         raise ValueError(
-            f"{spec.spec_id} runs the `agent` arm on holdout or smoke origins: "
+            f"{spec.spec_id} runs {sorted(_UNSCORED_BEFORE & set(spec.arms))} on holdout or smoke origins: "
             + ", ".join(str(a.date()) for a in clashes)
         )
 
@@ -169,7 +196,7 @@ def scored_frame(results: dict[str, BacktestResult], spec: SmokeSpec) -> tuple[p
     rows = []
     for predictor_id, result in results.items():
         for pred, score in zip(result.predictions, result.scores, strict=True):
-            as_of = pd.Timestamp(pred.as_of)
+            as_of = pd.Timestamp(pred.as_of).normalize()
             rows.append(
                 {
                     "predictor_id": predictor_id,
@@ -212,7 +239,7 @@ def run(spec_name: str = SPEC_NAME, force: bool = False, store_dir: Path | None 
     check_agent_origins_are_fresh(spec, service)
     store = store_dir or PREDICTIONS_DIR
 
-    predictors = [build_arm(arm) for arm in spec.arms]
+    predictors = [SessionDatePredictor(build_arm(arm)) for arm in spec.arms]
     results = {
         p.predictor_id: cached_backtest(p, spec.backtest_spec(), spec.spec_id, service, store, force_refresh=force)
         for p in predictors

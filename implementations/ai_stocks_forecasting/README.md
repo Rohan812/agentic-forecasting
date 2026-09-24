@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; give the shock agent the `as_of` close from the price data instead of asking search for it (see *Fresh re-score*); reject body-less search results; move the adaptive agent onto `NvdaStrategyState` |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; score the after-close shock agent (`agent_close`) once there is an origin set it may be scored on (see *After-close origins*); move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -517,6 +517,37 @@ late. The fix is to let the shock agent see the `as_of` close, for example a pri
 task stamped at the 16:00 close with origins after the close, rather than asking search for it.
 Search results with no summary body should be rejected as unusable, not passed on as news. These 16
 origins have now been scored, so the next prompt change needs origins of its own.
+
+**After-close origins (the fix).** The root cause turned out to be the fence itself. The harness
+fences `search_web` to information published *strictly before* the `as_of` date. Asking how NVDA
+moved *on* `as_of` therefore asked for fenced-out news, and the verifier stripped it. Two changes
+follow.
+
+- **Prices, not search, for the `as_of` session.** `register_shock_series` now also registers
+  `nvda_stock_price_at_close`. It holds the same adjusted closes, each released at 16:00 on its own
+  session (`MARKET_CLOSE`) rather than a business day later, and the shock indicator is released at
+  the close too. An origin at 20:00 (`after_close(day)`) sees that day's close.
+  `build_nvda_shock_predictor_after_close()` reads it with `TASK_SHOCK_SPEC_AFTER_CLOSE`, which is
+  the no-topics prompt with its timing paragraph replaced. It is filed as
+  `nvda_analyst_multitask_close`. The news fence does not move: the agent still sees only news
+  published before `as_of`, so news after that day's close stays out of reach. Checked on
+  2025-04-09, where the history now ends 96.06 → 114.04, the +18.7% session that was invisible
+  before.
+- **Every arm is wrapped in `SessionDatePredictor`.** Predictors stamp `forecast_date = as_of + h`,
+  so a 20:00 origin forecasts 20:00 on the target session. The harness matches outcomes by exact
+  timestamp, so that forecast goes unscored: with every origin lost the harness raises, but a spec
+  mixing origin times would lose the after-close ones silently. The wrapper pins the date to the
+  session and changes nothing else. A test shows both behaviours. The existing specs reproduce
+  exactly with it on.
+- **Empty search results are retried, not served** (core `search_web`). A clean verdict on an empty
+  summary now spends an attempt, and exhausting the attempts returns `[SEARCH_VERIFICATION_FAILED]`,
+  which the agent is already told how to handle.
+
+`shock_smoke.py` accepts `origin_time: after_close` in a spec and an `agent_close` arm. It refuses
+`agent_close`, like `agent`, on holdout or smoke origins, and refuses it at midnight origins. A live
+check on 2025-07-14 ran end to end for $0.01. **It has not been scored.** The only post-cutoff
+origins it may be scored on without touching the holdout or 2026 are the 16 in `nvda_shock_fresh`,
+and those have already been used once, for the search-topics A/B.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).

@@ -11,9 +11,13 @@ import pytest
 from ai_stocks_forecasting.analyst_agent.agent import _NVDA_MULTITASK_ANALYST_INSTRUCTION
 from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from ai_stocks_forecasting.tasks import (
+    NVDA_CLOSE_SERIES_ID,
     NVDA_SHOCK_SERIES_ID,
     TASK_SHOCK_SPEC,
+    TASK_SHOCK_SPEC_AFTER_CLOSE,
     NvdaMultitaskPromptBuilder,
+    SessionDatePredictor,
+    after_close,
     build_nvda_news_predictor,
     nvda_shock_task,
     register_shock_series,
@@ -23,7 +27,9 @@ from aieng.forecasting.data import DataService
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.data.features import StaticFrameAdapter
 from aieng.forecasting.data.models import SeriesMetadata
+from aieng.forecasting.evaluation.backtest import BacktestSpec, backtest
 from aieng.forecasting.methods.agentic import DiscreteAgentForecastOutput
+from aieng.forecasting.methods.baselines.historical_frequency import HistoricalFrequencyPredictor
 
 
 @pytest.fixture(autouse=True)
@@ -100,3 +106,63 @@ def test_shock_spec_names_fenced_search_topics() -> None:
     queries = re.findall(r"search_web\(query=\"[^\"]+\", cutoff_date=<as_of>\)", TASK_SHOCK_SPEC)
     assert len(queries) == 3, queries
     assert "[SEARCH_VERIFICATION_FAILED]" in TASK_SHOCK_SPEC
+
+
+def _service_with(closes: list[float], start: str = "2025-03-03") -> DataService:
+    service = DataService()
+    service.register(
+        NVDA_SERIES_ID,
+        StaticFrameAdapter(_prices(closes) if start == "2025-03-03" else _prices_from(closes, start)),
+        SeriesMetadata(series_id=NVDA_SERIES_ID, description="t", source="t", units="USD/share", frequency="B"),
+    )
+    return register_shock_series(service)
+
+
+def _prices_from(closes: list[float], start: str) -> pd.DataFrame:
+    dates = pd.bdate_range(start, periods=len(closes))
+    return pd.DataFrame({"timestamp": dates, "value": closes, "released_at": dates + pd.offsets.BDay(1)})
+
+
+def test_after_close_origin_sees_its_own_close_and_nothing_later() -> None:
+    """The close-stamped series shows day t's close at 20:00 on t, not before the 16:00 close, and not t+1."""
+    service = _service_with([100.0, 110.0, 99.0])
+    day = pd.Timestamp("2025-03-04")
+
+    def last_seen(as_of: pd.Timestamp) -> pd.Timestamp:
+        return pd.Timestamp(service.context(as_of=as_of).get_series(NVDA_CLOSE_SERIES_ID)["timestamp"].max())
+
+    assert last_seen(day + pd.Timedelta(hours=15, minutes=59)) == pd.Timestamp("2025-03-03")
+    assert last_seen(after_close(day)) == day
+
+    payload = json.loads(
+        NvdaMultitaskPromptBuilder(task_spec=TASK_SHOCK_SPEC_AFTER_CLOSE, price_series_id=NVDA_CLOSE_SERIES_ID)(
+            task=nvda_shock_task(), context=service.context(as_of=after_close(day))
+        )
+    )
+    assert payload["as_of"] == payload["last_close_date"] == "2025-03-04"
+
+
+def test_after_close_origins_are_scored_only_when_wrapped() -> None:
+    """Unwrapped, a 20:00 origin forecasts 20:00 next day, which matches no outcome row, so it goes unscored.
+
+    Here every origin is lost and the harness raises; a spec mixing midnight and
+    after-close origins would lose only the latter, silently.
+    ``SessionDatePredictor`` pins the forecast to the session date, so the same
+    origins resolve.
+    """
+    closes = [100.0 * (1.06 if i % 7 == 0 else 1.0) ** (i // 7) for i in range(300)]
+    service = _service_with(closes, start="2024-01-01")
+    origins = [after_close(d) for d in pd.bdate_range("2025-01-06", periods=5, freq="W-MON")]
+    spec = BacktestSpec(
+        task=nvda_shock_task(),
+        start=origins[0].to_pydatetime(),
+        end=origins[-1].to_pydatetime(),
+        origin_dates=[o.to_pydatetime() for o in origins],
+        warmup=10,
+        description="t",
+    )
+    with pytest.raises(ValueError, match="No predictions were scored"):
+        backtest(HistoricalFrequencyPredictor(), spec, service)
+    wrapped = backtest(SessionDatePredictor(HistoricalFrequencyPredictor()), spec, service)
+    assert len(wrapped.predictions) == len(origins)
+    assert all(pd.Timestamp(p.forecast_date) == pd.Timestamp(p.forecast_date).normalize() for p in wrapped.predictions)
