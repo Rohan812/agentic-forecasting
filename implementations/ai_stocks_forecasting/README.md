@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; score the after-close shock agent (`agent_close`) once there is an origin set it may be scored on (see *After-close origins*); move the adaptive agent onto `NvdaStrategyState` |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; find evidence that news separates shocks from calm days: no shock-agent variant has yet (see *After-close origins*). `nvda_shock_fresh` is closed to further iterations; move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -92,6 +92,7 @@ Shocks are **asymmetric**: upside outnumbers downside about 4:3 at ±5% and 3:1 
 | [`specs/nvda_eval.yaml`](specs/nvda_eval.yaml) | 2026-01-05 → 2026-08-17, weekly | 33 | Protected prospective evaluation. 6 shock days at ±5% (4 up / 2 down). |
 | [`specs/nvda_shock_smoke.yaml`](specs/nvda_shock_smoke.yaml) | Feb–Dec 2025, fixed | 10 | Shock-agent smoke: 5 holdout shocks + 5 volatility-matched controls, each with its expected outcome frozen. See *Shock smoke backtest*. |
 | [`specs/nvda_shock_fresh.yaml`](specs/nvda_shock_fresh.yaml) | Feb–Dec 2025, fixed | 16 | Search-topics A/B on every non-holdout 2025 session that follows a shock (3 continued). See *Fresh re-score*. |
+| [`specs/nvda_shock_fresh_close.yaml`](specs/nvda_shock_fresh_close.yaml) | Feb–Dec 2025, fixed, 20:00 origins | 16 | The same sessions for the after-close agent. The second and last iteration on this set. |
 
 Both use `task_id: nvda_price_forecast`, `target_series_id: nvda_stock_price`, horizons `[5, 10, 21]` business days, `warmup: 250`, and load as `MultiTargetBacktestSpec` (matching the energy/oil specs, not the single-task `BacktestSpec`).
 
@@ -545,9 +546,30 @@ follow.
 
 `shock_smoke.py` accepts `origin_time: after_close` in a spec and an `agent_close` arm. It refuses
 `agent_close`, like `agent`, on holdout or smoke origins, and refuses it at midnight origins. A live
-check on 2025-07-14 ran end to end for $0.01. **It has not been scored.** The only post-cutoff
-origins it may be scored on without touching the holdout or 2026 are the 16 in `nvda_shock_fresh`,
-and those have already been used once, for the search-topics A/B.
+check on 2025-07-14 ran end to end for $0.01.
+
+**Scored on the same 16 sessions** (`--spec nvda_shock_fresh_close`, 20:00 origins, 2026-09-24).
+This is the second and last iteration on that set, so it is weaker evidence than a first look.
+Every origin was scored, with no drops and no 503s, for $0.0104 per origin, the same as the
+no-topics arm.
+
+| Arm (same 16 sessions, 3 continued) | Sees `as_of` close | Brier | Mean P, continued | Mean P, calmed |
+|---|---|---|---|---|
+| Agent, after close | yes | 0.154 | 0.227 | 0.212 |
+| Agent, no topics (midnight) | no | **0.138** | 0.270 | 0.190 |
+| Agent, search topics (midnight) | no | 0.166 | 0.167 | 0.192 |
+| Climatology (either origin time) | — | 0.156 | 0.129 | 0.129 |
+
+**The mechanism works; the forecast doesn't improve.** Every after-close rationale quotes the
+`as_of` move correctly (−8.5%, −8.7%, +18.7%, +5.4%) and applies the "after a ≥5% move" anchor.
+The "no catalysts on March 3" error is gone. But the agent lifts every origin to about 0.2 without
+separating the sessions that continued from those that calmed down (0.227 against 0.212), and
+lands on climatology's Brier. The no-topics arm's lead rests largely on one guess, 0.45 on the day
+after the tariff-pause rally, made without seeing that rally in its history. With three positives
+none of these differences is evidence. **The honest summary for this task: across three variants,
+no shock agent has shown it can tell a continuing shock from a calm-down better than climatology.**
+`nvda_shock_fresh`'s 16 sessions are now closed to further iterations. The next measurement is the
+protected 2026 run.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).
