@@ -33,8 +33,9 @@ cutoff (February 2025 onward).
 Status
 ------
 **Partly implemented.**  :func:`flag_shock_windows`,
-:func:`sample_matched_controls`, :func:`train_holdout_split` and
-:func:`evaluate_pattern` are implemented and tested.  The remaining
+:func:`sample_matched_controls`, :func:`train_holdout_split`,
+:func:`evaluate_pattern` and :func:`gate_pass` are implemented and tested;
+only :func:`label_regimes` remains.  The remaining
 functions keep their final signatures and raise :class:`NotImplementedError`
 until their own tasks land.
 """
@@ -752,6 +753,45 @@ def evaluate_pattern(
     )
 
 
+def gate_reasons(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> list[str]:
+    """Return every reason a pattern fails the gate; an empty list means it graduates.
+
+    This is what a caller should write to the per-experiment file.  "Training
+    lift 2.40 cleared, holdout lift 0.90 is below 1.5" tells the next study
+    session something that ``False`` does not.  All failing criteria are
+    listed, not just the first, because a pattern that fails several ways
+    needs a different next step from one that narrowly misses one.
+
+    Parameters
+    ----------
+    metrics
+        The pattern scored on the training split.
+    holdout_metrics
+        The same pattern scored on the holdout split.
+
+    Returns
+    -------
+    list[str]
+        Plain-English reasons, one per failed criterion, in the order the
+        criteria are listed in :func:`gate_pass`.
+    """
+    reasons: list[str] = []
+    if metrics.n_matches < MIN_MATCHES:
+        reasons.append(f"matched {metrics.n_matches} training window(s); needs at least {MIN_MATCHES}")
+    # `not x >= t` rather than `x < t`, so an undefined (nan) value fails too.
+    if not metrics.lift >= MIN_LIFT:
+        reasons.append(f"training lift {metrics.lift:.2f} is below {MIN_LIFT:g}")
+    if not metrics.p_value < MAX_P_VALUE:
+        reasons.append(f"training p-value {metrics.p_value:.3g} is not below {MAX_P_VALUE:g}")
+    if not metrics.ci_low > 1.0:
+        reasons.append(f"training lift interval starts at {metrics.ci_low:.2f}, which does not exclude 1 (no effect)")
+    if holdout_metrics.n_matches == 0:
+        reasons.append("matched no holdout windows, so it was never tested on data the models cannot remember")
+    elif not holdout_metrics.lift >= MIN_HOLDOUT_LIFT:
+        reasons.append(f"holdout lift {holdout_metrics.lift:.2f} is below {MIN_HOLDOUT_LIFT:g}")
+    return reasons
+
+
 def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     """Decide whether a candidate pattern graduates to the master strategy file.
 
@@ -766,6 +806,9 @@ def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     - ``metrics.ci_low > 1.0`` — the confidence interval excludes "no effect"
     - ``holdout_metrics.lift >=`` :data:`MIN_HOLDOUT_LIFT`
 
+    An undefined (``nan``) value fails its criterion, as does a pattern that
+    matched no holdout window: it was never tested on post-cutoff data.
+
     Parameters
     ----------
     metrics
@@ -776,7 +819,8 @@ def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     Returns
     -------
     bool
-        ``True`` if every criterion is met.
+        ``True`` if every criterion is met.  Use :func:`gate_reasons` to record
+        why it was not.
 
     Notes
     -----
@@ -785,11 +829,20 @@ def gate_pass(metrics: PatternMetrics, holdout_metrics: PatternMetrics) -> bool:
     result says nothing about a later period.  Requiring all five together is
     what makes graduation mean something.
 
-    Callers should record the **reason for rejection**, not just the boolean,
-    into the per-experiment file.  "Rejected: lift 2.4 but holdout lift 0.9"
-    tells the next study session something; ``False`` does not.
+    **Known weakness: the holdout criterion is lenient.**  A memorised pattern
+    passes the four training criteria by construction (``LLM_CUTOFFS.md``),
+    so the holdout is the only protection against memorisation.  With a
+    holdout of 13 shocks and 13 controls, lift from a few matches is mostly
+    luck.  Simulated on that holdout, a pattern with **no** real effect clears
+    ``holdout lift >= 1.5`` 23-33% of the time, while a strong real pattern
+    (in half the shocks, a tenth of the controls) clears it 95% of the time.
+    Adding ``holdout_metrics.p_value < 0.10`` would cut the false passes to
+    1-4%, at the cost of passing that strong pattern 71% of the time and
+    weaker real ones far less often.  That trade-off between memorised
+    patterns getting through and real ones being rejected is the gate owner's
+    call, so the rule stays as specified until it is made.
     """
-    raise NotImplementedError("Phase 1, Team Signals T4")
+    return not gate_reasons(metrics, holdout_metrics)
 
 
 def label_regimes(
@@ -856,6 +909,7 @@ __all__ = [
     "evaluate_pattern",
     "flag_shock_windows",
     "gate_pass",
+    "gate_reasons",
     "label_regimes",
     "sample_matched_controls",
     "shock_base_rate",

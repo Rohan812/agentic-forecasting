@@ -22,7 +22,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
-| `signals.py` | *new* — not from energy | **flagging, control sampling, the train/holdout split and pattern scoring done**; the gate and regime labels pending (see below) |
+| `signals.py` | *new* — not from energy | **everything but regime labels done**: flagging, control sampling, the train/holdout split, pattern scoring and the gate (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
@@ -39,7 +39,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 
 | Step | Output |
 |------|--------|
-| Finish `signals.py` | the gate (`gate_pass`) and regime labels — each with tests |
+| Finish `signals.py` | regime labels (`label_regimes`), with tests; decide whether to tighten the holdout rule (see *The gate*) |
 | Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
 
 ---
@@ -178,11 +178,12 @@ train_holdout_split(windows)                                     -> tuple[list[W
 evaluate_pattern(pattern_matches, shock_labels, base_rate)       -> PatternMetrics
 shock_base_rate(prices_df, start, end, threshold_pct=5.0)        -> float
 gate_pass(metrics, holdout_metrics)                              -> bool
+gate_reasons(metrics, holdout_metrics)                           -> list[str]
 label_regimes(prices_df, window_days=21, ...)                    -> pd.DataFrame
 ```
 
 `Window` and `PatternMetrics` are frozen dataclasses. **`flag_shock_windows`,
-`sample_matched_controls`, `train_holdout_split` and `evaluate_pattern` are implemented and tested**; the other
+`sample_matched_controls`, `train_holdout_split`, `evaluate_pattern` and `gate_pass` are implemented and tested**; the other
 functions keep their final signatures and raise `NotImplementedError` until their own tasks land.
 
 **Shock windows.** A session is a shock when its simple return reaches ±5%, the same definition
@@ -304,8 +305,29 @@ shock threshold is ±5%: the clean post-cutoff holdout (Feb–Dec 2025) holds 13
 but only 4 at ±7%.
 
 Callers should record the **reason** for a rejection into the per-experiment file, not just
-the boolean. "Rejected: lift 2.4 but holdout lift 0.9" tells the next study session
-something; `False` does not.
+the boolean. `gate_reasons(train, holdout)` returns one plain-English reason per failed
+criterion, for example `"holdout lift 1.00 is below 1.5"`, and an empty list when the pattern
+graduates. An undefined value fails its criterion rather than slipping through: a `nan`
+compares false against everything, so a naive `lift < 2` check would wave it past. A pattern
+that matched no holdout window is rejected as never tested on post-cutoff data.
+
+**Known weakness: the holdout rule is lenient.** A memorised pattern passes the four training
+criteria by construction ([`LLM_CUTOFFS.md`](../../LLM_CUTOFFS.md)), so the holdout is the only
+real protection against memorisation. With 13 shocks and 13 controls, lift from a handful of
+matches is mostly luck. Simulated on that holdout:
+
+| Holdout rule | No effect, rarely fires | No effect, often fires | Real, strong | Real, weaker |
+|---|---|---|---|---|
+| lift ≥ 1.5 (**as specified, current**) | 33% pass | 23% | 95% | 68% |
+| + at least 5 holdout matches | 2% | 21% | 91% | 63% |
+| + holdout p < 0.10 | 1% | 4% | 71% | 26% |
+| + holdout CI low > 1 | 18% | 3% | 64% | 19% |
+
+"Strong" means the pattern appears in half the shocks and a tenth of the controls, like the
+earnings calendar. "Weaker" means 40% against 20%. As specified, roughly one memorised
+pattern in three or four would graduate. Adding a holdout p-value cuts that to 1–4% but rejects
+more real patterns. The gate stays as specified until its owner makes that trade-off; adding
+the rule is a one-line change in `gate_reasons`.
 
 ## Agent layer
 

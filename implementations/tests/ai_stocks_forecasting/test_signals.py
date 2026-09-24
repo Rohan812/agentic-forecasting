@@ -19,10 +19,17 @@ from ai_stocks_forecasting.signals import (
     CONTROL_EXCLUSION_DAYS,
     HOLDOUT_END,
     HOLDOUT_START,
+    MAX_P_VALUE,
+    MIN_HOLDOUT_LIFT,
+    MIN_LIFT,
+    MIN_MATCHES,
     VOL_WINDOW_DAYS,
+    PatternMetrics,
     Window,
     evaluate_pattern,
     flag_shock_windows,
+    gate_pass,
+    gate_reasons,
     sample_matched_controls,
     train_holdout_split,
 )
@@ -355,3 +362,71 @@ def test_scoring_rejects_malformed_input(
     """Malformed input fails with a message that says what is wrong."""
     with pytest.raises(ValueError, match=message):
         evaluate_pattern(matches, labels, base_rate=base_rate)
+
+
+# ── The gate ──────────────────────────────────────────────────────────────────
+
+
+def _metrics(**overrides: float) -> PatternMetrics:
+    """Build metrics sitting exactly on every passing threshold, with ``overrides`` applied.
+
+    Built directly rather than via ``evaluate_pattern``, so the thresholds can
+    be tested exactly, with no floating-point noise.
+    """
+    values: dict[str, float] = {
+        "n_windows": 40,
+        "n_matches": MIN_MATCHES,
+        "n_hits": MIN_MATCHES,
+        "precision": 0.3,
+        "base_rate": 0.12,
+        "lift": MIN_LIFT,
+        "p_value": MAX_P_VALUE / 2,
+        "ci_low": 1.01,
+        "ci_high": 5.0,
+    }
+    values.update(overrides)
+    return PatternMetrics(**values)  # type: ignore[arg-type]
+
+
+def test_gate_passes_a_pattern_on_every_inclusive_threshold() -> None:
+    """``n >= 5``, ``lift >= 2`` and ``holdout lift >= 1.5`` are inclusive: sitting exactly on them passes."""
+    train, holdout = _metrics(), _metrics(lift=MIN_HOLDOUT_LIFT)
+    assert gate_pass(train, holdout)
+    assert gate_reasons(train, holdout) == []
+
+
+@pytest.mark.parametrize(
+    ("train_overrides", "holdout_overrides", "reason"),
+    [
+        ({"n_matches": MIN_MATCHES - 1}, {}, "training window(s); needs at least"),
+        ({"lift": MIN_LIFT - 0.01}, {}, "training lift"),
+        ({"p_value": MAX_P_VALUE}, {}, "training p-value"),  # the p-value bound is strict
+        ({"ci_low": 1.0}, {}, "does not exclude 1"),  # so is the interval's
+        ({}, {"lift": MIN_HOLDOUT_LIFT - 0.01}, "holdout lift"),
+    ],
+)
+def test_failing_any_single_criterion_blocks_graduation(
+    train_overrides: dict[str, float], holdout_overrides: dict[str, float], reason: str
+) -> None:
+    """The conjunction is the point: each criterion alone vetoes, and the reason names it."""
+    train = _metrics(**train_overrides)
+    holdout = _metrics(**{"lift": MIN_HOLDOUT_LIFT, **holdout_overrides})
+    assert not gate_pass(train, holdout)
+    reasons = gate_reasons(train, holdout)
+    assert len(reasons) == 1 and reason in reasons[0], reasons
+
+
+def test_undefined_values_fail_instead_of_slipping_through() -> None:
+    """A ``nan`` compares false against everything, so a naive ``lift < 2`` check would wave it through.
+
+    A pattern that never matched a holdout window was never tested on data the
+    models cannot remember, and must say so.
+    """
+    nan = float("nan")
+    assert not gate_pass(_metrics(lift=nan), _metrics(lift=MIN_HOLDOUT_LIFT))
+
+    never_tested = _metrics(n_matches=0, n_hits=0, precision=nan, lift=nan, p_value=1.0, ci_low=nan, ci_high=nan)
+    assert not gate_pass(_metrics(), never_tested)
+    assert gate_reasons(_metrics(), never_tested) == [
+        "matched no holdout windows, so it was never tested on data the models cannot remember"
+    ]
