@@ -27,6 +27,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `story.py` | *new* — not from energy | **done** — presentation charts for notebooks 01–04: annotated shock chart, one-origin forecast fans, CRPS by shock window and volatility regime |
 | `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
 | `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
+| `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
 | `01`–`04` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
@@ -666,6 +667,41 @@ broadly, 3 of 2025's 4 earnings reactions were not ±5% moves, so a full-populat
 would not confirm it either (1 in 4). The high-volatility regime has lift 1.15 against
 volatility-matched controls, as the control design intends: volatility alone does not pass for
 a shock predictor. Tests are in `implementations/tests/ai_stocks_forecasting/test_discovery.py`.
+
+**News experiments 02–04.** [`news_labels.py`](news_labels.py) answers a yes/no news question
+for each window from a web search fenced at that window's own cutoff (news published by
+`as_of`, looking back three days), then a lite-model judge reads the verified briefing. A
+pilot showed the fence holding: on 2022-08-31 it found the A100/H100 licence notice, and on
+2023-10-16 it answered "no" because the October 2023 rule came a day later.
+[`news_study.py`](news_study.py) runs an experiment in three steps. A lite-model call
+proposes at most two questions from the focus file, saved to `questions.yaml` before any
+labelling and never edited after. Each question is then **screened on the 26 holdout windows
+first**: the gate needs holdout lift ≥ 1.5 and holdout p < 0.10 as well as the training
+criteria, so a question that fails these cannot graduate and its 238 training windows are
+never paid for. Only a survivor is labelled and scored in full.
+
+Cost is capped in code. `CostMeter` prices every LLM call's tokens as it returns (Langfuse's
+per-token prices for the two proxy models) and adds $0.014 per search call for Google Search
+grounding, which those prices leave out. `BudgetLedger` keeps cumulative spend in
+`experiments/budget.yaml` against a $30 stage cap, labelling stops before any batch that
+would cross the cap, and every label is cached under `experiments/labels/`. Measured cost is
+$0.016 per window, about $0.45 per holdout screen. Tests are in `test_news_labels.py`.
+
+| Question | Holdout (26 windows, 13 shocks) | Verdict |
+|---|---|---|
+| exp02 q1: new US export controls on AI chips or chip equipment for China | 1 match, 1 hit | screened out: p 0.50 |
+| exp02 q2: new US tariffs or licensing on semiconductor trade with China | 0 matches | screened out |
+| exp03 q1 (up): hyperscaler raises AI capex guidance | 1 match, 0 hits | screened out |
+| exp03 q2 (down): hyperscaler cuts capex or questions AI returns | 1 match, 1 hit | screened out: p 0.27 |
+| exp04 q1 (down): rival launches an AI accelerator | 1 match, 0 hits | screened out |
+| exp04 q2 (down): AI efficiency breakthrough cuts compute needs | 3 matches, 0 hits | screened out |
+
+Nothing graduated, for **$2.84** in total. The results say more about the holdout than about
+the questions. With one control per shock, a pattern passes holdout p < 0.10 only if it
+precedes at least **4 of the 13** holdout shocks with no false alarm. Specific news events are
+rarer than that, so the holdout cannot confirm them however strong they are; the same limit
+stopped earnings in experiment 01. With three controls per shock the bar falls to 2 of 13
+(3 with one false alarm), at about $0.43 more per screen.
 
 ## Notebooks
 

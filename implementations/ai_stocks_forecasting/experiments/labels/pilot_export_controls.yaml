@@ -1,0 +1,20 @@
+question_id: pilot_export_controls
+question: Was a new or tightened US government restriction on sales of NVIDIA AI chips
+  to China (an export-control rule, licence requirement or chip-specific ban) reported?
+labels:
+  '2021-06-15':
+    answer: 'no'
+    evidence: No new or tightened U.S. government restrictions on the sale of NVIDIA
+      AI chips to China were reported between June 13, 2021, and June 15, 2021.
+    search: ok
+  '2022-08-31':
+    answer: 'yes'
+    evidence: NVIDIA announced that it had received notification from the U.S. government
+      regarding new license requirements for the export of its A100 and H100 graphics
+      processors to China and Russia.
+    search: ok
+  '2023-10-16':
+    answer: 'no'
+    evidence: there were no official announcements of new or tightened U.S. government
+      restrictions on the sale of NVIDIA AI chips to China
+    search: ok

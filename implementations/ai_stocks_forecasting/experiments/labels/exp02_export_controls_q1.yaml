@@ -1,0 +1,179 @@
+question_id: exp02_export_controls_q1
+question: Did the US Department of Commerce or the Bureau of Industry and Security
+  announce new or expanded export control restrictions specifically targeting high-performance
+  AI chips or semiconductor manufacturing equipment destined for China?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: Between February 5, 2025, and February 7, 2025, there were no announcements
+      from the U.S. Department of Commerce or the Bureau of Industry and Security
+      (BIS) regarding new or expanded export control restrictions specifically targeting
+      high-performance AI chips or semiconductor manufacturing equipmen
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions specifically
+      targeting high-performance AI chips or semiconductor manufacturing equipment
+      destined for China.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions targeting
+      high-performance AI chips or semiconductor manufacturing equipment destined
+      for China.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: there were no announcements of new or expanded export control restrictions
+      specifically targeting high-performance AI chips or semiconductor manufacturing
+      equipment destined for China
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions specifically
+      targeting high-performance AI chips or semiconductor manufacturing equipment.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions specifically
+      targeting high-performance AI chips or semiconductor manufacturing equipment
+      destined for China.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions specifically
+      targeting high-performance AI chips or semiconductor manufacturing equipment
+      destined for China.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions specifically
+      targeting high-performance AI chips or semiconductor manufacturing equipment
+      destined for China.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no public announcements from the U.S. Department of Commerce
+      or the Bureau of Industry and Security (BIS) regarding new or expanded export
+      control restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: Between April 6, 2025, and April 8, 2025, there were no public announcements
+      from the U.S. Department of Commerce or the Bureau of Industry and Security
+      (BIS) regarding new or expanded export control restrictions specifically targeting
+      high-performance AI chips or semiconductor manufacturing equipme
+    search: ok
+  '2025-04-15':
+    answer: 'yes'
+    evidence: the U.S. Department of Commerce's Bureau of Industry and Security (BIS)
+      had imposed new export license requirements on certain artificial intelligence
+      (AI) chips destined for China
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: there were no announcements of new or expanded export control restrictions
+      specifically targeting high-performance AI chips or semiconductor manufacturing
+      equipment by the U.S. Department of Commerce or the Bureau of Industry and Security
+      (BIS).
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions targeting
+      high-performance AI chips or semiconductor manufacturing equipment for China.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: Between May 14, 2025, and May 16, 2025, the U.S. Department of Commerce’s
+      Bureau of Industry and Security (BIS) did not announce new or expanded export
+      control restrictions targeting high-performance AI chips or semiconductor manufacturing
+      equipment.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce’s Bureau of Industry and Security (BIS)
+      did not announce new or expanded export control restrictions targeting high-performance
+      AI chips or semiconductor manufacturing equipment.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: the U.S. Department of Commerce and the Bureau of Industry and Security
+      (BIS) did not announce new or expanded export control restrictions targeting
+      high-performance AI chips or semiconductor manufacturing equipment destined
+      for China.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: The BIS emphasized that this was a clarification of license requirements
+      that had been in place since 2023... rather than a new rule.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no public announcements from the U.S. Department of Commerce
+      or the Bureau of Industry and Security (BIS) regarding new or expanded export
+      control restrictions
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: there were no announcements from the U.S. Department of Commerce or
+      the Bureau of Industry and Security (BIS) regarding new or expanded export control
+      restrictions specifically targeting high-performance AI chips or semiconductor
+      manufacturing equipment destined for China.
+    search: ok

@@ -1,0 +1,149 @@
+question_id: exp04_competitor_launches_q2
+question: Was there a report of a significant breakthrough in AI model architecture
+  or software optimization that drastically reduces the computational power required
+  for training or inference?
+labels:
+  '2025-02-04':
+    answer: 'yes'
+    evidence: These improvements were attributed to architectural optimizations that
+      drastically reduced the computational effort required per inference operation.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: There were no reports of a "significant breakthrough" in AI model architecture
+      or software optimization that drastically reduced computational power requirements
+      published between February 5, 2025, and February 7, 2025.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduces computational power published
+      between February 16, 2025, and February 18, 2025.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: There were no reports of a significant, widely recognized breakthrough
+      in AI model architecture or software optimization specifically between February
+      17, 2025, and February 19, 2025
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: they were not a "breakthrough" that occurred within the February 26–28
+      window itself
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduced computational power for training
+      or inference published between March 3, 2025, and March 5, 2025.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduced computational power for training
+      or inference published between March 5, 2025, and March 7, 2025.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduced the computational power required
+      for training or inference published between March 9, 2025, and March 11, 2025.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no reports of a singular, industry-wide "breakthrough" in
+      AI architecture or software optimization that drastically reduced computational
+      power.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: there were no reports of a "significant breakthrough" in AI model architecture
+      or software optimization that drastically reduced computational power requirements.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduces computational power for training
+      or inference published between March 17, 2025, and March 19, 2025.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduces computational power for training
+      or inference published between March 23, 2025, and March 25, 2025.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduced computational power for training
+      or inference published between March 31, 2025, and April 2, 2025.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: There were no reports of a significant breakthrough in AI model architecture
+      or software optimization published between April 6, 2025, and April 8, 2025.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: There were no reports of a "significant breakthrough" in AI model architecture
+      or software optimization that drastically reduced computational power requirements
+      published between April 13, 2025, and April 15, 2025.
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-09':
+    answer: 'yes'
+    evidence: Photon enables organizations to co-train large models (up to tens of
+      billions of parameters) while minimizing communication overhead, offering an
+      alternative to conventional training methods
+    search: ok
+  '2025-05-16':
+    answer: 'yes'
+    evidence: the agent demonstrated the ability to optimize low-level GPU instructions
+      and kernel implementations... providing measurable savings in compute and energy
+      resources.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: there were no reports of a singular, industry-wide "breakthrough" in
+      AI architecture that drastically reduced computational power
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: there were no widely reported "significant breakthroughs" in AI architecture
+      or software optimization that drastically reduced computational power.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: Between May 31, 2025, and June 2, 2025, there were no reports of a "significant
+      breakthrough" in AI model architecture or software optimization that drastically
+      reduced computational power requirements.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: There were no reports of a significant, industry-wide breakthrough in
+      AI model architecture or software optimization that drastically reduced computational
+      power requirements published between June 1, 2025, and June 3, 2025.
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: no specific architectural "breakthrough" was announced during the requested
+      three-day window that fundamentally altered the computational requirements for
+      training or inference.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: Between November 29, 2025, and December 1, 2025, there were no reports
+      of a single, industry-wide "breakthrough" in AI architecture that drastically
+      reduced computational power.
+    search: ok

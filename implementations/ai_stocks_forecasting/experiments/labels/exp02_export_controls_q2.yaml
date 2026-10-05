@@ -1,0 +1,151 @@
+question_id: exp02_export_controls_q2
+question: Were there official reports of new US government trade policies or tariffs
+  that specifically impose additional duties or licensing requirements on the import
+  or export of semiconductor components involving Chinese entities?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: there were no official reports during this specific three-day window
+      (February 2–4, 2025) of new, semiconductor-specific duties or licensing requirements
+      targeting Chinese entities.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: there were no reports of new, official U.S. government trade policies
+      or tariffs specifically imposing *additional* duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: there were no reports of new, official U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: reports from the specified dates (February 26–28, 2025) do not indicate
+      the introduction of new, specific semiconductor-related trade policies or duties.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: there were no official U.S. government reports announcing new trade
+      policies or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: the specific window of March 16–18, 2025, does not contain records of
+      new, distinct policy announcements regarding semiconductor trade.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: the specific window of March 23–25, 2025, did not feature new official
+      policy enactments of this nature.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs that specifically imposed additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing *additional* duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: there were no reports of new U.S. government trade policies or tariffs
+      specifically imposing *additional* duties or licensing requirements on semiconductor
+      components involving Chinese entities.
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: no final policy or new tariff implementation was announced or enacted
+      within the specified timeframe.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: there were no new official U.S. government reports or announcements
+      imposing *additional* duties or licensing requirements specifically on semiconductor
+      components involving Chinese entities.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: the specific dates requested do not feature announcements of new semiconductor-specific
+      tariffs or licensing requirements.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: no further U.S. semiconductor-specific trade policies or tariffs were
+      announced between October 12 and October 14, 2025.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: there were no official reports of *new* U.S. government trade policies
+      or tariffs imposing additional duties or licensing requirements on semiconductor
+      components involving Chinese entities.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: there were no official reports of new U.S. government trade policies
+      or tariffs specifically imposing additional duties or licensing requirements
+      on the import or export of semiconductor components involving Chinese entities.
+    search: ok

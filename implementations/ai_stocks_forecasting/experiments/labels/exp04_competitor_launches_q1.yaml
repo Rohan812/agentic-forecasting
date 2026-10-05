@@ -1,0 +1,152 @@
+question_id: exp04_competitor_launches_q1
+question: Did a major technology company announce the release or deployment of a new
+  proprietary AI accelerator chip intended to compete with NVIDIA's data center GPUs?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of February 2, 2025, to February 4, 2025.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of February 5, 2025, to February 7, 2025.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of February 16, 2025, to February 18, 2025.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: no such announcement occurred within the specific three-day window requested
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: there were no major announcements from a technology company regarding
+      the release or deployment of a new proprietary AI accelerator chip
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of February 26, 2025, to February 28, 2025.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of March 3, 2025, to March 5, 2025.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of March 5, 2025, to March 7, 2025.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of March 9, 2025, to March 11, 2025.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no major announcements from a technology company regarding
+      the release or deployment of a new proprietary AI accelerator chip
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: no major technology company announced a new proprietary AI accelerator
+      chip intended to compete with NVIDIA's data center GPUs.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: no other major technology company announced a competing proprietary
+      AI accelerator chip during the specific window of March 17–19, 2025
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no major announcements of a new proprietary AI accelerator
+      chip intended to compete with NVIDIA's data center GPUs
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no announcements from major technology companies regarding
+      the release or deployment of a new proprietary AI accelerator chip intended
+      to compete with NVIDIA's data center GPUs.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of April 6, 2025, to April 8, 2025.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the specific window of April 13, 2025, to April 15, 2025.
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: there were no major announcements from a technology company regarding
+      the release or deployment of a new proprietary AI accelerator chip
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of May 7, 2025, to May 9, 2025.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of May 14, 2025, to May 16, 2025.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of May 17, 2025, to May 19, 2025.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period of May 19, 2025, to May 21, 2025.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: there were no major announcements of a new proprietary AI accelerator
+      chip from a major technology company intended to compete with NVIDIA's data
+      center GPUs
+    search: ok
+  '2025-06-03':
+    answer: 'yes'
+    evidence: Advanced Micro Devices (AMD) announced the release of its new AI accelerator
+      chips, the Instinct MI350X and MI355X, which were positioned to compete with
+      NVIDIA's data center GPUs.
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs between October 12, 2025, and October 14, 2025.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the specific window of November 5, 2025, to November 7, 2025.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: No major technology company announced the release or deployment of a
+      new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs during the period from November 29, 2025, to December 1, 2025.
+    search: ok

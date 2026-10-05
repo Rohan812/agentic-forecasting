@@ -1,0 +1,19 @@
+experiment_id: exp03_hyperscaler_capex
+proposed_on: '2026-10-05'
+questions:
+- question_id: exp03_hyperscaler_capex_q1
+  question: Did any of the major hyperscalers (Microsoft, Alphabet, Amazon, or Meta)
+    announce an increase in their capital expenditure guidance specifically earmarked
+    for AI infrastructure or data centers?
+  direction: up
+  rationale: Increased capital spending by hyperscalers directly translates to higher
+    demand for NVIDIA's data center GPUs, potentially triggering a positive stock
+    shock.
+- question_id: exp03_hyperscaler_capex_q2
+  question: Did any of the major hyperscalers report a reduction in their planned
+    capital expenditures or express caution regarding the return on investment for
+    their current AI data center build-outs?
+  direction: down
+  rationale: A pivot toward fiscal austerity or skepticism regarding AI infrastructure
+    ROI by key customers could lead to concerns about future NVIDIA revenue growth,
+    potentially triggering a negative stock shock.

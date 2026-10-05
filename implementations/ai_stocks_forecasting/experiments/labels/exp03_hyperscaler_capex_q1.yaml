@@ -1,0 +1,160 @@
+question_id: exp03_hyperscaler_capex_q1
+question: Did any of the major hyperscalers (Microsoft, Alphabet, Amazon, or Meta)
+  announce an increase in their capital expenditure guidance specifically earmarked
+  for AI infrastructure or data centers?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-07':
+    answer: 'yes'
+    evidence: Alphabet was the only company among the major hyperscalers (Microsoft,
+      Alphabet, Amazon, and Meta) to announce an increase in its capital expenditure
+      (capex) guidance specifically earmarked for AI infrastructure and data centers.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers during that three-day window.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: Between April 6, 2025, and April 8, 2025, there were no public announcements
+      from Microsoft, Alphabet, Amazon, or Meta regarding an increase in their capital
+      expenditure (capex) guidance specifically earmarked for AI infrastructure or
+      data centers.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure guidance specifically earmarked
+      for AI infrastructure or data centers during the period of May 17, 2025, to
+      May 19, 2025.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta specifically increasing their capital expenditure (capex) guidance for
+      AI infrastructure or data centers.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: there were no specific announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no public announcements from Microsoft, Alphabet, Amazon,
+      or Meta regarding an increase in their capital expenditure (capex) guidance
+      specifically earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: there were no announcements from Microsoft, Alphabet, Amazon, or Meta
+      regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: No, there were no announcements from Microsoft, Alphabet, Amazon, or
+      Meta regarding an increase in their capital expenditure (capex) guidance specifically
+      earmarked for AI infrastructure or data centers between November 29, 2025, and
+      December 1, 2025.
+    search: ok

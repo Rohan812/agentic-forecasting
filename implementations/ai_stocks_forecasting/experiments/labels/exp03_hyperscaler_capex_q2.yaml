@@ -1,0 +1,181 @@
+question_id: exp03_hyperscaler_capex_q2
+question: Did any of the major hyperscalers report a reduction in their planned capital
+  expenditures or express caution regarding the return on investment for their current
+  AI data center build-outs?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing caution regarding the return on investment (ROI) for their AI
+      data center build-outs.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers announcing a reduction in
+      their planned capital expenditures (CapEx) for AI data center build-outs.
+    search: ok
+  '2025-02-19':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Meta, or Amazon) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-02-26':
+    answer: 'yes'
+    evidence: The company acknowledged that it might "strategically pace or adjust
+      our infrastructure in some areas," a stance that had been previously communicated
+      during its earnings call.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Meta, or Amazon) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Meta, or Amazon) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing official caution regarding the return on investment (ROI) for
+      their AI data center build-outs.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Amazon, Google,
+      Meta, or Microsoft) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Meta, or Amazon) announcing a reduction in their planned capital expenditures
+      (capex) or expressing formal caution regarding the return on investment (ROI)
+      for their AI data center build-outs.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Amazon,
+      Alphabet, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-04-22':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Meta, or Amazon) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing official caution regarding the return on investment (ROI) for
+      their AI data center build-outs.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet/Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-05-19':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing formal caution regarding the return on investment (ROI) for their
+      AI data center build-outs.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing official caution regarding the return on investment (ROI) for
+      their AI data center build-outs.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers announcing a reduction in
+      their planned capital expenditures or expressing caution regarding the return
+      on investment (ROI) for their AI data center build-outs.
+    search: ok
+  '2025-10-14':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Alphabet,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing official caution regarding the return on investment (ROI) for
+      their AI data center build-outs.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: the hyperscalers did not issue guidance or reports indicating a pullback
+      in their planned capital expenditures.
+    search: ok
+  '2025-12-01':
+    answer: 'no'
+    evidence: there were no reports of major hyperscalers (such as Microsoft, Google,
+      Amazon, or Meta) announcing a reduction in their planned capital expenditures
+      or expressing official caution regarding the return on investment (ROI) for
+      their AI data center build-outs.
+    search: ok
