@@ -1,0 +1,38 @@
+# NVDA shock re-score, after the close: the same 16 sessions as nvda_shock_fresh.yaml.
+#
+# The after-close agent (tasks.build_nvda_shock_predictor_after_close) sees the
+# as_of close, which the midnight agents could not. Search cannot supply it,
+# because search_web is fenced to information published strictly before as_of.
+# Origins are at 20:00 on each as_of date. Every arm is wrapped in
+# SessionDatePredictor so forecasts resolve against the session date.
+# Climatology is recomputed here at the same origin times.
+#
+# SECOND AND LAST ITERATION ON THIS ORIGIN SET. The 16 sessions were first used
+# for the search-topics A/B (nvda_shock_fresh). Read this as weaker evidence than
+# a first look, and do not score a third prompt or data change on these origins.
+# The next change is scored on the protected 2026 run or on newly accrued data.
+
+spec_id: nvda_shock_fresh_close
+warmup: 250
+summary: "NVDA shock re-score after the close: same 16 sessions as nvda_shock_fresh"
+origin_time: after_close
+arms: [climatology, agent_close]
+
+origins:
+  # as_of (the shock session)   next session          outcome
+  - {as_of: "2025-02-05", outcome: 0}  # +5.2% -> 02-06 +3.1%
+  - {as_of: "2025-02-27", outcome: 0}  # -8.5% -> 02-28 +4.0%
+  - {as_of: "2025-03-03", outcome: 0}  # -8.7% -> 03-04 +1.7%
+  - {as_of: "2025-03-06", outcome: 0}  # -5.7% -> 03-07 +1.9%
+  - {as_of: "2025-03-10", outcome: 0}  # -5.1% -> 03-11 +1.7%
+  - {as_of: "2025-03-12", outcome: 0}  # +6.4% -> 03-13 -0.1%
+  - {as_of: "2025-03-14", outcome: 0}  # +5.3% -> 03-17 -1.8%
+  - {as_of: "2025-03-26", outcome: 0}  # -5.7% -> 03-27 -2.0%
+  - {as_of: "2025-04-03", outcome: 1}  # -7.8% -> 04-04 -7.4%
+  - {as_of: "2025-04-04", outcome: 0}  # -7.4% -> 04-07 +3.5%
+  - {as_of: "2025-04-09", outcome: 1}  # +18.7% -> 04-10 -5.9%
+  - {as_of: "2025-04-10", outcome: 0}  # -5.9% -> 04-11 +3.1%
+  - {as_of: "2025-04-16", outcome: 0}  # -6.9% -> 04-17 -2.9%
+  - {as_of: "2025-05-12", outcome: 1}  # +5.4% -> 05-13 +5.6%
+  - {as_of: "2025-05-13", outcome: 0}  # +5.6% -> 05-14 +4.2%
+  - {as_of: "2025-11-10", outcome: 0}  # +5.8% -> 11-11 -3.0%
