@@ -115,6 +115,8 @@ def _display_name(predictor_id: str) -> str:
         "darts_lightgbm": "LightGBM",
         "prophet_daily": "Prophet",
     }
+    if predictor_id.startswith("agent_predictor_nvda_analyst_multitask_gemini"):
+        return "News agent"
     return pretty.get(predictor_id, predictor_id.replace("_", " "))
 
 
@@ -195,13 +197,14 @@ def coverage_sharpness(
         fig.legend(
             handles,
             labels,
-            loc="upper right",
+            loc="upper center",
+            ncol=len(handles),
             frameon=False,
             fontsize=9,
             labelcolor=INK_SECONDARY,
-            bbox_to_anchor=(0.995, 0.955),
+            bbox_to_anchor=(0.5, 0.95),
         )
-    fig.tight_layout(rect=(0, 0.03, 1, 0.94))
+    fig.tight_layout(rect=(0, 0.03, 1, 0.90))
     return fig, axes
 
 

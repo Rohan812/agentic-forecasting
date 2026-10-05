@@ -23,8 +23,11 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
 | `signals.py` | *new* — not from energy | **done** — flagging, control sampling, the train/holdout split, pattern scoring, the gate and regime labels, all tested (see below) |
-| `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
-| `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
+| `charts.py` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, predicted-vs-actual, shock leaderboard and separation chart |
+| `story.py` | *new* — not from energy | **done** — presentation charts for notebooks 01–04: annotated shock chart, one-origin forecast fans, CRPS by shock window and volatility regime |
+| `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
+| `01`–`04` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest (see [Notebooks](#notebooks)) |
+| `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
@@ -144,7 +147,7 @@ Per horizon (USD/share):
 
 ### The raw-price baseline, and why it was replaced
 
-An earlier version fitted AutoARIMA on raw prices, and every calendar gap reached the model as `NaN`. Its results are kept in [`data/predictions/archive/`](data/predictions/archive/) as evidence. They are not a baseline, and the chart loader doesn't pick them up. [`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) walks through the diagnosis. In short: NYSE was closed on 2025-01-09 for a national day of mourning. That put a `NaN` in the second-to-last training row, which flipped the selected model and produced a **−77% forecast** ($31.32 against an actual $132.45) where the gap-free series gives +2.7%. The three worst forecasts in the backtest were exactly the three origins with a holiday in that position.
+An earlier version fitted AutoARIMA on raw prices, and every calendar gap reached the model as `NaN`. Its results are kept in [`data/predictions/archive/`](data/predictions/archive/) as evidence. They are not a baseline, and the chart loader doesn't pick them up. [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) walks through the diagnosis. In short: NYSE was closed on 2025-01-09 for a national day of mourning. That put a `NaN` in the second-to-last training row, which flipped the selected model and produced a **−77% forecast** ($31.32 against an actual $132.45) where the gap-free series gives +2.7%. The three worst forecasts in the backtest were exactly the three origins with a holiday in that position.
 
 | Variant | Mean CRPS | MAE | Largest miss | 80% interval coverage |
 |---|---|---|---|---|
@@ -630,41 +633,40 @@ ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by
 agent-written text is escaped, so a `|` or a line break in a cue or a source experiment can't shift or split the `SKILL.md` table. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
 
-## Charts
+## Notebooks
 
-[`01_leaderboard_and_calibration.ipynb`](01_leaderboard_and_calibration.ipynb) holds the
-CRPS leaderboard and the coverage-vs-sharpness chart. Both load by globbing
-`data/predictions/<spec_id>/`, so a new predictor appears the moment its YAML lands —
-re-running the notebook is the entire update path, and `SPEC_ID` switches between the 2025
-backtest and the protected 2026 window.
+The notebooks follow energy/oil's numbered series, each opening with a "Part N of 6"
+banner and a link to the previous one. They read committed artefacts only, so they run in
+seconds and call no LLM. Run them from `implementations/` after
+`uv run python scripts/fetch_nvda.py`.
 
-The coverage chart plots realised coverage of the 80% interval against its mean width, one
-panel per horizon. On the nominal-80% line is honest, below is overconfident, above is vague;
-further left on the line is better. The log-return AutoARIMA floor sits **above** the line (its
-intervals are too wide), so an agent cannot win by widening. It can win by moving *left*:
-the same ~80% coverage from a narrower interval, which also shows up as lower CRPS.
+| Notebook | What it shows |
+|---|---|
+| [`01_nvda_case_study.ipynb`](01_nvda_case_study.ipynb) | The story in four acts: AutoARIMA forecasting blind, the 19 shock sessions of 2025 with their documented causes, how the baseline did (its error doubles in shock windows), and the information a better forecaster would need |
+| [`02_intro_agentic_predictor.ipynb`](02_intro_agentic_predictor.ipynb) | The news-grounded agent beside the baselines at two origins: the morning of the DeepSeek sell-off (2025-01-27) and the Monday after the tariff crash (2025-04-07), with its rationale |
+| [`03_one_agent_two_tasks.ipynb`](03_one_agent_two_tasks.ipynb) | One identity, two task specs: the system prompt and fenced `search_web`, a trajectory answer, three shock answers for 2025-04-09, and the search-fence leak and its fix |
+| [`04_systematic_backtest_eval.ipynb`](04_systematic_backtest_eval.ipynb) | The full 2025 scorecard: CRPS leaderboard and paired comparison, coverage vs sharpness, CRPS by shock window and volatility regime, predicted vs actual, every prediction, and the shock task |
+| `05`, `06` | To come: adaptive agent training (Phase 2) and the protected 2026 evaluation |
+| [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) | Appendix: the raw-price baseline's −77% forecast, traced to a single holiday `NaN` |
 
-The notebook also prints **every prediction** (section 3). `load_scored_frame` returns one row
-per predictor, origin and horizon, with the forecast date, point forecast, percentiles, actual
-price, error and CRPS, ready to display or save with `to_csv`. And it draws
-**`predicted_vs_actual`** (section 4): the actual daily close as a line, each predictor's
-forecasts plotted at the date they were forecasting, with 80% bands, one panel per horizon.
-On the 21-day panel the naive forecast visibly lags every turn.
+**The trajectory agent on the 2025 backtest** (`agent_backtest.py`, all 51 weekly origins,
+$0.012 per origin). The news-grounded agent ties AutoARIMA on CRPS (8.01 against 8.17, inside
+one standard error; naive 10.67), but behaves differently. Its 80% intervals are about half
+as wide and overconfident: they contain the outcome 60%, 70% and 69% of the time at 5, 10 and
+21 days, against AutoARIMA's 83%, 89% and 98%. It wins quiet weeks and loses shock weeks: at
+5 days its CRPS is 3.9 against 4.7 when no ±5% session falls in the window, and 11.4 against
+9.5 when one does. By volatility regime it is best in low (5.6 against 7.3) and worst in high
+(11.0 against 9.2). No rationale quotes a close it could not have seen.
 
-Section 5 covers the **shock task**. `load_shock_frame` loads every committed shock backtest
-(`SHOCK_SPECS`: smoke, fresh and fresh after-close). It scores each arm on the origins all arms
-of a spec share, and flags midnight forecasts that quote the `as_of` close they cannot know.
-`shock_leaderboard` gives Brier, Brier skill against that spec's climatology, the separation
-between mean P before shocks and before calm sessions, and a 90% paired-bootstrap interval on
-the Brier difference. With `exclude_leaked=True` it drops a leaked origin from every arm of its
-spec. `shock_separation` plots every forecast by arm, with shocks as filled triangles, calm
-sessions as hollow circles and leaked forecasts ringed in grey. A forecaster that adds
-information puts the triangles above the circles. None does yet. Tests are in
+`charts.py` holds the scorecard charts. `load_scored_frame` and `load_shock_frame` glob
+`data/predictions/<spec_id>/`, so a new predictor appears the moment its YAML lands, and
+`SPEC_ID` in notebook 04 switches to the protected 2026 window. The coverage chart plots
+realised coverage of the 80% interval against its mean width, one panel per horizon: on the
+nominal-80% line is honest, below is overconfident, above is vague. `shock_leaderboard` scores
+each shock arm against its own spec's climatology on shared origins (Brier skill, separation,
+a 90% paired-bootstrap interval on the Brier difference), and `shock_separation` plots every
+shock forecast by outcome, with leaked forecasts ringed in grey. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_charts.py`.
-
-[`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) is the root-cause analysis of the
-original raw-price baseline's −77% forecast, described above. It reads the archived results
-and deliberately refits with the old code path, so the failure stays reproducible.
 
 Colour encodes the predictor **family**, marker shape the individual predictor. The
 categorical palette is only validated for colourblind separation up to three series on a
