@@ -72,7 +72,16 @@ def test_duplicate_pattern_ids_are_refused() -> None:
 
 
 def test_agent_written_pipes_do_not_break_the_pattern_table() -> None:
-    """A cue containing ``|`` must stay one cell, or every column after it shifts in SKILL.md."""
-    markdown = NvdaStrategyState(approach_narrative="x", news_patterns=[_pattern()]).build_markdown()
-    row = next(line for line in markdown.splitlines() if line.startswith("| P-1 "))
+    """Agent-written cells containing ``|`` or a line break must stay one cell on one row.
+
+    Both the cue and ``source_experiment`` are free text from the agent.  An
+    unescaped ``|`` shifts every column after it, and a line break splits the
+    row, leaving a stray fragment in SKILL.md.
+    """
+    pattern = _pattern().model_copy(update={"source_experiment": "exp01 | export controls\nrerun"})
+    markdown = NvdaStrategyState(approach_narrative="x", news_patterns=[pattern]).build_markdown()
+    lines = markdown.splitlines()
+    row = next(line for line in lines if line.startswith("| P-1 "))
     assert row.replace("\\|", "").count("|") == 9  # 8 columns
+    assert "rerun" in row, "The source must stay on its row, not spill onto the next line."
+    assert not any(line.startswith("rerun") for line in lines)
