@@ -30,116 +30,116 @@ predictor_id: historical_frequency
 predictions:
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.830782'
+  issued_at: '2026-10-05T13:54:32.109849'
   as_of: '2025-02-04T00:00:00'
   forecast_date: '2025-02-05T00:00:00'
   payload:
-    probability: 0.12843616371411118
+    probability: 0.12828344532681735
   metadata:
     n_observations: 6548
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.851621'
+  issued_at: '2026-10-05T13:54:32.133058'
   as_of: '2025-02-07T00:00:00'
   forecast_date: '2025-02-10T00:00:00'
   payload:
-    probability: 0.1285299954205465
+    probability: 0.12837734696992825
   metadata:
     n_observations: 6551
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.872541'
+  issued_at: '2026-10-05T13:54:32.156116'
   as_of: '2025-03-05T00:00:00'
   forecast_date: '2025-03-06T00:00:00'
   payload:
-    probability: 0.1285018270401949
+    probability: 0.1283495736906212
   metadata:
     n_observations: 6568
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.892732'
+  issued_at: '2026-10-05T13:54:32.177229'
   as_of: '2025-03-13T00:00:00'
   forecast_date: '2025-03-14T00:00:00'
   payload:
-    probability: 0.12884088834803772
+    probability: 0.12868877395801642
   metadata:
     n_observations: 6574
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.913129'
+  issued_at: '2026-10-05T13:54:32.198511'
   as_of: '2025-03-18T00:00:00'
   forecast_date: '2025-03-19T00:00:00'
   payload:
-    probability: 0.12893416451269576
+    probability: 0.12878211950737417
   metadata:
     n_observations: 6577
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.932978'
+  issued_at: '2026-10-05T13:54:32.219358'
   as_of: '2025-04-08T00:00:00'
   forecast_date: '2025-04-09T00:00:00'
   payload:
-    probability: 0.12909587378640777
+    probability: 0.12894417475728157
   metadata:
     n_observations: 6592
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.953554'
+  issued_at: '2026-10-05T13:54:32.240805'
   as_of: '2025-05-16T00:00:00'
   forecast_date: '2025-05-19T00:00:00'
   payload:
-    probability: 0.12932467140051368
+    probability: 0.12917359117691493
   metadata:
     n_observations: 6619
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.975106'
+  issued_at: '2026-10-05T13:54:32.262059'
   as_of: '2025-06-02T00:00:00'
   forecast_date: '2025-06-03T00:00:00'
   payload:
-    probability: 0.12912958213908585
+    probability: 0.12897872982350278
   metadata:
     n_observations: 6629
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:20.995920'
+  issued_at: '2026-10-05T13:54:32.283078'
   as_of: '2025-11-07T00:00:00'
   forecast_date: '2025-11-10T00:00:00'
   payload:
-    probability: 0.12700296735905045
+    probability: 0.12685459940652818
   metadata:
     n_observations: 6740
     window: null
 - predictor_id: historical_frequency
   task_id: nvda_shock_1d
-  issued_at: '2026-09-24T16:37:21.015761'
+  issued_at: '2026-10-05T13:54:32.304512'
   as_of: '2025-12-01T00:00:00'
   forecast_date: '2025-12-02T00:00:00'
   payload:
-    probability: 0.12686898593634344
+    probability: 0.12672094744633605
   metadata:
     n_observations: 6755
     window: null
 scores:
-- 0.7596235207213756
-- 0.0165199597228057
-- 0.7595090654722785
-- 0.758918197814236
-- 0.016624018778586897
-- 0.7584739970558606
-- 0.01672487063285084
-- 0.016674448983414917
-- 0.7621238189999031
-- 0.01609573959251611
+- 0.7598897516912838
+- 0.016480743215037348
+- 0.7597744656853218
+- 0.7591832526267845
+- 0.016584834304811603
+- 0.7587382506892731
+- 0.016685816657540754
+- 0.016635512746884126
+- 0.7623828905775343
+- 0.016058198521697063
 metric: brier
-mean_score: 0.38812876377738287
-ran_at: '2026-09-24T16:37:21.025254'
+mean_score: 0.38824137167161676
+ran_at: '2026-10-05T13:54:32.314480'
 skipped_origins: 0

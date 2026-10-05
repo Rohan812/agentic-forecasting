@@ -587,11 +587,28 @@ drops, after the verifier passes a result, every sentence that names a day or mo
 entirely before the cutoff. The verifier is also told that facts about the cutoff day itself fail.
 Undated leaks still depend on the verifier. Removing the leaked origins from every arm of their
 spec, neither midnight arm beats climatology on the fresh set: on 14 clean origins, with one shock
-left, skill is −0.26 without topics and −0.35 with them. The midnight arms are to be re-run with the
-new fence. That re-run measures the fence, not a new prompt, so it does not spend the closed
-origins on another iteration. The first attempt, on 2026-09-24, failed because the proxy's Google
-Search quota was exhausted (HTTP 429 on every search call; plain model calls still worked). It
-was stopped before it wrote anything.
+left, skill is −0.26 without topics and −0.35 with them.
+
+**Midnight arms re-run with the fixed fence** (2026-10-05). This measures the fence, not a new
+prompt, so it does not spend the closed origins on another iteration. A first attempt on
+2026-09-24 failed because the proxy's shared Google Search grounding quota was exhausted (HTTP
+429 on every search call while plain model calls still worked). It was stopped before it wrote
+anything. In the re-run every origin was scored, and no forecast quotes the `as_of` close. The
+date backstop dropped verifier-passed same-day sentences in 5 smoke searches and 33 fresh ones,
+2025-04-03 among them.
+
+| Arm (re-run) | Set | Brier | Climatology | Mean P, shock | Mean P, calm | Cost / origin |
+|---|---|---|---|---|---|---|
+| Agent, no topics | smoke (50% shocks) | 0.358 | 0.388 | 0.166 | 0.142 | $0.0103 |
+| Agent, search topics | fresh | 0.165 | 0.156 | 0.163 | 0.190 | $0.0214 |
+| Agent, no topics | fresh | 0.159 | 0.156 | 0.153 | 0.171 | $0.0104 |
+
+The no-topics forecast on 2025-04-09 fell from 0.45 to 0.18 once it could no longer see the
+rally, and the arm's lead disappeared. Both midnight arms now sit at or just below climatology,
+and their 90% paired intervals on the Brier difference contain 0. They give lower probabilities
+before shocks than before calm sessions. With the after-close arm also tying climatology (0.154),
+**no shock agent variant has shown skill on post-cutoff data**. The smoke Brier advantage is the
+50%-shock sample rewarding a higher average P, not skill.
 
 **Master strategy schema**
 ([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).
