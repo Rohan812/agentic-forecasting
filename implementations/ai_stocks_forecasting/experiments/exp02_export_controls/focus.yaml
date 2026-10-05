@@ -1,0 +1,7 @@
+experiment_id: exp02_export_controls
+focus: >-
+  US export controls and China trade policy. Do reports of new or tightened US
+  restrictions on AI-accelerator sales to China (Commerce/BIS rules, licence
+  requirements, chip-specific bans such as A800/H800/H20), or tariff announcements
+  affecting semiconductors, in the days before as_of predict a ±5% move?
+data: fenced news labels per window (cutoff = the window's as_of)

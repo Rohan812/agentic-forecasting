@@ -1,0 +1,7 @@
+experiment_id: exp01_earnings
+focus: >-
+  Scheduled earnings. Does NVDA's own quarterly results release (after the close on
+  as_of) predict a ±5% move in the next session, in either direction or one
+  direction? Also test calendar-free controls (volatility regime) so an earnings
+  effect cannot be confused with "volatile times".
+data: earnings calendar (scheduled in advance, so knowable at as_of) and prices up to as_of

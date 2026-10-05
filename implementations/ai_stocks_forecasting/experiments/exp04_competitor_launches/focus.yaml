@@ -1,0 +1,7 @@
+experiment_id: exp04_competitor_launches
+focus: >-
+  Competitor and substitute launches. Do announcements of competing AI chips (AMD,
+  Intel, custom silicon such as Google TPU or Amazon Trainium) or efficiency
+  breakthroughs in AI models that could reduce GPU demand, in the days before
+  as_of, predict a ±5% NVDA move?
+data: fenced news labels per window (cutoff = the window's as_of)

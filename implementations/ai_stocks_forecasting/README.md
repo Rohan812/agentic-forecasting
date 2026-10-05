@@ -26,6 +26,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `charts.py` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, predicted-vs-actual, shock leaderboard and separation chart |
 | `story.py` | *new* — not from energy | **done** — presentation charts for notebooks 01–04: annotated shock chart, one-origin forecast fans, CRPS by shock window and volatility regime |
 | `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
+| `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
 | `01`–`04` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
@@ -632,6 +633,39 @@ current standard, and a change to the standard shows up rather than being grandf
 ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by id, and
 agent-written text is escaped, so a `|` or a line break in a cue or a source experiment can't shift or split the `SKILL.md` table. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
+
+## Discovery loop (Phase 2)
+
+[`discovery.py`](discovery.py) is the engine the study agent will drive. A **candidate
+pattern** is a rule that answers yes or no for one window using only what was knowable at
+that window's `as_of`: prices up to that session, the earnings calendar (scheduled weeks in
+advance), or a fenced news label. `build_study_set` builds the windows once and
+deterministically (seed 0): 238 discovery windows from 2020 to January 2025 (119 shocks and
+their matched controls) and 26 holdout windows from February to December 2025 (13 shocks).
+`evaluate_candidate` scores a rule on both splits through `signals.evaluate_pattern` and runs
+`signals.gate_reasons`. **The statistics are always computed by the engine**, so a study agent
+proposes rules and cannot hand in its own lift or p-value. A one-direction pattern is scored
+against the one-direction shock rate, with moves the other way counted as non-shocks, so it
+cannot borrow strength from moves it does not predict. `record_candidate` writes every
+candidate, passed or rejected, with its evidence and the gate's reasons, to
+`experiments/<id>/trail.yaml`. Each experiment folder also holds its `focus.yaml`: earnings,
+export controls, hyperscaler capex, competitor launches.
+
+**Experiment 01: earnings** (deterministic, no LLM). Nothing graduated.
+
+| Candidate | Train lift (p, 95% CI) | Holdout | Verdict |
+|---|---|---|---|
+| P-1: results after the close on `as_of` | 3.17 (p 0.030, 1.21–8.30) | 1 match, 1 hit, p 0.50 | fails: holdout p ≥ 0.10 |
+| P-2: same, up moves only | 2.51 (p 0.072, 0.80–7.42) | 1 match, 0 hits | fails: training p and CI, holdout |
+| P-3: high-volatility regime | 1.15 (p 0.21) | 13 matches, 7 hits | fails: lift, p, CI, holdout |
+
+Earnings clears every training criterion: 9 of the 11 earnings sessions in the discovery
+windows preceded a shock. The 2025 holdout cannot confirm it, because only one earnings
+reaction falls inside its 26 windows, and a single match can never reach p < 0.10. More
+broadly, 3 of 2025's 4 earnings reactions were not ±5% moves, so a full-population holdout
+would not confirm it either (1 in 4). The high-volatility regime has lift 1.15 against
+volatility-matched controls, as the control design intends: volatility alone does not pass for
+a shock predictor. Tests are in `implementations/tests/ai_stocks_forecasting/test_discovery.py`.
 
 ## Notebooks
 
