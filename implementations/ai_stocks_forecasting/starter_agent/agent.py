@@ -31,7 +31,7 @@ from typing import Any, Callable, Sequence
 
 # Reuse the existing WTI prompt builder + history compression — these serialise
 # the task/context into the agent's JSON payload and are not worth duplicating.
-from ai_stocks_forecasting.analyst_agent import WtiPriceForecastPromptBuilder
+from ai_stocks_forecasting.analyst_agent import NvdaPriceForecastPromptBuilder
 from ai_stocks_forecasting.starter_agent.tools import ToolSpec, news_search
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.task import ForecastingTask
@@ -201,7 +201,7 @@ class _StarterForecastPromptBuilder:
 def build_starter_agent_predictor(config: AgentConfig) -> AgentPredictor:
     """Wrap a starter :class:`AgentConfig` in an :class:`AgentPredictor`.
 
-    Reuses :class:`~ai_stocks_forecasting.analyst_agent.WtiPriceForecastPromptBuilder`
+    Reuses :class:`~ai_stocks_forecasting.analyst_agent.NvdaPriceForecastPromptBuilder`
     for data serialisation, wrapped so the (drift-free) continuous output schema
     and a forecast directive ride in the payload — keeping the schema out of the
     persona. ``predict(task, context)`` returns one
@@ -210,7 +210,7 @@ def build_starter_agent_predictor(config: AgentConfig) -> AgentPredictor:
     return AgentPredictor(
         agent_config=config,
         prompt_builder=_StarterForecastPromptBuilder(
-            WtiPriceForecastPromptBuilder(),
+            NvdaPriceForecastPromptBuilder(),
             ContinuousAgentForecastOutput.prompt_schema_json(),
         ),
         output_schema=ContinuousAgentForecastOutput,

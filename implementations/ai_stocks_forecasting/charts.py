@@ -31,12 +31,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import yaml
 from ai_stocks_forecasting.analysis import predictions_to_frame
 from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from aieng.forecasting.data import DataService
 from aieng.forecasting.evaluation.backtest import BacktestResult
+from matplotlib.lines import Line2D
 
 
 if TYPE_CHECKING:
@@ -432,3 +434,224 @@ __all__ = [
     "load_scored_frame",
     "predicted_vs_actual",
 ]
+
+
+# ── Shock task (binary, Brier) ────────────────────────────────────────────────
+
+SHOCK_SPECS: tuple[str, ...] = ("nvda_shock_smoke", "nvda_shock_fresh", "nvda_shock_fresh_close")
+"""The committed shock backtests, in the order they were run."""
+
+CLIMATOLOGY_ARM = "Climatology"
+
+_SHOCK_ARMS: dict[str, str] = {
+    "historical_frequency": CLIMATOLOGY_ARM,
+    "agent_predictor_nvda_analyst_multitask_notopics": "Agent, no topics",
+    "agent_predictor_nvda_analyst_multitask_close": "Agent, after close",
+    "agent_predictor_nvda_analyst_multitask": "Agent, search topics",
+}
+
+SHOCK_BOOTSTRAP_RESAMPLES = 2000
+SHOCK_CI_LEVEL = 0.90
+
+
+def _shock_arm(predictor_id: str) -> str:
+    """Map a shock predictor id to its arm label, matching the longest known prefix."""
+    for prefix in sorted(_SHOCK_ARMS, key=len, reverse=True):
+        if predictor_id == prefix or predictor_id.startswith(prefix + "_"):
+            return _SHOCK_ARMS[prefix]
+    return predictor_id.replace("_", " ")
+
+
+def _quotes_close(record: str, close: float) -> bool:
+    """Return True if *record* contains *close* to the cent, allowing a one-cent rounding difference."""
+    return any(f"{close + cents / 100:.2f}" in record for cents in (-1, 0, 1))
+
+
+def load_shock_frame(data_service: DataService, spec_ids: tuple[str, ...] = SHOCK_SPECS) -> pd.DataFrame:
+    """Load every committed shock forecast, scored, on the origins all of a spec's arms share.
+
+    Adds ``quotes_unseen_close``: a midnight forecast whose record (rationale,
+    evidence, metadata) contains the ``as_of`` session's close to the cent.  A
+    midnight origin must not know that close, so a hit means the news fence
+    leaked.  It is never set for after-close specs, which see the close by
+    design.  It finds only verbatim quotes, so a clean flag is not proof.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns ``spec, arm, predictor_id, as_of, probability, outcome, brier,
+        quotes_unseen_close``.  Specs with no committed predictions are skipped.
+    """
+    from ai_stocks_forecasting.shock_smoke import load_smoke_spec, scored_frame  # noqa: PLC0415
+
+    now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+    prices = data_service.get_series(NVDA_SERIES_ID, as_of=now)
+    closes = prices.set_index(pd.to_datetime(prices["timestamp"]).dt.normalize())["value"]
+
+    frames = []
+    for spec_id in spec_ids:
+        spec_dir = PREDICTIONS_DIR / spec_id
+        paths = sorted(spec_dir.glob("*.yaml")) if spec_dir.exists() else []
+        if not paths:
+            continue
+        spec = load_smoke_spec(spec_id)
+        results = {path.stem: BacktestResult.model_validate(yaml.safe_load(path.read_text())) for path in paths}
+        frame, _ = scored_frame(results, spec)
+        records = {
+            (predictor_id, pd.Timestamp(p.as_of).normalize()): p.model_dump_json()
+            for predictor_id, result in results.items()
+            for p in result.predictions
+        }
+        frame["quotes_unseen_close"] = [
+            spec.origin_time == "midnight"
+            and as_of in closes.index
+            and _quotes_close(records[(pid, as_of)], float(closes[as_of]))
+            for pid, as_of in zip(frame["predictor_id"], frame["as_of"], strict=True)
+        ]
+        frame.insert(0, "arm", frame["predictor_id"].map(_shock_arm))
+        frame.insert(0, "spec", spec_id)
+        frames.append(frame.drop(columns="trace_id"))
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+
+def shock_leaderboard(frame: pd.DataFrame, *, exclude_leaked: bool = False, seed: int = 0) -> pd.DataFrame:
+    """Score each shock arm against climatology on the same spec and the same origins.
+
+    ``brier_skill`` is ``1 - brier / climatology brier``: above zero beats
+    climatology.  ``separation`` is mean P before shocks minus mean P before
+    calm sessions; a forecaster that adds information has it above zero.
+    ``diff_lo`` / ``diff_hi`` bound the arm's Brier minus climatology's with a
+    paired bootstrap over origins, so an interval containing 0 means the
+    difference is not distinguishable from noise.
+
+    With ``exclude_leaked``, an origin is dropped from **every** arm of its spec
+    when any arm's forecast there quotes the unseen close, so the comparison
+    stays paired.
+    """
+    if frame.empty:
+        return pd.DataFrame()
+    if exclude_leaked:
+        leaked = frame.loc[frame["quotes_unseen_close"], ["spec", "as_of"]].drop_duplicates()
+        keys = pd.MultiIndex.from_frame(frame[["spec", "as_of"]])
+        frame = frame[~keys.isin(pd.MultiIndex.from_frame(leaked))]
+
+    rng = np.random.default_rng(seed)
+    tail = (1 - SHOCK_CI_LEVEL) / 2
+    rows = []
+    for spec_id, spec_frame in frame.groupby("spec", sort=False):
+        wide = spec_frame.pivot(index="as_of", columns="arm", values="brier")
+        clim = wide.get(CLIMATOLOGY_ARM)
+        for arm, arm_frame in spec_frame.groupby("arm", sort=False):
+            p, y = arm_frame["probability"], arm_frame["outcome"]
+            row: dict[str, Any] = {
+                "spec": spec_id,
+                "arm": arm,
+                "n": len(arm_frame),
+                "shocks": int(y.sum()),
+                "leaked_origins": int(arm_frame["quotes_unseen_close"].sum()),
+                "brier": arm_frame["brier"].mean(),
+                "mean_p_shock": p[y == 1].mean(),
+                "mean_p_calm": p[y == 0].mean(),
+            }
+            row["separation"] = row["mean_p_shock"] - row["mean_p_calm"]
+            if clim is not None and arm != CLIMATOLOGY_ARM:
+                diff = (wide[arm] - clim).to_numpy()
+                boot = rng.choice(diff, size=(SHOCK_BOOTSTRAP_RESAMPLES, len(diff))).mean(axis=1)
+                row["brier_skill"] = 1 - row["brier"] / clim.mean()
+                row["diff_lo"], row["diff_hi"] = np.quantile(boot, [tail, 1 - tail])
+            rows.append(row)
+    return pd.DataFrame(rows).set_index(["spec", "arm"]).round(3)
+
+
+def shock_separation(
+    frame: pd.DataFrame,
+    title: str = "Does the agent tell shocks from calm sessions? NVDA, next-session ±5%",
+) -> tuple[Figure, Any]:
+    """Plot every shock forecast by arm, split by what happened next, one panel per spec.
+
+    **How to read it.**  Each point is one forecast.  Filled triangles are
+    origins followed by a shock, hollow circles by a calm session.  A forecaster
+    that adds information puts the triangles above the circles; one that
+    ignores the news draws both at the same height.  Leaked forecasts (a
+    midnight forecast quoting the unseen close) are ringed in grey.  The dashed
+    line is climatology's mean forecast on that spec.
+    """
+    specs = list(dict.fromkeys(frame["spec"])) if not frame.empty else []
+    fig, axes = plt.subplots(1, max(len(specs), 1), figsize=(4.6 * max(len(specs), 1), 4.8), sharey=True)
+    fig.patch.set_facecolor(SURFACE)
+    axes_list = list(np.atleast_1d(axes))
+    jitter = np.random.default_rng(0)
+
+    for ax, spec_id in zip(axes_list, specs, strict=False):
+        ax.set_facecolor(SURFACE)
+        spec_frame = frame[frame["spec"] == spec_id]
+        arms = [a for a in dict.fromkeys(spec_frame["arm"]) if a != CLIMATOLOGY_ARM]
+        clim = spec_frame.loc[spec_frame["arm"] == CLIMATOLOGY_ARM, "probability"]
+        if not clim.empty:
+            ax.axhline(clim.mean(), color=INK_MUTED, linestyle="--", linewidth=1.2, zorder=1)
+            ax.text(len(arms) - 0.5, clim.mean() + 0.012, "climatology", ha="right", fontsize=8.5, color=INK_MUTED)
+        for x, arm in enumerate(arms):
+            arm_frame = spec_frame[spec_frame["arm"] == arm]
+            for outcome, marker, offset in ((0, "o", -0.12), (1, "^", 0.12)):
+                sub = arm_frame[arm_frame["outcome"] == outcome]
+                xs = x + offset + jitter.uniform(-0.06, 0.06, len(sub))
+                color = FAMILY_COLORS["LLM / Agent"]
+                ax.scatter(
+                    xs,
+                    sub["probability"],
+                    s=70,
+                    marker=marker,
+                    facecolor=color if outcome else SURFACE,
+                    edgecolor=np.where(sub["quotes_unseen_close"], INK_MUTED, color),
+                    linewidth=np.where(sub["quotes_unseen_close"], 3.0, 1.6),
+                    zorder=3,
+                )
+        ax.set_xticks(range(len(arms)), [a.replace("Agent, ", "Agent,\n") for a in arms], fontsize=9)
+        ax.set_xlim(-0.6, len(arms) - 0.4)
+        n = spec_frame["as_of"].nunique()
+        shocks = int(spec_frame.drop_duplicates("as_of")["outcome"].sum())
+        ax.set_title(f"{spec_id}\n{n} origins, {shocks} shocks", fontsize=10.5, color=INK_PRIMARY, pad=8)
+        ax.grid(True, axis="y", color=GRID, linewidth=0.8, zorder=0)
+        ax.set_axisbelow(True)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+
+    axes_list[0].set_ylabel("Forecast P(shock next session)", color=INK_SECONDARY, fontsize=10)
+    axes_list[0].set_ylim(0, 0.6)
+    agent = FAMILY_COLORS["LLM / Agent"]
+    handles = [
+        Line2D([], [], linestyle="", marker="^", markersize=8, color=agent, label="shock next session"),
+        Line2D(
+            [],
+            [],
+            linestyle="",
+            marker="o",
+            markersize=8,
+            markerfacecolor=SURFACE,
+            color=agent,
+            label="calm next session",
+        ),
+        Line2D(
+            [],
+            [],
+            linestyle="",
+            marker="o",
+            markersize=8,
+            markerfacecolor=SURFACE,
+            markeredgecolor=INK_MUTED,
+            markeredgewidth=2.5,
+            label="leaked (quotes unseen close)",
+        ),
+    ]
+    fig.legend(handles=handles, loc="upper right", frameon=False, fontsize=9, labelcolor=INK_SECONDARY)
+    fig.suptitle(title, fontsize=13, color=INK_PRIMARY, fontweight="600", y=0.995)
+    fig.text(
+        0.5,
+        0.005,
+        "Triangles above circles = the forecaster separates shocks from calm days. Grey ring = leaked forecast.",
+        ha="center",
+        fontsize=9,
+        color=INK_MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.03, 1, 0.93))
+    return fig, axes

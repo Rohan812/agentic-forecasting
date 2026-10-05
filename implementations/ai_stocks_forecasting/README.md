@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, news-grounded agent config (`build_nvda_news_config`), shock task spec, and master-strategy schema are NVDA**. Still WTI-targeted: the other config-factory and prompt-builder *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
+> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, news-grounded agent configs (`build_nvda_news_config`, `build_nvda_multitask_news_config`), prompt builders, shock task and its `AgentPredictor`, and master-strategy schema are NVDA**. Still WTI-targeted: the other config-factory *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -16,7 +16,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 |------|--------------------|-----------------|
 | `data.py` | WTI `DataService` wiring (`CL=F` via `YFinanceDailyAdapter`) | **done** — `NVDA_SERIES_ID` + `build_nvda_service()`; covariate panel removed |
 | `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 5%`, both directions. Cache-path constants are still energy-named |
-| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±5% shock spec with measured anchors (see [Agent layer](#agent-layer)); scenario task still WTI |
+| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±5% shock spec with measured anchors, `nvda_shock_task()`, and NVDA-named predictors via `build_nvda_news_predictor` (see [Agent layer](#agent-layer)); scenario task still WTI |
 | `shock_anchors.py` | *new* — not from energy | **done** — reproduces the shock-spec calibration anchors from 2020–2024 |
 | `analysis.py` | Shared scoring helpers | **fixed** — true 80% interval (q10–q90) and `mae_horizon` honoured; see *Two scoring fixes* |
 | `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
@@ -25,8 +25,8 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `signals.py` | *new* — not from energy | **done** — flagging, control sampling, the train/holdout split, pattern scoring, the gate and regime labels, all tested (see below) |
 | `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
 | `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
-| `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factory is `build_nvda_news_config`; the basic, multitask, code-execution and tool factories and the prompt builder are still `build_wti_*` / `Wti*` |
-| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema drafted** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`; the agent's own instructions and skills still WTI |
+| `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
+| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
 
 Deliberately **not** copied: the energy notebooks, the committed WTI prediction YAMLs under `data/`, the 52 cached curriculum news files, the trained `wti-strategy-trained/` skill state, and the oil forecast animation. Those are WTI results, not scaffolding — the equivalents are produced here from NVDA runs. The energy `specs/` were not copied either; the NVDA specs below were written fresh rather than edited down from WTI ones.
@@ -40,7 +40,7 @@ Deliberately **not** copied: the energy notebooks, the committed WTI prediction 
 | Step | Output |
 |------|--------|
 | Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | an NVDA prompt builder, and renaming the remaining `build_wti_*` factories; wire the trajectory and shock `AgentPredictor`s; finalise `NvdaStrategyState` and move the adaptive agent onto it |
+| Finish the agent layer | renaming the remaining `build_wti_*` factories; find evidence that news separates shocks from calm days: no shock-agent variant has yet (see *After-close origins*). `nvda_shock_fresh` is closed to further iterations; move the adaptive agent onto `NvdaStrategyState` |
 
 ---
 
@@ -90,6 +90,9 @@ Shocks are **asymmetric**: upside outnumbers downside about 4:3 at ±5% and 3:1 
 |---|---|---|---|
 | [`specs/nvda_backtest.yaml`](specs/nvda_backtest.yaml) | 2025-01-06 → 2025-12-22, weekly | 51 | Model selection. 19 shock days at ±5% (8 up / 11 down), 15 events after merging. The first origins sit on the model-cutoff boundary. |
 | [`specs/nvda_eval.yaml`](specs/nvda_eval.yaml) | 2026-01-05 → 2026-08-17, weekly | 33 | Protected prospective evaluation. 6 shock days at ±5% (4 up / 2 down). |
+| [`specs/nvda_shock_smoke.yaml`](specs/nvda_shock_smoke.yaml) | Feb–Dec 2025, fixed | 10 | Shock-agent smoke: 5 holdout shocks + 5 volatility-matched controls, each with its expected outcome frozen. See *Shock smoke backtest*. |
+| [`specs/nvda_shock_fresh.yaml`](specs/nvda_shock_fresh.yaml) | Feb–Dec 2025, fixed | 16 | Search-topics A/B on every non-holdout 2025 session that follows a shock (3 continued). See *Fresh re-score*. |
+| [`specs/nvda_shock_fresh_close.yaml`](specs/nvda_shock_fresh_close.yaml) | Feb–Dec 2025, fixed, 20:00 origins | 16 | The same sessions for the after-close agent. The second and last iteration on this set. |
 
 Both use `task_id: nvda_price_forecast`, `target_series_id: nvda_stock_price`, horizons `[5, 10, 21]` business days, `warmup: 250`, and load as `MultiTargetBacktestSpec` (matching the energy/oil specs, not the single-task `BacktestSpec`).
 
@@ -382,6 +385,17 @@ costs about three searches plus three to nine verifier calls. Tests in
 `implementations/tests/ai_stocks_forecasting/test_analyst_agent.py` pin down the identity and the
 fence, and run offline.
 
+**Prompt builder** ([`analyst_agent/agent.py`](analyst_agent/agent.py) `NvdaPriceForecastPromptBuilder`).
+It serialises the task and the price history into the JSON payload that the analyst instruction's
+forecasting contract describes: `task`, `as_of`, `horizons`, `standard_quantiles`, a
+`target_summary` (last close, 52-week range) and `target_history_csv`. A test fails if the
+instruction promises a key the payload doesn't carry. The history is daily for the last six months
+and weekly averages for the **five years** before that (`WEEKLY_HISTORY_YEARS`). It used to reach
+back to NVDA's 1999 listing. Split-adjusted, those years are a few cents a share, and 900 of 1,300
+weekly rows printed as `0.0x`. Bounding them cut a 2025 payload from about 26K to 7.5K characters,
+on every agent turn. `target_summary.last_date` is usually the session before `as_of`, because the
+adapter releases each close one business day later.
+
 **Shock task** ([`tasks.py`](tasks.py) `TASK_SHOCK_SPEC`). This asks for P(|next-session return|
 ≥ 5%) in either direction, matching `paths.SHOCK_THRESHOLD`. The WTI version was a one-sided
 upside question with guessed anchors. The NVDA anchors are measured over 2020–2024 by
@@ -407,14 +421,214 @@ calendar, not just the unconditional rate. Re-run `uv run python -m
 ai_stocks_forecasting.shock_anchors` after any change to the threshold, and update the spec
 string to match.
 
+**Shock predictor** ([`tasks.py`](tasks.py)). `build_nvda_news_predictor("shock")` pairs the
+multitask news identity (`nvda_analyst_multitask`, a task-agnostic instruction) with
+`TASK_SHOCK_SPEC` and `DiscreteAgentForecastOutput`, so a forecast comes back as a
+`BinaryForecast` filed as `agent_predictor_nvda_analyst_multitask_<model>_discrete`.
+`nvda_shock_task()` is the matching single-horizon task (`nvda_shock_1d`). **Mind the timing.**
+The adapter releases each close one business day late, so at a Monday `as_of` the history ends
+on Friday. The question, like `signals.Window`, is Tuesday's close against Monday's, and the
+prediction's `forecast_date` is Tuesday. So the agent has not seen the `as_of` session's own
+close. That matters most for the "session after a ≥5% move" anchor, since the move it depends on
+is exactly the missing session. The payload carries `last_close_date`, and the spec tells the
+agent to judge the `as_of` session from news rather than assume it was quiet. `forecast_date` is
+pandas `BDay`, not the NYSE calendar: an origin followed by a market holiday has no session to
+resolve against, so choose shock origins with a trading day after them. Offline tests in
+`implementations/tests/ai_stocks_forecasting/test_tasks.py` pin the id, the output schema, and
+the payload against the instruction's input list. Writing that test turned up an undocumented
+`task` key, which the instruction now lists.
+
+**Scoring shock forecasts.** The harness resolves a binary forecast by reading the task's target
+series at `forecast_date`, so the outcome is a series of its own. `register_shock_series(service)`
+adds `nvda_shock_1d`, which is 1 on a session whose close moved at least 5% from the prior close.
+That is the `signals.flag_shock_windows` definition before cluster merging, and it reproduces the
+151 shock days of 2020–2024. Each value is released with its close, one business day late, and a
+test checks that an outcome is hidden on its own session. `nvda_shock_task()` targets this series
+with `payload_type="binary"`, and the prompt builder reads price history from `price_series_id`
+rather than from the task's target.
+
+**Shock smoke backtest** ([`shock_smoke.py`](shock_smoke.py), `uv run python -m
+ai_stocks_forecasting.shock_smoke`). The news-grounded shock agent and `HistoricalFrequencyPredictor`
+run on the ten origins in `specs/nvda_shock_smoke.yaml`: five holdout shocks and five of their
+volatility-matched controls from `signals`. Ten *random* origins would not work: only 2% of the
+sessions after the weekly 2025 origins were shocks, so a random ten almost surely holds none. Both
+predictors are scored on the intersection of their origins, and the report prints how many were
+dropped. The agent loses an origin whenever the proxy fails after retries, and the harness does not
+line those up across predictors. Resolved outcomes are checked against the labels frozen in the
+spec before scoring. Cost and latency are read back from each prediction's Langfuse trace into
+`data/predictions/costs/nvda_shock_smoke.yaml`. First run (lite model, 2026-09-24):
+
+| Predictor | Brier (50% shock sample) | Mean P before shock | Mean P before control |
+|---|---|---|---|
+| Shock agent (news-grounded) | 0.353 | 0.174 | 0.154 |
+| Climatology | 0.388 | 0.128 | 0.129 |
+
+No origins dropped. **$0.104 in total, $0.0104 per origin** (maximum $0.0126), 12 s mean latency.
+The leakage verifier on the advanced model is about 60% of each origin's cost. Read these numbers
+as a pipeline and cost check. Ten origins in a sample built to be half shocks can't rank
+predictors, and that Brier is not a market Brier. What they do show is that **the agent barely
+separates shocks from volatile quiet days.** It answered 0.14, 0.15 or 0.18 at every origin, which
+is the trailing-volatility anchor from the task spec. It gave 0.18 the day before the +18.7%
+tariff-pause rally. The traces show why news added little: **every origin ran exactly one search.**
+The multitask instruction says to search but, unlike `build_nvda_news_config`, names no topics.
+
+**Search topics added (after the run above).** `TASK_SHOCK_SPEC` now names three fenced queries.
+The first asks how NVDA moved on the `as_of` session, which is the session its price history does
+not show. The second covers scheduled catalysts for the next session: earnings, CPI, jobs, FOMC,
+export-control rulings. The third covers unscheduled ones: export controls, tariffs, hyperscaler
+capex, competition. The topics live in the task spec, not the shared multitask instruction, because
+the trajectory task uses that instruction too. A one-origin mechanics check on 2025-07-14, which is
+not a holdout window, ran three searches instead of one, for $0.0092. The table above predates the
+change and was **deliberately not re-run** on the same ten origins: they are gate holdout windows,
+and re-scoring a prompt change on them would tune on the holdout. The smoke spec therefore declares
+its arms as `climatology` and `agent_notopics`. The earlier agent results were relabelled to the
+no-topics predictor id (`nvda_analyst_multitask_notopics`), because the old id now means "with
+topics". `TASK_SHOCK_SPEC_NO_TOPICS` reproduces the earlier prompt byte for byte.
+
+**Fresh re-score** (`--spec nvda_shock_fresh`, 2026-09-24). Fresh origins turned out to be
+scarce. They have to fall after both models' cutoff, before the protected 2026 window, and outside
+the gate holdout, and the holdout already uses every independent 2025 shock event. Only three 2025
+shock sessions lie outside it, and all three are the second day of an episode. So the fresh set
+conditions on "the previous session was a shock", the spec's ~22% anchor. It takes every such
+session that is not a holdout or smoke target: **16 origins, 3 continued** (19%, not enriched).
+Every origin's `as_of` is a shock session the price history does not show, which is the case
+search topic 1 was written for. `run` refuses to score the `agent` arm on a gate-holdout shock
+origin or a smoke origin, and a test enforces this.
+
+| Arm | Brier | Mean P, move continued | Mean P, calmed down | Cost / origin |
+|---|---|---|---|---|
+| Agent, with search topics | 0.166 | 0.167 | 0.192 | $0.0215 |
+| Agent, no topics (earlier prompt) | **0.138** | 0.270 | 0.190 | $0.0100 |
+| Climatology | 0.156 | 0.129 | 0.129 | — |
+
+No origins dropped, no 503s. **The topics did not help.** With three positives this can't show they
+hurt either. Almost all of the Brier gap is one origin: the day after the +18.7% tariff-pause rally,
+where the no-topics arm said 0.45 (correct, −5.9% next) and the topics arm said 0.14. The topics
+arm's probability was *lower* before continuations than before calm days. The topics also doubled
+the cost.
+
+**Why: web search is not a reliable source for a price move.** Every origin ran three searches
+with no verification failures, but topic 1, "how did NVDA move on `as_of`", was often wrong or
+empty. On 2025-04-09 and 2025-11-10 it returned only source URLs and no summary, passed the
+verifier, and reached the agent as a successful result. That is the soft-failure mode where
+retrieval returns something that isn't news. On 04-09 it cost the agent the continuation. On
+03-06 it reported "down ~3%" for a −5.7% day, on 03-10 "closed higher" for a −5.1% day, and on
+04-10 "a significant rally" for a −5.9% day. The move is already in our price data, one session
+late. The fix is to let the shock agent see the `as_of` close, for example a price series for this
+task stamped at the 16:00 close with origins after the close, rather than asking search for it.
+Search results with no summary body should be rejected as unusable, not passed on as news. These 16
+origins have now been scored, so the next prompt change needs origins of its own.
+
+**After-close origins (the fix).** The root cause turned out to be the fence itself. The harness
+fences `search_web` to information published *strictly before* the `as_of` date. Asking how NVDA
+moved *on* `as_of` therefore asked for fenced-out news, and the verifier stripped it. Two changes
+follow.
+
+- **Prices, not search, for the `as_of` session.** `register_shock_series` now also registers
+  `nvda_stock_price_at_close`. It holds the same adjusted closes, each released at 16:00 on its own
+  session (`MARKET_CLOSE`) rather than a business day later, and the shock indicator is released at
+  the close too. An origin at 20:00 (`after_close(day)`) sees that day's close.
+  `build_nvda_shock_predictor_after_close()` reads it with `TASK_SHOCK_SPEC_AFTER_CLOSE`, which is
+  the no-topics prompt with its timing paragraph replaced. It is filed as
+  `nvda_analyst_multitask_close`. The news fence does not move: the agent still sees only news
+  published before `as_of`, so news after that day's close stays out of reach. Checked on
+  2025-04-09, where the history now ends 96.06 → 114.04, the +18.7% session that was invisible
+  before.
+- **Every arm is wrapped in `SessionDatePredictor`.** Predictors stamp `forecast_date = as_of + h`,
+  so a 20:00 origin forecasts 20:00 on the target session. The harness matches outcomes by exact
+  timestamp, so that forecast goes unscored: with every origin lost the harness raises, but a spec
+  mixing origin times would lose the after-close ones silently. The wrapper pins the date to the
+  session and changes nothing else. A test shows both behaviours. The existing specs reproduce
+  exactly with it on.
+- **Empty search results are retried, not served** (core `search_web`). A clean verdict on an empty
+  summary now spends an attempt, and exhausting the attempts returns `[SEARCH_VERIFICATION_FAILED]`,
+  which the agent is already told how to handle.
+
+`shock_smoke.py` accepts `origin_time: after_close` in a spec and an `agent_close` arm. It refuses
+`agent_close`, like `agent`, on holdout or smoke origins, and refuses it at midnight origins. A live
+check on 2025-07-14 ran end to end for $0.01.
+
+**Scored on the same 16 sessions** (`--spec nvda_shock_fresh_close`, 20:00 origins, 2026-09-24).
+This is the second and last iteration on that set, so it is weaker evidence than a first look.
+Every origin was scored, with no drops and no 503s, for $0.0104 per origin, the same as the
+no-topics arm.
+
+| Arm (same 16 sessions, 3 continued) | Sees `as_of` close | Brier | Mean P, continued | Mean P, calmed |
+|---|---|---|---|---|
+| Agent, after close | yes | 0.154 | 0.227 | 0.212 |
+| Agent, no topics (midnight) | no | **0.138** | 0.270 | 0.190 |
+| Agent, search topics (midnight) | no | 0.166 | 0.167 | 0.192 |
+| Climatology (either origin time) | — | 0.156 | 0.129 | 0.129 |
+
+**The mechanism works; the forecast doesn't improve.** Every after-close rationale quotes the
+`as_of` move correctly (−8.5%, −8.7%, +18.7%, +5.4%) and applies the "after a ≥5% move" anchor.
+The "no catalysts on March 3" error is gone. But the agent lifts every origin to about 0.2 without
+separating the sessions that continued from those that calmed down (0.227 against 0.212), and
+lands on climatology's Brier. The no-topics arm's lead rests largely on one origin, 0.45 on the day
+after the tariff-pause rally. The rally was not in its price history, but a later review of the
+traces showed it saw the rally through search anyway (see the fence leak below). With three
+positives none of these differences is evidence. **The honest summary for this task: across three variants,
+no shock agent has shown it can tell a continuing shock from a calm-down better than climatology.**
+`nvda_shock_fresh`'s 16 sessions are now closed to further iterations. The next measurement is the
+protected 2026 run.
+
+**Search fence leak (found in review, fixed in core `search_web`).** At midnight origins the
+agent is not meant to see anything from the `as_of` session. Langfuse traces show the LLM leakage
+verifier sometimes passed that session anyway, marked clean at confidence 9–10. Examples: "On
+February 4, 2025, NVIDIA (NVDA) stock ... closing the session at $118.34" for a 2025-02-04 origin,
+and "On April 3, 2025, NVIDIA (NVDA) stock experienced a decline, closing at $101.54" for
+2025-04-03. One midnight origin per agent arm quotes the exact `as_of` close in its forecast
+record: smoke 2025-02-04, topics 2025-04-03, and no-topics 2025-04-09. The 2025-04-09 rationale
+cites the $96.06 → $114.04 rally and the H20 export notice, which was not public until 2025-04-15.
+That origin is the one that gave the no-topics arm its lead, so **the midnight-arm Brier scores
+above are contaminated and should not be read as agent skill.** The after-close arm sees the
+`as_of` close legitimately and is unaffected, although its fence had the same gap. `search_web` now
+drops, after the verifier passes a result, every sentence that names a day or month that is not
+entirely before the cutoff. The verifier is also told that facts about the cutoff day itself fail.
+Undated leaks still depend on the verifier. Removing the leaked origins from every arm of their
+spec, neither midnight arm beats climatology on the fresh set: on 14 clean origins, with one shock
+left, skill is −0.26 without topics and −0.35 with them.
+
+**Midnight arms re-run with the fixed fence** (2026-10-05). This measures the fence, not a new
+prompt, so it does not spend the closed origins on another iteration. A first attempt on
+2026-09-24 failed because the proxy's shared Google Search grounding quota was exhausted (HTTP
+429 on every search call while plain model calls still worked). It was stopped before it wrote
+anything. In the re-run every origin was scored, and no forecast quotes the `as_of` close. The
+date backstop dropped verifier-passed same-day sentences in 5 smoke searches and 33 fresh ones,
+2025-04-03 among them.
+
+| Arm (re-run) | Set | Brier | Climatology | Mean P, shock | Mean P, calm | Cost / origin |
+|---|---|---|---|---|---|---|
+| Agent, no topics | smoke (50% shocks) | 0.358 | 0.388 | 0.166 | 0.142 | $0.0103 |
+| Agent, search topics | fresh | 0.165 | 0.156 | 0.163 | 0.190 | $0.0214 |
+| Agent, no topics | fresh | 0.159 | 0.156 | 0.153 | 0.171 | $0.0104 |
+
+The no-topics forecast on 2025-04-09 fell from 0.45 to 0.18 once it could no longer see the
+rally, and the arm's lead disappeared. Both midnight arms now sit at or just below climatology,
+and their 90% paired intervals on the Brier difference contain 0. They give lower probabilities
+before shocks than before calm sessions. With the after-close arm also tying climatology (0.154),
+**no shock agent variant has shown skill on post-cutoff data**. The smoke Brier advantage is the
+50%-shock sample rewarding a higher average P, not skill.
+
 **Master strategy schema**
-([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py), draft).
+([`adaptive_agent/nvda_strategy_state.py`](adaptive_agent/nvda_strategy_state.py)).
 `NvdaStrategyState` extends `AdaptiveSkillState`. Its main field is `news_patterns: list[NewsPattern]`.
 Each pattern stores the train and holdout `PatternEvidence` it was graduated on, copied
 field-for-field from `signals.PatternMetrics` via `PatternEvidence.from_metrics`, along with its
 `source_experiment`. Only graduated patterns go in this file; candidates and rejections belong
 in the per-experiment trail. The WTI `skill_state.py` stays in place until the adaptive agent
 moves over to the new schema.
+
+**The schema enforces the gate itself.** A `NewsPattern` re-runs `signals.gate_reasons` on its own
+train and holdout evidence when it is built, and refuses to exist if any criterion fails; the error
+lists which ones. `AdaptiveSkillStore.load` validates `skill_state.yaml` through the same model, so a
+hand-edited file with weakened evidence fails to load instead of reaching the forecaster. Tightening
+a gate constant in `signals.py` therefore makes any previously graduated pattern that no longer
+clears it fail to load, by name. That is deliberate: every pattern in the master file meets the
+current standard, and a change to the standard shows up rather than being grandfathered in. Pattern
+ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by id, and
+agent-written text is escaped so a `|` in a cue can't shift the `SKILL.md` table. Tests are in
+`implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
 
 ## Charts
 
@@ -436,6 +650,17 @@ price, error and CRPS, ready to display or save with `to_csv`. And it draws
 **`predicted_vs_actual`** (section 4): the actual daily close as a line, each predictor's
 forecasts plotted at the date they were forecasting, with 80% bands, one panel per horizon.
 On the 21-day panel the naive forecast visibly lags every turn.
+
+Section 5 covers the **shock task**. `load_shock_frame` loads every committed shock backtest
+(`SHOCK_SPECS`: smoke, fresh and fresh after-close). It scores each arm on the origins all arms
+of a spec share, and flags midnight forecasts that quote the `as_of` close they cannot know.
+`shock_leaderboard` gives Brier, Brier skill against that spec's climatology, the separation
+between mean P before shocks and before calm sessions, and a 90% paired-bootstrap interval on
+the Brier difference. With `exclude_leaked=True` it drops a leaked origin from every arm of its
+spec. `shock_separation` plots every forecast by arm, with shocks as filled triangles, calm
+sessions as hollow circles and leaked forecasts ringed in grey. A forecaster that adds
+information puts the triangles above the circles. None does yet. Tests are in
+`implementations/tests/ai_stocks_forecasting/test_charts.py`.
 
 [`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) is the root-cause analysis of the
 original raw-price baseline's −77% forecast, described above. It reads the archived results

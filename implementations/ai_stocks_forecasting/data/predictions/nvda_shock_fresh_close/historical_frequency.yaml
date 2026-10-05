@@ -1,0 +1,217 @@
+spec:
+  task:
+    task_id: nvda_shock_1d
+    target_series_id: nvda_shock_1d
+    horizons:
+    - 1
+    frequency: B
+    description: P(|NVDA close-to-close return| >= 5%) over the 1 session(s) after
+      as_of
+    payload_type: binary
+    categories: null
+    resolution_fn: observed_value_at_resolution_timestamp
+  start: '2025-02-05T20:00:00'
+  end: '2025-11-10T20:00:00'
+  stride: 1
+  origin_dates:
+  - '2025-02-05T20:00:00'
+  - '2025-02-27T20:00:00'
+  - '2025-03-03T20:00:00'
+  - '2025-03-06T20:00:00'
+  - '2025-03-10T20:00:00'
+  - '2025-03-12T20:00:00'
+  - '2025-03-14T20:00:00'
+  - '2025-03-26T20:00:00'
+  - '2025-04-03T20:00:00'
+  - '2025-04-04T20:00:00'
+  - '2025-04-09T20:00:00'
+  - '2025-04-10T20:00:00'
+  - '2025-04-16T20:00:00'
+  - '2025-05-12T20:00:00'
+  - '2025-05-13T20:00:00'
+  - '2025-11-10T20:00:00'
+  warmup: 250
+  description: 'NVDA shock re-score after the close: same 16 sessions as nvda_shock_fresh'
+predictor_id: historical_frequency
+predictions:
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.655197'
+  as_of: '2025-02-05T20:00:00'
+  forecast_date: '2025-02-06T00:00:00'
+  payload:
+    probability: 0.12839694656488548
+  metadata:
+    n_observations: 6550
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.677746'
+  as_of: '2025-02-27T20:00:00'
+  forecast_date: '2025-02-28T00:00:00'
+  payload:
+    probability: 0.12825590251332825
+  metadata:
+    n_observations: 6565
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.698284'
+  as_of: '2025-03-03T20:00:00'
+  forecast_date: '2025-03-04T00:00:00'
+  payload:
+    probability: 0.12836911831886708
+  metadata:
+    n_observations: 6567
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.719020'
+  as_of: '2025-03-06T20:00:00'
+  forecast_date: '2025-03-07T00:00:00'
+  payload:
+    probability: 0.12846270928462708
+  metadata:
+    n_observations: 6570
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.739613'
+  as_of: '2025-03-10T20:00:00'
+  forecast_date: '2025-03-11T00:00:00'
+  payload:
+    probability: 0.12857577601947656
+  metadata:
+    n_observations: 6572
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.760449'
+  as_of: '2025-03-12T20:00:00'
+  forecast_date: '2025-03-13T00:00:00'
+  payload:
+    probability: 0.12868877395801642
+  metadata:
+    n_observations: 6574
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.780871'
+  as_of: '2025-03-14T20:00:00'
+  forecast_date: '2025-03-17T00:00:00'
+  payload:
+    probability: 0.12880170316301703
+  metadata:
+    n_observations: 6576
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.802079'
+  as_of: '2025-03-26T20:00:00'
+  forecast_date: '2025-03-27T00:00:00'
+  payload:
+    probability: 0.12879708383961117
+  metadata:
+    n_observations: 6584
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.822207'
+  as_of: '2025-04-03T20:00:00'
+  forecast_date: '2025-04-04T00:00:00'
+  payload:
+    probability: 0.12883156297420334
+  metadata:
+    n_observations: 6590
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.842647'
+  as_of: '2025-04-04T20:00:00'
+  forecast_date: '2025-04-07T00:00:00'
+  payload:
+    probability: 0.12896373843119405
+  metadata:
+    n_observations: 6591
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.863045'
+  as_of: '2025-04-09T20:00:00'
+  forecast_date: '2025-04-10T00:00:00'
+  payload:
+    probability: 0.12905671822869275
+  metadata:
+    n_observations: 6594
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.883977'
+  as_of: '2025-04-10T20:00:00'
+  forecast_date: '2025-04-11T00:00:00'
+  payload:
+    probability: 0.1291887793783169
+  metadata:
+    n_observations: 6595
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.904409'
+  as_of: '2025-04-16T20:00:00'
+  forecast_date: '2025-04-17T00:00:00'
+  payload:
+    probability: 0.12926200939536292
+  metadata:
+    n_observations: 6599
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.925487'
+  as_of: '2025-05-12T20:00:00'
+  forecast_date: '2025-05-13T00:00:00'
+  payload:
+    probability: 0.12908101571946795
+  metadata:
+    n_observations: 6616
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.951635'
+  as_of: '2025-05-13T20:00:00'
+  forecast_date: '2025-05-14T00:00:00'
+  payload:
+    probability: 0.12921263412422548
+  metadata:
+    n_observations: 6617
+    window: null
+- predictor_id: historical_frequency
+  task_id: nvda_shock_1d
+  issued_at: '2026-09-24T17:35:19.974008'
+  as_of: '2025-11-10T20:00:00'
+  forecast_date: '2025-11-11T00:00:00'
+  payload:
+    probability: 0.12696529219816077
+  metadata:
+    n_observations: 6742
+    window: null
+scores:
+- 0.01648577588718606
+- 0.016449576529508358
+- 0.016478630537963293
+- 0.016502667676746612
+- 0.016531730179010603
+- 0.016560800542817444
+- 0.016589878737693953
+- 0.016588688805587826
+- 0.7589344456699694
+- 0.016631645830149436
+- 0.7585422000625746
+- 0.01668974071725944
+- 0.01670866707292689
+- 0.7584998771802336
+- 0.01669590481732096
+- 0.016120185422964346
+metric: brier
+mean_score: 0.15568815097936956
+ran_at: '2026-09-24T17:35:19.983874'
+skipped_origins: 0
