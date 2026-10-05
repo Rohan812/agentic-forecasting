@@ -5,8 +5,8 @@ For each experiment in ``experiments/<id>/focus.yaml``:
 1. **Propose.** One lite-model call turns the focus into at most
    ``max_questions`` yes/no news questions, saved to ``questions.yaml`` before
    any labelling.  They are never edited after labels are seen.
-2. **Screen on the holdout.** Each question is labelled on the 26 holdout
-   windows first (about $0.43).  The gate needs holdout lift >= 1.5 and
+2. **Screen on the holdout.** Each question is labelled on the holdout
+   windows first (13 shocks with three matched controls each, about $0.85).  The gate needs holdout lift >= 1.5 and
    holdout p < 0.10 *as well as* the training criteria, so a question that
    fails these cannot graduate whatever its training result, and its 238
    training windows are never paid for.
@@ -35,18 +35,20 @@ from ai_stocks_forecasting import signals
 from ai_stocks_forecasting.data import NVDA_SERIES_ID, build_nvda_service
 from ai_stocks_forecasting.discovery import (
     EXPERIMENTS_DIR,
+    HOLDOUT_CONTROLS_PER_SHOCK,
     StudySet,
     _labels,
     build_study_set,
     evaluate_candidate,
     record_candidate,
+    upsert_candidate,
 )
 from ai_stocks_forecasting.news_labels import BudgetLedger, label_windows
 from aieng.forecasting.models import LITE_MODEL
 
 
 EXPERIMENT_BUDGET_USD = 10.0
-"""Cap on one experiment's labelling spend (two full questions at about $4.30 each, plus screens)."""
+"""Cap on one experiment's labelling spend (two full questions at about $4.70 each, screens included)."""
 
 _PROPOSER_INSTRUCTION = """\
 You design candidate news signals for a statistical study of NVIDIA (NVDA) stock shocks \
@@ -136,8 +138,8 @@ def _record_screened_out(
 ) -> None:
     path = EXPERIMENTS_DIR / experiment_id / "trail.yaml"
     trail = yaml.safe_load(path.read_text()) if path.exists() else {"experiment_id": experiment_id, "candidates": []}
-    trail["candidates"] = [c for c in trail["candidates"] if c["pattern_id"] != q["question_id"]]
-    trail["candidates"].append(
+    upsert_candidate(
+        trail,
         {
             "pattern_id": q["question_id"],
             "cue": q["question"],
@@ -147,8 +149,9 @@ def _record_screened_out(
             "graduated": False,
             "stage": "screened out on the holdout; training windows not labelled",
             "rejection_reasons": reasons,
+            "holdout_design": f"matched, {HOLDOUT_CONTROLS_PER_SHOCK} controls per shock",
             "holdout": {k: (round(v, 4) if isinstance(v, float) else v) for k, v in metrics.__dict__.items()},
-        }
+        },
     )
     path.write_text(yaml.safe_dump(trail, sort_keys=False, allow_unicode=True))
 

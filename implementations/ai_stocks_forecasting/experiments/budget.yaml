@@ -1,5 +1,5 @@
 cap_usd: 30.0
-spent_usd: 2.8383
+spent_usd: 6.3355
 entries:
 - what: pilot_export_controls
   usd: 0.0491
@@ -29,3 +29,27 @@ entries:
   usd: 0.4698
   windows: 26
   searches: 26
+- what: exp02_export_controls_q1
+  usd: 0.6039
+  windows: 31
+  searches: 33
+- what: exp02_export_controls_q2
+  usd: 0.6522
+  windows: 31
+  searches: 35
+- what: exp03_hyperscaler_capex_q1
+  usd: 0.569
+  windows: 31
+  searches: 33
+- what: exp03_hyperscaler_capex_q2
+  usd: 0.5489
+  windows: 31
+  searches: 31
+- what: exp04_competitor_launches_q1
+  usd: 0.5529
+  windows: 31
+  searches: 32
+- what: exp04_competitor_launches_q2
+  usd: 0.5703
+  windows: 31
+  searches: 31

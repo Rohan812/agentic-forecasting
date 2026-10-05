@@ -49,6 +49,19 @@ STUDY_START = "2020-01-01"
 STUDY_SEED = 0
 """Seed for matched-control sampling, fixed so every experiment scores against the same windows."""
 
+HOLDOUT_CONTROLS_PER_SHOCK = 3
+"""Matched controls per holdout shock (training keeps one per shock).
+
+The holdout has only 13 shocks, so with one control each a pattern needed to
+precede at least 4 of them with no false alarm to reach p < 0.10, which no
+specific news event does.  Three controls lower that to 2 of 13 (3 with one
+false alarm).  In simulation a pattern that triples the shock rate and appears
+before 3% of calm days passes the holdout criteria 22% of the time instead of
+3%, while a pattern with no effect passes 2-6% of the time.  Five controls add
+almost nothing.  Adopted on 2026-10-05 after experiments 01-04 had been
+screened with one control; see the README's discovery section.
+"""
+
 Direction = Literal["up", "down", "either"]
 Rule = Callable[[signals.Window, "StudySet"], bool]
 """A candidate pattern: given a window and the study context, did its signature appear by ``as_of``?"""
@@ -98,19 +111,31 @@ class StudySet:
         return self._base_rates[key]
 
 
-def build_study_set(prices: pd.DataFrame, seed: int = STUDY_SEED, n_each: int = 1) -> StudySet:
-    """Flag shocks from :data:`STUDY_START`, sample matched controls, and split train / holdout."""
+def build_study_set(
+    prices: pd.DataFrame, seed: int = STUDY_SEED, holdout_controls_per_shock: int = HOLDOUT_CONTROLS_PER_SHOCK
+) -> StudySet:
+    """Flag shocks from :data:`STUDY_START`, sample matched controls, and split train / holdout.
+
+    Training windows are each shock plus one matched control, exactly as when
+    the first experiments ran, so their results stay comparable.  Holdout
+    shocks get ``holdout_controls_per_shock`` controls, drawn separately.
+    """
     history = prices[pd.to_datetime(prices["timestamp"]) >= pd.Timestamp(STUDY_START)].reset_index(drop=True)
     shocks = signals.flag_shock_windows(history)
-    controls = signals.sample_matched_controls(shocks, history, n_each=n_each, seed=seed)
+    controls = signals.sample_matched_controls(shocks, history, n_each=1, seed=seed)
     train, holdout = signals.train_holdout_split(shocks + controls)
-    holdout_start = pd.Timestamp(signals.HOLDOUT_START)
+    holdout_start, holdout_end = pd.Timestamp(signals.HOLDOUT_START), pd.Timestamp(signals.HOLDOUT_END)
+    if holdout_controls_per_shock != 1:
+        holdout_shocks = [w for w in holdout if w.is_shock]
+        extra = signals.sample_matched_controls(holdout_shocks, history, n_each=holdout_controls_per_shock, seed=seed)
+        in_window = [w for w in extra if w.as_of >= holdout_start and w.event_date <= holdout_end]
+        holdout = sorted(holdout_shocks + in_window, key=lambda w: w.event_date)
     return StudySet(
         prices=history,
         train=train,
         holdout=holdout,
         train_period=(pd.Timestamp(STUDY_START), holdout_start - pd.Timedelta(days=1)),
-        holdout_period=(holdout_start, pd.Timestamp(signals.HOLDOUT_END)),
+        holdout_period=(holdout_start, holdout_end),
     )
 
 
@@ -137,17 +162,53 @@ class CandidateResult:
         return not self.reasons
 
 
+def population_holdout(study: StudySet) -> list[signals.Window]:
+    """Every holdout-period session as a window: ``as_of`` is the session, the event is the next one.
+
+    For rules that need no labelling (calendar and price rules) this replaces
+    the matched holdout with the whole of 2025, a larger and more powerful test.
+    """
+    close = study.close
+    ret = close.pct_change() * 100
+    start, end = study.holdout_period
+    sessions = close.loc[start:end].index
+    windows = []
+    for day, nxt in zip(sessions[:-1], sessions[1:], strict=True):
+        move = float(ret.loc[nxt])
+        shock = abs(move) >= study.threshold_pct
+        windows.append(
+            signals.Window(
+                as_of=day,
+                event_date=nxt,
+                is_shock=shock,
+                return_pct=move,
+                direction=("up" if move > 0 else "down") if shock else None,
+            )
+        )
+    return windows
+
+
 def evaluate_candidate(
-    study: StudySet, pattern_id: str, cue: str, rule: Rule, direction: Direction = "either"
+    study: StudySet,
+    pattern_id: str,
+    cue: str,
+    rule: Rule,
+    direction: Direction = "either",
+    *,
+    holdout: Literal["matched", "population"] = "matched",
 ) -> CandidateResult:
     """Score a rule on the train and holdout windows and run the gate.
 
     For a one-directional pattern, shocks in the other direction count as
     non-shocks and the base rate is the one-directional shock rate, so a rule
-    cannot borrow strength from moves it does not predict.
+    cannot borrow strength from moves it does not predict.  ``holdout=
+    "population"`` scores the holdout on every 2025 session
+    (:func:`population_holdout`); use it only for rules that cost nothing to
+    evaluate, since a news rule would need a label per session.
     """
+    holdout_windows = population_holdout(study) if holdout == "population" else study.holdout
     metrics = {}
-    for split, windows in (("train", study.train), ("holdout", study.holdout)):
+    for split, windows in (("train", study.train), ("holdout", holdout_windows)):
         matches = [bool(rule(w, study)) for w in windows]
         metrics[split] = signals.evaluate_pattern(
             matches, _labels(windows, direction), study.base_rate(split, direction)
@@ -192,25 +253,39 @@ def _metrics_dict(m: signals.PatternMetrics) -> dict[str, float | int]:
 
 
 def record_candidate(
-    experiment_id: str, result: CandidateResult, rule_name: str, experiments_dir: Path | None = None
+    experiment_id: str,
+    result: CandidateResult,
+    rule_name: str,
+    experiments_dir: Path | None = None,
+    holdout_design: str = f"matched, {HOLDOUT_CONTROLS_PER_SHOCK} controls per shock",
 ) -> Path:
     """Append one candidate's evidence and verdict to ``experiments/<id>/trail.yaml``."""
     path = (experiments_dir or EXPERIMENTS_DIR) / experiment_id / "trail.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
     trail = yaml.safe_load(path.read_text()) if path.exists() else {"experiment_id": experiment_id, "candidates": []}
-    trail["candidates"] = [c for c in trail["candidates"] if c["pattern_id"] != result.pattern_id]
-    trail["candidates"].append(
-        {
-            "pattern_id": result.pattern_id,
-            "cue": result.cue,
-            "rule": rule_name,
-            "direction": result.direction,
-            "evaluated_on": date.today().isoformat(),
-            "graduated": result.graduates,
-            "rejection_reasons": result.reasons,
-            "train": _metrics_dict(result.train),
-            "holdout": _metrics_dict(result.holdout),
-        }
-    )
+    entry = {
+        "pattern_id": result.pattern_id,
+        "cue": result.cue,
+        "rule": rule_name,
+        "direction": result.direction,
+        "evaluated_on": date.today().isoformat(),
+        "graduated": result.graduates,
+        "rejection_reasons": result.reasons,
+        "holdout_design": holdout_design,
+        "train": _metrics_dict(result.train),
+        "holdout": _metrics_dict(result.holdout),
+    }
+    upsert_candidate(trail, entry)
     path.write_text(yaml.safe_dump(trail, sort_keys=False, allow_unicode=True))
     return path
+
+
+def upsert_candidate(trail: dict, entry: dict) -> None:
+    """Replace a candidate's entry, keeping every earlier evaluation of it under ``history``."""
+    previous = next((c for c in trail["candidates"] if c["pattern_id"] == entry["pattern_id"]), None)
+    if previous is not None:
+        history = previous.pop("history", [])
+        entry["history"] = [*history, previous]
+        trail["candidates"].remove(previous)
+    trail["candidates"].append(entry)
+    trail["candidates_tested"] = len(trail["candidates"])

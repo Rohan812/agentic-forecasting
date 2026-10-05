@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 import pytest
 from ai_stocks_forecasting import signals
-from ai_stocks_forecasting.discovery import StudySet, evaluate_candidate
+from ai_stocks_forecasting.discovery import StudySet, build_study_set, evaluate_candidate
 
 
 def _window(day: str, shock: bool, direction: str | None = None) -> signals.Window:
@@ -55,3 +56,25 @@ def test_a_one_direction_pattern_gets_no_credit_for_moves_the_other_way() -> Non
     assert up_only.train.n_hits == 0
     assert up_only.train.lift == pytest.approx(0.0)
     assert up_only.train.base_rate == pytest.approx(0.06)
+
+
+def test_more_holdout_controls_leave_the_training_windows_unchanged() -> None:
+    """Changing the holdout design must not move the training set, or earlier experiments stop being comparable.
+
+    Synthetic history from 2020: a calm random walk with isolated ±8% shocks,
+    enough of them in 2020-2024 and in 2025 for both splits to be scored.
+    """
+    rng = np.random.default_rng(1)
+    days = pd.bdate_range("2019-01-01", "2025-12-31")
+    returns = rng.normal(0, 0.012, len(days))
+    first_2025 = int(days.searchsorted(pd.Timestamp("2025-02-10")))
+    shock_idx = [*range(300, first_2025 - 30, 37), *range(first_2025, len(days) - 5, 15)]
+    returns[shock_idx] = rng.choice([-0.08, 0.08], len(shock_idx))
+    prices = pd.DataFrame({"timestamp": days, "value": 100 * np.cumprod(1 + returns)})
+
+    one = build_study_set(prices, holdout_controls_per_shock=1)
+    three = build_study_set(prices, holdout_controls_per_shock=3)
+
+    assert [(w.as_of, w.is_shock) for w in one.train] == [(w.as_of, w.is_shock) for w in three.train]
+    n_shocks = sum(w.is_shock for w in three.holdout)
+    assert sum(not w.is_shock for w in three.holdout) == 3 * n_shocks

@@ -7,7 +7,8 @@ candidates:
   evaluated_on: '2026-10-05'
   graduated: false
   rejection_reasons:
-  - holdout p-value 0.5 is not below 0.1, so the holdout result could be luck
+  - holdout p-value 0.253 is not below 0.1, so the holdout result could be luck
+  holdout_design: population (every 2025 session)
   train:
     n_windows: 238
     n_matches: 11
@@ -19,15 +20,45 @@ candidates:
     ci_low: 1.2134
     ci_high: 8.2987
   holdout:
-    n_windows: 26
-    n_matches: 1
+    n_windows: 229
+    n_matches: 4
     n_hits: 1
-    precision: 1.0
+    precision: 0.2491
     base_rate: 0.0696
-    lift: 14.375
-    p_value: 0.5
-    ci_low: 14.375
+    lift: 3.5811
+    p_value: 0.253
+    ci_low: 0.0
     ci_high: 14.375
+  history:
+  - pattern_id: P-1
+    cue: NVDA reports quarterly results after the close on as_of
+    rule: earnings_after_close
+    direction: either
+    evaluated_on: '2026-10-05'
+    graduated: false
+    rejection_reasons:
+    - holdout p-value 0.5 is not below 0.1, so the holdout result could be luck
+    train:
+      n_windows: 238
+      n_matches: 11
+      n_hits: 9
+      precision: 0.3814
+      base_rate: 0.1205
+      lift: 3.1651
+      p_value: 0.0297
+      ci_low: 1.2134
+      ci_high: 8.2987
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 1
+      precision: 1.0
+      base_rate: 0.0696
+      lift: 14.375
+      p_value: 0.5
+      ci_low: 14.375
+      ci_high: 14.375
+    holdout_design: matched, 1 control per shock
 - pattern_id: P-2
   cue: NVDA reports quarterly results after the close on as_of (up moves only)
   rule: earnings_after_close
@@ -39,6 +70,7 @@ candidates:
   - training lift interval starts at 0.80, which does not exclude 1 (no effect)
   - holdout lift 0.00 is below 1.5
   - holdout p-value 1 is not below 0.1, so the holdout result could be luck
+  holdout_design: population (every 2025 session)
   train:
     n_windows: 238
     n_matches: 11
@@ -50,8 +82,8 @@ candidates:
     ci_low: 0.7959
     ci_high: 7.4164
   holdout:
-    n_windows: 26
-    n_matches: 1
+    n_windows: 229
+    n_matches: 4
     n_hits: 0
     precision: 0.0
     base_rate: 0.0304
@@ -59,6 +91,39 @@ candidates:
     p_value: 1.0
     ci_low: 0.0
     ci_high: 0.0
+  history:
+  - pattern_id: P-2
+    cue: NVDA reports quarterly results after the close on as_of (up moves only)
+    rule: earnings_after_close
+    direction: up
+    evaluated_on: '2026-10-05'
+    graduated: false
+    rejection_reasons:
+    - training p-value 0.0715 is not below 0.05
+    - training lift interval starts at 0.80, which does not exclude 1 (no effect)
+    - holdout lift 0.00 is below 1.5
+    - holdout p-value 1 is not below 0.1, so the holdout result could be luck
+    train:
+      n_windows: 238
+      n_matches: 11
+      n_hits: 6
+      precision: 0.1727
+      base_rate: 0.0689
+      lift: 2.5078
+      p_value: 0.0715
+      ci_low: 0.7959
+      ci_high: 7.4164
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 0
+      precision: 0.0
+      base_rate: 0.0304
+      lift: 0.0
+      p_value: 1.0
+      ci_low: 0.0
+      ci_high: 0.0
+    holdout_design: matched, 1 control per shock
 - pattern_id: P-3
   cue: Trailing 21-session volatility in the top third of history at as_of
   rule: high_volatility_regime
@@ -69,8 +134,7 @@ candidates:
   - training lift 1.15 is below 2
   - training p-value 0.21 is not below 0.05
   - training lift interval starts at 0.85, which does not exclude 1 (no effect)
-  - holdout lift 1.15 is below 1.5
-  - holdout p-value 0.5 is not below 0.1, so the holdout result could be luck
+  holdout_design: population (every 2025 session)
   train:
     n_windows: 238
     n_matches: 87
@@ -82,12 +146,47 @@ candidates:
     ci_low: 0.8504
     ci_high: 1.5501
   holdout:
-    n_windows: 26
-    n_matches: 13
-    n_hits: 7
-    precision: 0.0802
+    n_windows: 229
+    n_matches: 60
+    n_hits: 8
+    precision: 0.1328
     base_rate: 0.0696
-    lift: 1.1533
-    p_value: 0.5
-    ci_low: 0.518
-    ci_high: 2.6336
+    lift: 1.9089
+    p_value: 0.0303
+    ci_low: 1.0223
+    ci_high: 2.8642
+  history:
+  - pattern_id: P-3
+    cue: Trailing 21-session volatility in the top third of history at as_of
+    rule: high_volatility_regime
+    direction: either
+    evaluated_on: '2026-10-05'
+    graduated: false
+    rejection_reasons:
+    - training lift 1.15 is below 2
+    - training p-value 0.21 is not below 0.05
+    - training lift interval starts at 0.85, which does not exclude 1 (no effect)
+    - holdout lift 1.15 is below 1.5
+    - holdout p-value 0.5 is not below 0.1, so the holdout result could be luck
+    train:
+      n_windows: 238
+      n_matches: 87
+      n_hits: 47
+      precision: 0.1387
+      base_rate: 0.1205
+      lift: 1.1507
+      p_value: 0.2097
+      ci_low: 0.8504
+      ci_high: 1.5501
+    holdout:
+      n_windows: 26
+      n_matches: 13
+      n_hits: 7
+      precision: 0.0802
+      base_rate: 0.0696
+      lift: 1.1533
+      p_value: 0.5
+      ci_low: 0.518
+      ci_high: 2.6336
+    holdout_design: matched, 1 control per shock
+candidates_tested: 3

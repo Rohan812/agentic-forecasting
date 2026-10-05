@@ -12,9 +12,10 @@ candidates:
   rejection_reasons:
   - holdout lift 0.00 is below 1.5
   - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
   holdout:
-    n_windows: 26
-    n_matches: 1
+    n_windows: 52
+    n_matches: 4
     n_hits: 0
     precision: 0.0
     base_rate: 0.0304
@@ -22,6 +23,30 @@ candidates:
     p_value: 1.0
     ci_low: 0.0
     ci_high: 0.0
+  history:
+  - pattern_id: exp03_hyperscaler_capex_q1
+    cue: Did any of the major hyperscalers (Microsoft, Alphabet, Amazon, or Meta)
+      announce an increase in their capital expenditure guidance specifically earmarked
+      for AI infrastructure or data centers?
+    rule: 'news label: labels/exp03_hyperscaler_capex_q1.yaml'
+    direction: up
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout lift 0.00 is below 1.5
+    - holdout p-value 1 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 0
+      precision: 0.0
+      base_rate: 0.0304
+      lift: 0.0
+      p_value: 1.0
+      ci_low: 0.0
+      ci_high: 0.0
+    holdout_design: matched, 1 control per shock
 - pattern_id: exp03_hyperscaler_capex_q2
   cue: Did any of the major hyperscalers report a reduction in their planned capital
     expenditures or express caution regarding the return on investment for their current
@@ -32,14 +57,39 @@ candidates:
   graduated: false
   stage: screened out on the holdout; training windows not labelled
   rejection_reasons:
-  - holdout p-value 0.269 is not below 0.1
+  - holdout p-value 0.135 is not below 0.1
+  holdout_design: matched, 3 controls per shock
   holdout:
-    n_windows: 26
+    n_windows: 52
     n_matches: 1
     n_hits: 1
     precision: 1.0
     base_rate: 0.0391
     lift: 25.5556
-    p_value: 0.2692
+    p_value: 0.1346
     ci_low: 25.5556
     ci_high: 25.5556
+  history:
+  - pattern_id: exp03_hyperscaler_capex_q2
+    cue: Did any of the major hyperscalers report a reduction in their planned capital
+      expenditures or express caution regarding the return on investment for their
+      current AI data center build-outs?
+    rule: 'news label: labels/exp03_hyperscaler_capex_q2.yaml'
+    direction: down
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout p-value 0.269 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 1
+      precision: 1.0
+      base_rate: 0.0391
+      lift: 25.5556
+      p_value: 0.2692
+      ci_low: 25.5556
+      ci_high: 25.5556
+    holdout_design: matched, 1 control per shock
+candidates_tested: 2

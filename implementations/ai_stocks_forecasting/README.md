@@ -637,71 +637,95 @@ agent-written text is escaped, so a `|` or a line break in a cue or a source exp
 
 ## Discovery loop (Phase 2)
 
-[`discovery.py`](discovery.py) is the engine the study agent will drive. A **candidate
-pattern** is a rule that answers yes or no for one window using only what was knowable at
-that window's `as_of`: prices up to that session, the earnings calendar (scheduled weeks in
-advance), or a fenced news label. `build_study_set` builds the windows once and
-deterministically (seed 0): 238 discovery windows from 2020 to January 2025 (119 shocks and
-their matched controls) and 26 holdout windows from February to December 2025 (13 shocks).
+[`discovery.py`](discovery.py) is the engine the study agent drives. A **candidate pattern**
+is a rule that answers yes or no for one window using only what was knowable at that window's
+`as_of`: prices up to that session, the earnings calendar (scheduled weeks in advance), or a
+fenced news label. `build_study_set` builds the windows deterministically (seed 0):
+
+- **Training:** 238 windows from 2020 to January 2025, 119 shocks each with one matched control.
+- **Holdout:** 52 windows from February to December 2025, 13 shocks each with **three** matched
+  controls (see [The holdout redesign](#the-holdout-redesign) for why).
+
 `evaluate_candidate` scores a rule on both splits through `signals.evaluate_pattern` and runs
 `signals.gate_reasons`. **The statistics are always computed by the engine**, so a study agent
 proposes rules and cannot hand in its own lift or p-value. A one-direction pattern is scored
 against the one-direction shock rate, with moves the other way counted as non-shocks, so it
-cannot borrow strength from moves it does not predict. `record_candidate` writes every
-candidate, passed or rejected, with its evidence and the gate's reasons, to
-`experiments/<id>/trail.yaml`. Each experiment folder also holds its `focus.yaml`: earnings,
-export controls, hyperscaler capex, competitor launches.
+cannot borrow strength from moves it does not predict. For rules that cost nothing to evaluate
+(calendar and price rules), `holdout="population"` scores the holdout on every 2025 session
+instead of the matched windows. `record_candidate` writes every candidate, passed or rejected,
+with its evidence, the gate's reasons and the holdout design used, to
+`experiments/<id>/trail.yaml`. Re-evaluating a candidate keeps its earlier results under
+`history`, and the trail counts `candidates_tested`. Each experiment folder also holds its
+`focus.yaml` and, for news experiments, its `questions.yaml`.
 
-**Experiment 01: earnings** (deterministic, no LLM). Nothing graduated.
+**News labels.** [`news_labels.py`](news_labels.py) answers a yes/no news question for each
+window from a web search fenced at that window's own cutoff (news published by `as_of`, looking
+back three days), and a lite-model judge reads the verified briefing. A pilot showed the fence
+holding: on 2022-08-31 it found the A100/H100 licence notice, and on 2023-10-16 it answered
+"no" because the October 2023 rule came a day later. [`news_study.py`](news_study.py) runs an
+experiment in three steps. A lite-model call proposes at most two questions from the focus
+file, saved to `questions.yaml` before any labelling and never edited after. Each question is
+then **screened on the holdout first**: the gate needs holdout lift ≥ 1.5 and holdout p < 0.10
+as well as the training criteria, so a question that fails these cannot graduate, and its 238
+training windows are never paid for. Only a survivor is labelled and scored in full.
 
-| Candidate | Train lift (p, 95% CI) | Holdout | Verdict |
-|---|---|---|---|
-| P-1: results after the close on `as_of` | 3.17 (p 0.030, 1.21–8.30) | 1 match, 1 hit, p 0.50 | fails: holdout p ≥ 0.10 |
-| P-2: same, up moves only | 2.51 (p 0.072, 0.80–7.42) | 1 match, 0 hits | fails: training p and CI, holdout |
-| P-3: high-volatility regime | 1.15 (p 0.21) | 13 matches, 7 hits | fails: lift, p, CI, holdout |
-
-Earnings clears every training criterion: 9 of the 11 earnings sessions in the discovery
-windows preceded a shock. The 2025 holdout cannot confirm it, because only one earnings
-reaction falls inside its 26 windows, and a single match can never reach p < 0.10. More
-broadly, 3 of 2025's 4 earnings reactions were not ±5% moves, so a full-population holdout
-would not confirm it either (1 in 4). The high-volatility regime has lift 1.15 against
-volatility-matched controls, as the control design intends: volatility alone does not pass for
-a shock predictor. Tests are in `implementations/tests/ai_stocks_forecasting/test_discovery.py`.
-
-**News experiments 02–04.** [`news_labels.py`](news_labels.py) answers a yes/no news question
-for each window from a web search fenced at that window's own cutoff (news published by
-`as_of`, looking back three days), then a lite-model judge reads the verified briefing. A
-pilot showed the fence holding: on 2022-08-31 it found the A100/H100 licence notice, and on
-2023-10-16 it answered "no" because the October 2023 rule came a day later.
-[`news_study.py`](news_study.py) runs an experiment in three steps. A lite-model call
-proposes at most two questions from the focus file, saved to `questions.yaml` before any
-labelling and never edited after. Each question is then **screened on the 26 holdout windows
-first**: the gate needs holdout lift ≥ 1.5 and holdout p < 0.10 as well as the training
-criteria, so a question that fails these cannot graduate and its 238 training windows are
-never paid for. Only a survivor is labelled and scored in full.
-
-Cost is capped in code. `CostMeter` prices every LLM call's tokens as it returns (Langfuse's
+**Cost is capped in code.** `CostMeter` prices every LLM call's tokens as it returns (Langfuse's
 per-token prices for the two proxy models) and adds $0.014 per search call for Google Search
-grounding, which those prices leave out. `BudgetLedger` keeps cumulative spend in
-`experiments/budget.yaml` against a $30 stage cap, labelling stops before any batch that
+grounding, which those prices leave out, so it errs high. `BudgetLedger` keeps cumulative spend
+in `experiments/budget.yaml` against a $30 stage cap, labelling stops before any batch that
 would cross the cap, and every label is cached under `experiments/labels/`. Measured cost is
-$0.016 per window, about $0.45 per holdout screen. Tests are in `test_news_labels.py`.
+$0.016 per window. Tests are in `test_discovery.py` and `test_news_labels.py`.
 
-| Question | Holdout (26 windows, 13 shocks) | Verdict |
-|---|---|---|
-| exp02 q1: new US export controls on AI chips or chip equipment for China | 1 match, 1 hit | screened out: p 0.50 |
-| exp02 q2: new US tariffs or licensing on semiconductor trade with China | 0 matches | screened out |
-| exp03 q1 (up): hyperscaler raises AI capex guidance | 1 match, 0 hits | screened out |
-| exp03 q2 (down): hyperscaler cuts capex or questions AI returns | 1 match, 1 hit | screened out: p 0.27 |
-| exp04 q1 (down): rival launches an AI accelerator | 1 match, 0 hits | screened out |
-| exp04 q2 (down): AI efficiency breakthrough cuts compute needs | 3 matches, 0 hits | screened out |
+### Results: nothing has graduated
 
-Nothing graduated, for **$2.84** in total. The results say more about the holdout than about
-the questions. With one control per shock, a pattern passes holdout p < 0.10 only if it
-precedes at least **4 of the 13** holdout shocks with no false alarm. Specific news events are
-rarer than that, so the holdout cannot confirm them however strong they are; the same limit
-stopped earnings in experiment 01. With three controls per shock the bar falls to 2 of 13
-(3 with one false alarm), at about $0.43 more per screen.
+Nine candidates tested across four experiments, **$6.34** spent of the $30 cap. Results on the
+current design (three controls per holdout shock; population holdout for calendar and price
+rules):
+
+| Candidate | Training (2020–Jan 2025) | Holdout (2025) | Why it did not pass |
+|---|---|---|---|
+| exp01 P-1: NVDA reports results after the close | lift 3.17, p 0.030, CI 1.21–8.30: **passes** | every session: 4 earnings reactions, 1 shock, p 0.25 | **Not confirmed after the cutoff.** 9 of 11 earnings sessions preceded a shock in 2020–24, but only 1 of 2025's 4 did |
+| exp01 P-2: same, up moves only | lift 2.51, p 0.072, CI 0.80–7.42 | every session: 4 matches, 0 hits | **No evidence**: fails training significance, and no 2025 earnings reaction was an up shock |
+| exp01 P-3: high-volatility regime | lift 1.15, p 0.21 | every session: lift 1.91, p 0.030 | **A volatility proxy, not a shock predictor.** Against volatility-matched controls it has no edge; the population holdout is not volatility-matched, which is why it looks good there |
+| exp02 q1: new US export controls on AI chips for China | not labelled | 4 matches, 1 shock: lift 1.00, p 0.70 | **No effect**: reported as often before calm days as before shocks |
+| exp02 q2: new US chip tariffs or licensing on China trade | not labelled | 0 matches | **Too rare to test**: never reported in a holdout window |
+| exp03 q1 (up): hyperscaler raises AI capex guidance | not labelled | 4 matches, 0 shocks | **No effect** |
+| exp03 q2 (down): hyperscaler cuts capex or questions AI returns | not labelled | 1 match, 1 shock: lift 25.6, p 0.135 | **Closest to passing, but one event.** Its only holdout match preceded a down shock; a single match cannot be significant |
+| exp04 q1 (down): rival launches an AI accelerator | not labelled | 3 matches, 0 shocks | **No effect** |
+| exp04 q2 (down): AI efficiency breakthrough cuts compute needs | not labelled | 5 matches, 0 shocks | **No effect**: the DeepSeek sell-off is the famous case, but it falls in the training period, and in 2025 such reports preceded only calm days |
+
+The failures fall into three groups:
+
+1. **No effect.** Five news questions match calm days at least as often as shocks. The holdout
+   is not too small for these: they show no edge at all.
+2. **One event.** Hyperscaler capex caution (down) matched once, and that once was a shock. A
+   single match cannot reach p < 0.10 under any design, so it stays a lead, not a pattern.
+3. **Real before the cutoff, not after.** Earnings passes every training criterion, but 2025
+   did not repeat it. This is what the post-cutoff holdout exists to catch: a pattern the
+   models may remember from 2020–24 has to hold on data they cannot have seen.
+
+### The holdout redesign
+
+The first screens (2026-10-05, kept under `history` in each trail) used one control per
+holdout shock, 26 windows. Under that design a pattern reaches holdout p < 0.10 only if it
+precedes **at least 4 of the 13** holdout shocks with no false alarm. That is a sample-size
+limit, not a strict threshold: no specific news event recurs that often, so the gate could not
+have confirmed one however real. In simulation, a pattern that triples the shock rate and
+appears before 3% of calm days passed the holdout criteria 3% of the time.
+
+The holdout now draws **three controls per shock** (`HOLDOUT_CONTROLS_PER_SHOCK`), which
+lowers the bar to 2 of 13 shocks (3 with one false alarm). The same simulated pattern passes
+22% of the time, while a pattern with no effect passes 2–6% of the time, still under the
+nominal 10%. Five controls add almost nothing (25%). No threshold changed, the training
+windows are identical (a test checks this), and the six news questions were re-screened
+exactly as first proposed. The change was made after seeing the first screens, which is why
+both results are kept. Even now, most real rare patterns will not be confirmed: the remaining
+fix is more post-cutoff shocks, from the protected 2026 window or from more tickers (Phase 4).
+
+**Multiple testing.** A candidate must pass training (p < 0.05 and a lift interval above 1)
+*and* the holdout, so a pattern with no effect gets through both with probability well under 1%.
+Nine candidates have been tested; the trail counts them so any future graduation can be judged
+against that number.
 
 ## Notebooks
 
