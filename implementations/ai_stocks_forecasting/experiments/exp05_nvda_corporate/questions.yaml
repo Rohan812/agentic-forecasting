@@ -1,0 +1,15 @@
+experiment_id: exp05_nvda_corporate
+proposed_on: '2026-10-06'
+questions:
+- question_id: exp05_nvda_corporate_q1
+  question: Was there a public announcement regarding a new product, hardware architecture,
+    or software platform launch by NVIDIA?
+  direction: up
+  rationale: Major product launches often generate significant market anticipation
+    and can lead to rapid re-evaluations of the company's growth trajectory.
+- question_id: exp05_nvda_corporate_q2
+  question: Were there reports of new regulatory investigations, antitrust probes,
+    or formal legal actions initiated against NVIDIA by government authorities?
+  direction: down
+  rationale: Regulatory scrutiny introduces uncertainty and potential operational
+    constraints that can trigger sharp negative sentiment among investors.

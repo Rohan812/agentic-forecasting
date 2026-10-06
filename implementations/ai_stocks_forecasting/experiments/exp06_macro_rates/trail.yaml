@@ -1,0 +1,47 @@
+experiment_id: exp06_macro_rates
+candidates:
+- pattern_id: exp06_macro_rates_q1
+  cue: Was there a release of a US Consumer Price Index (CPI) report that deviated
+    from consensus analyst expectations in the three days prior?
+  rule: 'news label: labels/exp06_macro_rates_q1.yaml'
+  direction: either
+  evaluated_on: '2026-10-06'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.00 is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 1
+    n_hits: 0
+    precision: 0.0
+    base_rate: 0.0696
+    lift: 0.0
+    p_value: 1.0
+    ci_low: 0.0
+    ci_high: 0.0
+- pattern_id: exp06_macro_rates_q2
+  cue: Did the Federal Reserve issue an official policy statement or did a voting
+    member provide public commentary signaling a shift in interest rate expectations?
+  rule: 'news label: labels/exp06_macro_rates_q2.yaml'
+  direction: either
+  evaluated_on: '2026-10-06'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.00 is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 7
+    n_hits: 0
+    precision: 0.0
+    base_rate: 0.0696
+    lift: 0.0
+    p_value: 1.0
+    ci_low: 0.0
+    ci_high: 0.0
+candidates_tested: 2

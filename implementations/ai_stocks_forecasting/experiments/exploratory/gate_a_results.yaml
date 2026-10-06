@@ -1,0 +1,204 @@
+gate: A
+candidates_tested: 15
+graduated: 1
+candidates:
+- pattern_id: P-1
+  experiment: exp01_earnings
+  cue: NVDA reports quarterly results after the close
+  rule: earnings_after_close
+  direction: either
+  train_lift: 3.165
+  train_p: 0.0297
+  train_matches: 11
+  train_precision: 0.3814
+  holdout_lift: 3.581
+  holdout_matches: 4
+  holdout_hits: 1
+  gate_a: true
+  reasons: []
+- pattern_id: P-2
+  experiment: exp01_earnings
+  cue: NVDA reports results after the close (up moves only)
+  rule: earnings_after_close
+  direction: up
+  train_lift: 2.508
+  train_p: 0.0715
+  train_matches: 11
+  train_precision: 0.1727
+  holdout_lift: 0.0
+  holdout_matches: 4
+  holdout_hits: 0
+  gate_a: false
+  reasons:
+  - holdout lift 0.00 is below 1.0
+- pattern_id: P-3
+  experiment: exp01_earnings
+  cue: Trailing volatility in the top third of history
+  rule: high_volatility_regime
+  direction: either
+  train_lift: 1.151
+  train_p: 0.2097
+  train_matches: 87
+  train_precision: 0.1387
+  holdout_lift: 1.909
+  holdout_matches: 60
+  holdout_hits: 8
+  gate_a: false
+  reasons:
+  - training lift 1.15 is below 1.5
+  - training p-value 0.21 is not below 0.1
+- pattern_id: exp02_export_controls_q1
+  experiment: exp02_export_controls
+  cue: Did the US Department of Commerce or the Bureau of Industry and Security announce
+    new or expanded export control restrictions specifically targeting high-performance
+    AI chips or semiconductor manufacturing equipment destined for China?
+  rule: news:exp02_export_controls_q1
+  direction: either
+  train_lift: 0.695
+  train_p: 0.8152
+  train_matches: 5
+  train_precision: 0.0837
+  holdout_lift: 1.0
+  holdout_matches: 4
+  holdout_hits: 1
+  gate_a: false
+  reasons:
+  - training lift 0.69 is below 1.5
+  - training p-value 0.815 is not below 0.1
+- pattern_id: exp02_export_controls_q2
+  experiment: exp02_export_controls
+  cue: Were there official reports of new US government trade policies or tariffs
+    that specifically impose additional duties or licensing requirements on the import
+    or export of semiconductor components involving Chinese entities?
+  rule: news:exp02_export_controls_q2
+  direction: either
+  holdout_lift: null
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp03_hyperscaler_capex_q1
+  experiment: exp03_hyperscaler_capex
+  cue: Did any of the major hyperscalers (Microsoft, Alphabet, Amazon, or Meta) announce
+    an increase in their capital expenditure guidance specifically earmarked for AI
+    infrastructure or data centers?
+  rule: news:exp03_hyperscaler_capex_q1
+  direction: up
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp03_hyperscaler_capex_q2
+  experiment: exp03_hyperscaler_capex
+  cue: Did any of the major hyperscalers report a reduction in their planned capital
+    expenditures or express caution regarding the return on investment for their current
+    AI data center build-outs?
+  rule: news:exp03_hyperscaler_capex_q2
+  direction: down
+  train_lift: 0.0
+  train_p: 1.0
+  train_matches: 1
+  train_precision: 0.0
+  holdout_lift: 25.556
+  holdout_matches: 1
+  holdout_hits: 1
+  gate_a: false
+  reasons:
+  - training matches 1 is below 5
+  - training lift 0.00 is below 1.5
+  - training p-value 1 is not below 0.1
+- pattern_id: exp04_competitor_launches_q1
+  experiment: exp04_competitor_launches
+  cue: Did a major technology company announce the release or deployment of a new
+    proprietary AI accelerator chip intended to compete with NVIDIA's data center
+    GPUs?
+  rule: news:exp04_competitor_launches_q1
+  direction: down
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp04_competitor_launches_q2
+  experiment: exp04_competitor_launches
+  cue: Was there a report of a significant breakthrough in AI model architecture or
+    software optimization that drastically reduces the computational power required
+    for training or inference?
+  rule: news:exp04_competitor_launches_q2
+  direction: down
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp05_nvda_corporate_q1
+  experiment: exp05_nvda_corporate
+  cue: Was there a public announcement regarding a new product, hardware architecture,
+    or software platform launch by NVIDIA?
+  rule: news:exp05_nvda_corporate_q1
+  direction: up
+  train_lift: 1.268
+  train_p: 0.2941
+  train_matches: 31
+  train_precision: 0.0873
+  holdout_lift: 1.267
+  holdout_matches: 7
+  holdout_hits: 1
+  gate_a: false
+  reasons:
+  - training lift 1.27 is below 1.5
+  - training p-value 0.294 is not below 0.1
+- pattern_id: exp05_nvda_corporate_q2
+  experiment: exp05_nvda_corporate
+  cue: Were there reports of new regulatory investigations, antitrust probes, or formal
+    legal actions initiated against NVIDIA by government authorities?
+  rule: news:exp05_nvda_corporate_q2
+  direction: down
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp06_macro_rates_q1
+  experiment: exp06_macro_rates
+  cue: Was there a release of a US Consumer Price Index (CPI) report that deviated
+    from consensus analyst expectations in the three days prior?
+  rule: news:exp06_macro_rates_q1
+  direction: either
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp06_macro_rates_q2
+  experiment: exp06_macro_rates
+  cue: Did the Federal Reserve issue an official policy statement or did a voting
+    member provide public commentary signaling a shift in interest rate expectations?
+  rule: news:exp06_macro_rates_q2
+  direction: either
+  holdout_lift: 0.0
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)
+- pattern_id: exp07_semis_peers_q1
+  experiment: exp07_semis_peers
+  cue: Did any of NVIDIA's key semiconductor peers (TSMC, ASML, AMD, Broadcom, or
+    Micron) release earnings, updated financial guidance, or monthly sales figures?
+  rule: news:exp07_semis_peers_q1
+  direction: either
+  train_lift: 0.773
+  train_p: 0.9003
+  train_matches: 49
+  train_precision: 0.0932
+  holdout_lift: 6.798
+  holdout_matches: 5
+  holdout_hits: 4
+  gate_a: false
+  reasons:
+  - training lift 0.77 is below 1.5
+  - training p-value 0.9 is not below 0.1
+- pattern_id: exp07_semis_peers_q2
+  experiment: exp07_semis_peers
+  cue: Were there any reports concerning AI-chip supply chain constraints, such as
+    packaging capacity bottlenecks or production delays for critical components?
+  rule: news:exp07_semis_peers_q2
+  direction: either
+  holdout_lift: 0.963
+  gate_a: false
+  reasons:
+  - training not labelled (holdout lift below 1.0, so it cannot pass Gate A)

@@ -1,0 +1,6 @@
+experiment_id: exp03_hyperscaler_capex
+focus: >-
+  Hyperscaler capital spending. Do earnings or guidance from Microsoft, Alphabet,
+  Amazon or Meta that change AI data-centre capex expectations, released in the
+  days before as_of, predict a ±5% NVDA move?
+data: fenced news labels per window (cutoff = the window's as_of)

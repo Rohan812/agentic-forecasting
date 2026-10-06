@@ -15,11 +15,11 @@ the agent proposes. It tells you what a term means and why it can move the stock
 |---|---|---|
 | **Data Center segment** | NVDA's reporting segment for accelerators, networking, and systems sold for servers. It overtook Gaming as the main revenue line in 2023. | This is the segment the market prices. Guidance for it is the most important number in an earnings release. |
 | **Fiscal calendar** | NVDA's fiscal year ends in late January. For example, FY2025 ran from February 2024 to January 2025. | Headlines about "Q3 FY25" refer to calendar Aug–Oct 2024. Mixing the two up puts events in the wrong window. |
-| **Earnings reaction session** | NVDA reports after the US close, in late Feb, May, Aug, and Nov. The price reacts in the next session. | In 2020–2024, 8 of 20 reaction sessions moved ≥7%, against about 4% of sessions overall. This is the biggest predictable source of shocks. See `shock_anchors.py`. |
+| **Earnings reaction session** | NVDA reports after the US close, in late Feb, May, Aug, and Nov. The price reacts in the next session. | In 2020–2024, 10 of 20 reaction sessions moved ≥5%, against 12% of sessions overall. This is the biggest predictable source of shocks. See `shock_anchors.py`. |
 | **Guidance / beat-and-raise** | Management's revenue forecast for next quarter. "Beat-and-raise" means the quarter beat estimates and guidance went up. | The stock reacts to guidance compared with what investors expected, not to the reported quarter. A beat with weak guidance can still fall. |
 | **Gross margin** | Revenue minus cost of goods, as a share of revenue. | It falls during a new product ramp. The market reads a margin drop as either execution risk or a pricing signal. |
 | **Split-adjusted price** | Past prices divided by later split ratios: 4:1 in July 2021 and 10:1 in June 2024. | Every series here is adjusted. Raw prices show fake drops of −75% and −90% on split dates. |
-| **Shock** (this project) | A move of \|1-session return\| ≥ 7% in either direction. See `paths.SHOCK_THRESHOLD`. | The target event for the shock task and the discovery loop. |
+| **Shock** (this project) | A move of \|1-session return\| ≥ 5% in either direction. See `paths.SHOCK_THRESHOLD`. It was 7% until the post-cutoff holdout turned out to hold only 4 events at that level (13 at 5%). | The target event for the shock task and the discovery loop. |
 
 ## Demand: the AI capex cycle
 

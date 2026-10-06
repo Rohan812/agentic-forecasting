@@ -1,0 +1,97 @@
+experiment_id: exp02_export_controls
+candidates:
+- pattern_id: exp02_export_controls_q1
+  cue: Did the US Department of Commerce or the Bureau of Industry and Security announce
+    new or expanded export control restrictions specifically targeting high-performance
+    AI chips or semiconductor manufacturing equipment destined for China?
+  rule: 'news label: labels/exp02_export_controls_q1.yaml'
+  direction: either
+  evaluated_on: '2026-10-05'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 1.00 is below 1.5
+  - holdout p-value 0.696 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 4
+    n_hits: 1
+    precision: 0.0696
+    base_rate: 0.0696
+    lift: 1.0
+    p_value: 0.6962
+    ci_low: 0.0
+    ci_high: 14.375
+  history:
+  - pattern_id: exp02_export_controls_q1
+    cue: Did the US Department of Commerce or the Bureau of Industry and Security
+      announce new or expanded export control restrictions specifically targeting
+      high-performance AI chips or semiconductor manufacturing equipment destined
+      for China?
+    rule: 'news label: labels/exp02_export_controls_q1.yaml'
+    direction: either
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout p-value 0.5 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 1
+      precision: 1.0
+      base_rate: 0.0696
+      lift: 14.375
+      p_value: 0.5
+      ci_low: 14.375
+      ci_high: 14.375
+    holdout_design: matched, 1 control per shock
+- pattern_id: exp02_export_controls_q2
+  cue: Were there official reports of new US government trade policies or tariffs
+    that specifically impose additional duties or licensing requirements on the import
+    or export of semiconductor components involving Chinese entities?
+  rule: 'news label: labels/exp02_export_controls_q2.yaml'
+  direction: either
+  evaluated_on: '2026-10-05'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift nan is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 0
+    n_hits: 0
+    precision: .nan
+    base_rate: 0.0696
+    lift: .nan
+    p_value: 1.0
+    ci_low: .nan
+    ci_high: .nan
+  history:
+  - pattern_id: exp02_export_controls_q2
+    cue: Were there official reports of new US government trade policies or tariffs
+      that specifically impose additional duties or licensing requirements on the
+      import or export of semiconductor components involving Chinese entities?
+    rule: 'news label: labels/exp02_export_controls_q2.yaml'
+    direction: either
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout lift nan is below 1.5
+    - holdout p-value 1 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 0
+      n_hits: 0
+      precision: .nan
+      base_rate: 0.0696
+      lift: .nan
+      p_value: 1.0
+      ci_low: .nan
+      ci_high: .nan
+    holdout_design: matched, 1 control per shock
+candidates_tested: 2

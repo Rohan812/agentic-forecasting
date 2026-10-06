@@ -1,24 +1,39 @@
-"""Task specifications and agent predictor wiring for the WTI experiment.
+"""Task specifications and agent predictor wiring for the NVDA experiment.
 
 Implements the "one agent, three tasks" pattern: a single :class:`AgentConfig`
 identity with task-specific prompt builders and output schemas supplied via
-:class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.
+:class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.  The
+trajectory and shock tasks are NVDA; the scenario task is still WTI.
+
+**Which session the shock task asks about.**  ``YFinanceDailyAdapter`` releases
+each close one business day after the session, so a context at ``as_of`` ends
+at the *previous* session's close.  The shock question, like
+:class:`~ai_stocks_forecasting.signals.Window`, is about the session after
+``as_of``: its close against the ``as_of`` close, which the agent has not seen.
+News fenced at ``as_of`` may describe the ``as_of`` session, so the payload
+says so rather than let the agent assume its price history is current.  See
+:func:`nvda_shock_task`.
 """
 
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, ClassVar, Literal
 
 import pandas as pd
 from ai_stocks_forecasting.analyst_agent import (
-    build_wti_multitask_news_config,
+    build_nvda_multitask_news_config,
     compress_history,
 )
+from ai_stocks_forecasting.data import NVDA_SERIES_ID
 from ai_stocks_forecasting.paths import SHOCK_HORIZON, SHOCK_THRESHOLD
+from aieng.forecasting.data import DataService
+from aieng.forecasting.data.adapters.base import BaseAdapter
 from aieng.forecasting.data.context import ForecastContext
+from aieng.forecasting.data.models import SeriesMetadata
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES, BinaryForecast, Prediction
+from aieng.forecasting.evaluation.predictor import Predictor
 from aieng.forecasting.evaluation.task import ForecastingTask
 from aieng.forecasting.methods.agentic import (
     AgentPredictor,
@@ -34,7 +49,7 @@ from pydantic import BaseModel, Field
 TaskKind = Literal["trajectory", "shock", "scenario"]
 
 
-class WtiMultitaskPromptBuilder(BaseModel):
+class NvdaMultitaskPromptBuilder(BaseModel):
     """Prompt builder for task-spec-driven agent calls (NB3).
 
     The system instruction is task-agnostic; the ask lives in ``task_spec``.
@@ -44,11 +59,14 @@ class WtiMultitaskPromptBuilder(BaseModel):
     """
 
     task_spec: str
+    price_series_id: str = NVDA_SERIES_ID
+    """Series the price history is read from.  Not ``task.target_series_id``:
+    the shock task's target is the 0/1 indicator series, not the price."""
 
     model_config = {"extra": "forbid"}
 
     def __call__(self, *, task: ForecastingTask, context: ForecastContext) -> str:
-        df = context.get_series(task.target_series_id)
+        df = context.get_series(self.price_series_id)
         last_row = df.iloc[-1]
         payload: dict[str, Any] = {
             "task": task.task_id,
@@ -57,6 +75,7 @@ class WtiMultitaskPromptBuilder(BaseModel):
             "horizons": list(task.horizons),
             "standard_quantiles": list(STANDARD_QUANTILES),
             "origin_price_usd": float(last_row["value"]),
+            "last_close_date": str(pd.Timestamp(last_row["timestamp"]).date()),
             "target_history_csv": compress_history(df),
         }
         return json.dumps(payload, indent=2)
@@ -168,29 +187,79 @@ TASK_TRAJECTORY_SPEC = (
     "Required JSON format:\n" + ContinuousAgentForecastOutput.prompt_schema_json()
 )
 
+_SHOCK_TIMING_LAGGED = (
+    "Timing: the price history ends at `last_close_date`, normally the session "
+    "BEFORE `as_of` (each close is published the next day). So you have not seen "
+    "the `as_of` session's own close or return; `origin_price_usd` is the "
+    "`last_close_date` close. Retrieved news may describe the `as_of` session — "
+    "use it to judge whether that session was itself a large move. Do not assume "
+    "it was quiet because the history does not show it.\n\n"
+)
+"""Timing paragraph for origins at midnight, where the ``as_of`` close is not yet published."""
+
+_SHOCK_TIMING_AFTER_CLOSE = (
+    "Timing: the forecast is made after the `as_of` close. The price history ends "
+    "at `last_close_date`, which is `as_of` itself, and `origin_price_usd` is that "
+    "close, so the history shows how the `as_of` session traded. Retrieved news "
+    "covers only what was published before `as_of`; for the `as_of` session's own "
+    "move, the price history is the authority.\n\n"
+)
+"""Timing paragraph for after-close origins (:func:`build_nvda_shock_predictor_after_close`)."""
+
+_SHOCK_SEARCH_TOPICS = (
+    "Research before answering. Call `search_web` once per topic below, always "
+    "with `cutoff_date` equal to `as_of`:\n"
+    '  1. `search_web(query="NVIDIA stock move on <as_of> and what drove it", '
+    "cutoff_date=<as_of>)` — the session your price history does not show.\n"
+    '  2. `search_web(query="NVIDIA next earnings date and events scheduled for the '
+    "next trading session: US CPI, jobs report, FOMC, export-control rulings, major "
+    'product or hyperscaler earnings", cutoff_date=<as_of>)` — dated catalysts '
+    "inside the horizon.\n"
+    '  3. `search_web(query="breaking news on AI chip export controls, tariffs, '
+    'hyperscaler AI capex, or AMD and custom-silicon competition affecting NVIDIA", '
+    "cutoff_date=<as_of>)` — unscheduled catalysts.\n"
+    "Each search also runs a leakage-verifier call, so keep to these three unless "
+    "a result names a specific event inside the horizon that needs one follow-up. "
+    "If a result begins with `[SEARCH_VERIFICATION_FAILED]`, treat that topic as "
+    "unknown and do not fill it from memory.\n\n"
+)
+"""The three fenced search topics in :data:`TASK_SHOCK_SPEC`.
+
+Without them the agent ran one search per origin and stayed on the volatility
+anchor (``nvda_shock_smoke``).  Kept as its own constant so the no-topics arm of
+:func:`build_nvda_shock_predictor` is exactly the earlier prompt.
+
+They did not help on ``nvda_shock_fresh``, and topic 1 cannot work: the harness
+fences ``search_web`` to information published *strictly before* the ``as_of``
+date, so asking how NVDA moved *on* ``as_of`` asks for fenced-out news.  It came
+back empty or wrong.  The after-close predictor reads that move from prices instead.
+"""
+
 TASK_SHOCK_SPEC = (
     f"Estimate P(shock) — the probability that NVDA's close {SHOCK_HORIZON} "
     f"trading day(s) after `as_of` differs from the `as_of` close by at least "
     f"{SHOCK_THRESHOLD:g}% in EITHER direction (|return| >= {SHOCK_THRESHOLD:g}%).\n\n"
-    "This is a two-sided magnitude question: a large drop counts exactly like a "
+    + _SHOCK_TIMING_LAGGED
+    + "This is a two-sided magnitude question: a large drop counts exactly like a "
     "large rally. Report which way you lean in `direction_bias`, but the "
     "probability is for a move of either sign.\n\n"
     "Calibration anchors (NVDA, 2020-2024, share of sessions with a move this large;\n"
     "trailing vol = std of daily returns over the previous 21 sessions):\n"
-    "  - Any session, unconditional                     -> ~4%\n"
-    "  - Calm tape (trailing vol < 2.5%), no earnings    -> ~1%\n"
-    "  - Normal tape (trailing vol 2.5-3.5%), no earnings -> ~4%\n"
-    "  - Elevated vol (trailing vol > 3.5%), no earnings -> ~6%\n"
-    "  - Session right after a >=7% move                -> ~8%\n"
+    "  - Any session, unconditional                     -> ~12%\n"
+    "  - Calm tape (trailing vol < 2.5%), no earnings    -> ~4%\n"
+    "  - Normal tape (trailing vol 2.5-3.5%), no earnings -> ~12%\n"
+    "  - Elevated vol (trailing vol > 3.5%), no earnings -> ~18%\n"
+    f"  - Session right after a >={SHOCK_THRESHOLD:g}% move                -> ~22%\n"
     "  - Next session is the reaction to NVDA's own quarterly results "
-    "(reported after the close) -> ~40%\n\n"
-    "Start from the anchor that matches the price history and the calendar, then "
+    "(reported after the close) -> ~50%\n\n"
+    + _SHOCK_SEARCH_TOPICS
+    + "Start from the anchor that matches the price history and the calendar, then "
     "move away from it only for a specific, dated catalyst inside the horizon "
     "(e.g. an announced export-control ruling, a hyperscaler capex guidance "
     "change, a major competitor launch). Generic AI enthusiasm or a strong "
-    "trend is not a catalyst. Probabilities above ~15% outside an earnings "
+    "trend is not a catalyst. Probabilities above ~30% outside an earnings "
     "reaction need a named event. Upside shocks were more common than downside "
-    "(31 up vs 21 down).\n\n"
+    "(87 up vs 64 down).\n\n"
     "If a `set_model_response` tool is available, call it with your complete "
     "JSON as `json_response`. Otherwise return the JSON directly as plain text.\n\n"
     "Required JSON format:\n" + DiscreteAgentForecastOutput.prompt_schema_json()
@@ -201,6 +270,12 @@ The anchors come from :func:`ai_stocks_forecasting.shock_anchors.anchor_table`
 over 2020-2024 at the committed ``SHOCK_THRESHOLD`` / ``SHOCK_HORIZON``; re-run
 that module and update these numbers if either constant changes.
 """
+
+TASK_SHOCK_SPEC_NO_TOPICS = TASK_SHOCK_SPEC.replace(_SHOCK_SEARCH_TOPICS, "")
+""":data:`TASK_SHOCK_SPEC` as it was before the search topics: the ablation arm."""
+
+TASK_SHOCK_SPEC_AFTER_CLOSE = TASK_SHOCK_SPEC_NO_TOPICS.replace(_SHOCK_TIMING_LAGGED, _SHOCK_TIMING_AFTER_CLOSE)
+"""The no-topics shock spec for after-close origins, where the history includes the ``as_of`` close."""
 
 TASK_SCENARIOS_SPEC = (
     "Identify the three scenarios that oil market analysts and experts are most "
@@ -234,14 +309,14 @@ TASK_OUTPUT_SCHEMAS: dict[TaskKind, type[AgentForecastOutput]] = {
 }
 
 
-def build_wti_news_predictor(
+def build_nvda_news_predictor(
     task: TaskKind,
     model: str = LITE_MODEL,
 ) -> AgentPredictor:
     """Build a news-grounded agent predictor for the given task kind.
 
     All three task kinds share the same multitask news identity
-    (:func:`~ai_stocks_forecasting.analyst_agent.build_wti_multitask_news_config`);
+    (:func:`~ai_stocks_forecasting.analyst_agent.build_nvda_multitask_news_config`);
     only the user-payload ``task_spec`` and output schema change.
 
     Parameters
@@ -255,34 +330,257 @@ def build_wti_news_predictor(
         advanced model (``"gemini-3.5-flash"``) when more capability is needed.
     """
     return AgentPredictor(
-        agent_config=build_wti_multitask_news_config(model=model),
-        prompt_builder=WtiMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
+        agent_config=build_nvda_multitask_news_config(model=model),
+        prompt_builder=NvdaMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
         output_schema=TASK_OUTPUT_SCHEMAS[task],
     )
 
 
-def build_wti_agent_predictor_for_task(config: AgentConfig, task: TaskKind) -> AgentPredictor:
-    """Wire any WTI agent config to a task-specific predictor.
+def build_nvda_shock_predictor(model: str = LITE_MODEL, *, search_topics: bool = True) -> AgentPredictor:
+    """Build the news-grounded shock predictor, with or without the named search topics.
+
+    ``search_topics=False`` is the ablation arm: the same identity and payload
+    with :data:`TASK_SHOCK_SPEC_NO_TOPICS`.  Its agent is named
+    ``nvda_analyst_multitask_notopics`` so the two arms get different predictor
+    ids and never share a cache file.
+    """
+    config = build_nvda_multitask_news_config(model=model)
+    if not search_topics:
+        config = config.model_copy(update={"name": f"{config.name}_notopics"})
+    return AgentPredictor(
+        agent_config=config,
+        prompt_builder=NvdaMultitaskPromptBuilder(
+            task_spec=TASK_SHOCK_SPEC if search_topics else TASK_SHOCK_SPEC_NO_TOPICS
+        ),
+        output_schema=DiscreteAgentForecastOutput,
+    )
+
+
+def build_nvda_shock_predictor_after_close(model: str = LITE_MODEL) -> AgentPredictor:
+    """Build the shock predictor for after-close origins: it sees the ``as_of`` close.
+
+    Reads price from :data:`NVDA_CLOSE_SERIES_ID` with
+    :data:`TASK_SHOCK_SPEC_AFTER_CLOSE` (no search topics).  Named
+    ``nvda_analyst_multitask_close``.  Score it only at :func:`after_close`
+    origins, wrapped with every other arm in :class:`SessionDatePredictor`.
+    """
+    config = build_nvda_multitask_news_config(model=model)
+    return AgentPredictor(
+        agent_config=config.model_copy(update={"name": f"{config.name}_close"}),
+        prompt_builder=NvdaMultitaskPromptBuilder(
+            task_spec=TASK_SHOCK_SPEC_AFTER_CLOSE, price_series_id=NVDA_CLOSE_SERIES_ID
+        ),
+        output_schema=DiscreteAgentForecastOutput,
+    )
+
+
+class SessionDatePredictor(Predictor):
+    """Pin each prediction's ``forecast_date`` to midnight of its session, so after-close origins resolve.
+
+    Predictors stamp ``forecast_date = as_of + h`` business days.  From an
+    :func:`after_close` origin that is 20:00 on the target session, and the
+    harness matches the outcome by exact timestamp, so the prediction goes
+    unscored.  If every origin is lost the harness raises; if only some are
+    (a spec mixing origin times), they vanish silently.  Wrap **every**
+    predictor in a comparison, or none.
+    """
+
+    def __init__(self, inner: Predictor) -> None:
+        self._inner = inner
+
+    @property
+    def predictor_id(self) -> str:
+        """The wrapped predictor's id: this changes no forecast, only its date label."""
+        return self._inner.predictor_id
+
+    def predict(self, task: ForecastingTask, context: ForecastContext) -> list[Prediction]:
+        """Delegate, then normalise each ``forecast_date`` to the session date."""
+        return [
+            p.model_copy(update={"forecast_date": pd.Timestamp(p.forecast_date).normalize().to_pydatetime()})
+            for p in self._inner.predict(task, context)
+        ]
+
+
+def build_nvda_agent_predictor_for_task(config: AgentConfig, task: TaskKind) -> AgentPredictor:
+    """Wire any NVDA agent config to a task-specific predictor.
 
     Uses the multitask prompt builder for every task kind so the ask rides in
     ``task_spec`` rather than in the system instruction.
     """
     return AgentPredictor(
         agent_config=config,
-        prompt_builder=WtiMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
+        prompt_builder=NvdaMultitaskPromptBuilder(task_spec=TASK_SPECS[task]),
         output_schema=TASK_OUTPUT_SCHEMAS[task],
     )
 
 
+SHOCK_TASK_ID = "nvda_shock_1d"
+
+NVDA_SHOCK_SERIES_ID = "nvda_shock_1d"
+"""0/1 series: 1 on a session whose close moved at least ``SHOCK_THRESHOLD``% from the prior close.
+
+The shock task's target.  The harness resolves a binary forecast by reading
+the target series at ``forecast_date``, so the outcome has to exist as a series.
+"""
+
+
+def shock_indicator_frame(prices: pd.DataFrame) -> pd.DataFrame:
+    """Turn a canonical price frame into the 0/1 shock series, one row per session.
+
+    Uses the same definition as :func:`~ai_stocks_forecasting.signals.flag_shock_windows`
+    before cluster merging: a simple ``SHOCK_HORIZON``-session return of at least
+    ``SHOCK_THRESHOLD`` percent in absolute value.  Each row keeps the price
+    row's ``released_at``, since a session's outcome is known exactly when its
+    close is.  The first ``SHOCK_HORIZON`` sessions have no prior close and are
+    dropped rather than labelled 0.
+
+    Parameters
+    ----------
+    prices : pd.DataFrame
+        Canonical ``(timestamp, value, released_at)`` price frame.
+
+    Returns
+    -------
+    pd.DataFrame
+        Canonical frame with ``value`` in ``{0.0, 1.0}``.
+    """
+    frame = prices.sort_values("timestamp").reset_index(drop=True)
+    returns_pct = frame["value"].astype(float).pct_change(SHOCK_HORIZON) * 100.0
+    out = frame.loc[returns_pct.notna(), ["timestamp", "released_at"]].copy()
+    out["value"] = (returns_pct[returns_pct.notna()].abs() >= SHOCK_THRESHOLD).astype(float)
+    return out[["timestamp", "value", "released_at"]].reset_index(drop=True)
+
+
+MARKET_CLOSE = pd.Timedelta(hours=16)
+"""NYSE close, as an offset from midnight in exchange time.  Timestamps here are naive exchange time."""
+
+AFTER_CLOSE = pd.Timedelta(hours=20)
+"""Time of day for after-close shock origins: past the close, before the next session."""
+
+NVDA_CLOSE_SERIES_ID = "nvda_stock_price_at_close"
+"""The NVDA adjusted close, released at :data:`MARKET_CLOSE` on its own session.
+
+The same values as ``nvda_stock_price``, which is released one business day
+late.  An origin at :data:`AFTER_CLOSE` sees that session's close here.  The
+news fence does not move: ``search_web`` still admits only what was published
+before the ``as_of`` date.
+"""
+
+
+def after_close(day: pd.Timestamp) -> pd.Timestamp:
+    """Return the after-close origin for a session date."""
+    return pd.Timestamp(day).normalize() + AFTER_CLOSE
+
+
+class _ReleasedAtCloseAdapter(BaseAdapter):
+    """Re-stamp a registered daily price series so each close is released at the close."""
+
+    def __init__(self, service: DataService, price_series_id: str) -> None:
+        self._service = service
+        self._price_series_id = price_series_id
+
+    def fetch(self) -> pd.DataFrame:
+        now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+        frame = self._service.get_series(self._price_series_id, as_of=now)
+        frame["released_at"] = pd.to_datetime(frame["timestamp"]).dt.normalize() + MARKET_CLOSE
+        return frame[["timestamp", "value", "released_at"]]
+
+
+class _ShockIndicatorAdapter(BaseAdapter):
+    """Derive the shock series from the price series already registered on a service."""
+
+    def __init__(self, service: DataService, price_series_id: str) -> None:
+        self._service = service
+        self._price_series_id = price_series_id
+
+    def fetch(self) -> pd.DataFrame:
+        now = datetime.now(tz=timezone.utc).replace(tzinfo=None)
+        return shock_indicator_frame(self._service.get_series(self._price_series_id, as_of=now))
+
+
+def register_shock_series(service: DataService, price_series_id: str = NVDA_SERIES_ID) -> DataService:
+    """Register :data:`NVDA_CLOSE_SERIES_ID` and :data:`NVDA_SHOCK_SERIES_ID` on a service holding the NVDA price.
+
+    Both are released at the session's close: a session's outcome is known
+    exactly when its close is.  Kept here rather than in ``data.py`` so the
+    price service stays a plain price service; call it on the output of
+    :func:`~ai_stocks_forecasting.data.build_nvda_service`.  Returns the same
+    service for chaining.
+    """
+    service.register(
+        NVDA_CLOSE_SERIES_ID,
+        _ReleasedAtCloseAdapter(service, price_series_id),
+        SeriesMetadata(
+            series_id=NVDA_CLOSE_SERIES_ID,
+            description="NVIDIA daily adjusted close, released at the 16:00 close of its own session",
+            source="derived",
+            units="USD/share",
+            frequency="B",
+        ),
+    )
+    service.register(
+        NVDA_SHOCK_SERIES_ID,
+        _ShockIndicatorAdapter(service, NVDA_CLOSE_SERIES_ID),
+        SeriesMetadata(
+            series_id=NVDA_SHOCK_SERIES_ID,
+            description=f"1 if NVDA's {SHOCK_HORIZON}-session close-to-close move was >= {SHOCK_THRESHOLD:g}%",
+            source="derived",
+            units="indicator",
+            frequency="B",
+        ),
+    )
+    return service
+
+
+def nvda_shock_task() -> ForecastingTask:
+    """Return the binary shock task the shock predictor answers: one horizon of ``SHOCK_HORIZON`` sessions.
+
+    ``DiscreteAgentForecastOutput`` requires exactly one horizon and stamps
+    ``forecast_date = as_of + SHOCK_HORIZON`` business days: the session whose
+    move against the ``as_of`` close decides the outcome, the same event
+    :func:`~ai_stocks_forecasting.signals.flag_shock_windows` labels.  That is
+    pandas ``BDay``, not the NYSE calendar: an origin whose next business day
+    is a market holiday has no session to resolve against, so choose shock
+    origins with a trading day after them.
+
+    The target is :data:`NVDA_SHOCK_SERIES_ID`, so a service must have it
+    registered (:func:`register_shock_series`) before this task is scored.
+    """
+    return ForecastingTask(
+        task_id=SHOCK_TASK_ID,
+        target_series_id=NVDA_SHOCK_SERIES_ID,
+        horizons=[SHOCK_HORIZON],
+        frequency="B",
+        payload_type="binary",
+        description=(
+            f"P(|NVDA close-to-close return| >= {SHOCK_THRESHOLD:g}%) over the {SHOCK_HORIZON} session(s) after as_of"
+        ),
+    )
+
+
 __all__ = [
+    "AFTER_CLOSE",
+    "MARKET_CLOSE",
+    "NVDA_CLOSE_SERIES_ID",
+    "NVDA_SHOCK_SERIES_ID",
+    "SHOCK_TASK_ID",
     "TASK_SCENARIOS_SPEC",
     "TASK_SHOCK_SPEC",
+    "TASK_SHOCK_SPEC_AFTER_CLOSE",
+    "TASK_SHOCK_SPEC_NO_TOPICS",
     "TASK_SPECS",
     "TASK_TRAJECTORY_SPEC",
     "ScenarioAgentForecastOutput",
     "ScenarioCard",
+    "SessionDatePredictor",
     "TaskKind",
-    "WtiMultitaskPromptBuilder",
-    "build_wti_agent_predictor_for_task",
-    "build_wti_news_predictor",
+    "NvdaMultitaskPromptBuilder",
+    "build_nvda_agent_predictor_for_task",
+    "build_nvda_news_predictor",
+    "after_close",
+    "build_nvda_shock_predictor",
+    "build_nvda_shock_predictor_after_close",
+    "nvda_shock_task",
+    "register_shock_series",
+    "shock_indicator_frame",
 ]

@@ -27,15 +27,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from ai_stocks_forecasting.paths import SHOCK_THRESHOLD
 from aieng.forecasting.data.adapters.yfinance import YFinanceDailyAdapter
 
 
 CACHE_DIR = Path("data/yfinance")
 TICKER = "NVDA"
 HISTORY_START = "1999-01-01"  # NVDA listed 1999-01-22; ask for the full history.
-
-SHOCK_THRESHOLD_PCT = 7.0
-"""Daily move that counts as a shock, in percent (see ai_stocks_forecasting.paths)."""
 
 
 def main() -> None:
@@ -50,12 +48,12 @@ def main() -> None:
     # Shock counts are the headline property of this series for the discovery
     # loop, so surface them here rather than making everyone recompute them.
     returns = df.set_index("timestamp")["value"].pct_change()
-    threshold = SHOCK_THRESHOLD_PCT / 100.0
+    threshold = SHOCK_THRESHOLD / 100.0
     recent = returns.loc["2020-01-01":]
     up = int((recent >= threshold).sum())
     down = int((recent <= -threshold).sum())
     print(
-        f"  Shocks since 2020 at ±{SHOCK_THRESHOLD_PCT:.0f}% in 1 day: "
+        f"  Shocks since 2020 at ±{SHOCK_THRESHOLD:g}% in 1 day: "
         f"{up + down} ({up} up / {down} down, {100 * (up + down) / recent.notna().sum():.1f}% of days)"
     )
     print("Done.")

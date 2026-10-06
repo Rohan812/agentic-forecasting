@@ -1,0 +1,300 @@
+spec:
+  task:
+    task_id: nvda_shock_1d
+    target_series_id: nvda_shock_1d
+    horizons:
+    - 1
+    frequency: B
+    description: P(|NVDA close-to-close return| >= 5%) over the 1 session(s) after
+      as_of
+    payload_type: binary
+    categories: null
+    resolution_fn: observed_value_at_resolution_timestamp
+  start: '2025-02-04T00:00:00'
+  end: '2025-12-01T00:00:00'
+  stride: 1
+  origin_dates:
+  - '2025-02-04T00:00:00'
+  - '2025-02-07T00:00:00'
+  - '2025-03-05T00:00:00'
+  - '2025-03-13T00:00:00'
+  - '2025-03-18T00:00:00'
+  - '2025-04-08T00:00:00'
+  - '2025-05-16T00:00:00'
+  - '2025-06-02T00:00:00'
+  - '2025-11-07T00:00:00'
+  - '2025-12-01T00:00:00'
+  warmup: 250
+  description: 'NVDA shock smoke: 5 holdout shocks + 5 matched controls'
+predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+predictions:
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:54:45.472276'
+  as_of: '2025-02-04T00:00:00'
+  forecast_date: '2025-02-05T00:00:00'
+  payload:
+    probability: 0.18
+  metadata:
+    rationale: NVDA's recent price action has been characterized by high volatility,
+      evidenced by the sharp drop on Jan 27 and continued fluctuations in early February.
+      The stock's trailing volatility is currently elevated as it digests recent macro
+      noise and sector-specific concerns regarding Blackwell production and hyperscaler
+      spending shifts. While there is no specific 'shock' catalyst (like an earnings
+      report) for the next session, the market remains reactive to news about semiconductor
+      supply chains and broader AI demand sentiment. The probability reflects an elevated-volatility
+      regime (anchored at 18%) given the recent pattern of sharp intraday and overnight
+      price swings.
+    direction_bias: neutral
+    key_signals:
+    - High realized trailing volatility (>3.5% range)
+    - Recent large price swings suggesting sensitive market positioning
+    - Persistent focus on Blackwell supply chain/CoWoS capacity
+    - Absence of a specific binary catalyst in the immediate 1-day horizon
+    confidence: medium
+    langfuse_trace_id: b85adf0583ae1d7b10079468b56ccc99
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/b85adf0583ae1d7b10079468b56ccc99
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:54:55.800710'
+  as_of: '2025-02-07T00:00:00'
+  forecast_date: '2025-02-10T00:00:00'
+  payload:
+    probability: 0.14
+  metadata:
+    rationale: As of Feb 7, 2025, NVDA is coming off a period of elevated volatility
+      following a sharp correction in late January and a subsequent recovery in early
+      February. The trailing 21-session volatility remains elevated due to the large
+      swings in the second half of January. While there is no major company-specific
+      earnings catalyst or event scheduled for the next session, the stock remains
+      in a high-beta regime sensitive to hyperscaler capex narratives and broader
+      AI sentiment. Given the recent price action (including a ~3% move on Feb 6),
+      the probability of a 5%+ move is slightly above the unconditional 12% anchor,
+      reflecting this ongoing volatility profile, though not high enough to warrant
+      an 'elevated vol' classification of 18%.
+    direction_bias: neutral
+    key_signals:
+    - Elevated trailing 21-day volatility following late-January price swings
+    - High sensitivity to hyperscaler capex and Blackwell production ramp news
+    - Absence of immediate earnings-related catalyst for the next session
+    confidence: medium
+    langfuse_trace_id: 86653a2837fec7709b88694a1ee29bc5
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/86653a2837fec7709b88694a1ee29bc5
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:05.653761'
+  as_of: '2025-03-05T00:00:00'
+  forecast_date: '2025-03-06T00:00:00'
+  payload:
+    probability: 0.14
+  metadata:
+    rationale: The recent trailing 21-session volatility has been high (given the
+      ~10% drop on Feb 27 and volatility leading into early March). NVDA has been
+      experiencing significant daily swings following its Q4 earnings report (late
+      Feb), which typically results in a period of elevated volatility. While the
+      12% unconditional anchor applies, the high recent volatility warrants a slight
+      premium to ~14%. There is no specific, dated catalyst scheduled for March 5,
+      2025; market focus remains on broader macro sentiment and the upcoming GTC event
+      (scheduled for later in the month).
+    direction_bias: neutral
+    key_signals:
+    - Elevated 21-day trailing volatility following late-February earnings
+    - Absence of specific, dated catalysts for March 5, 2025
+    - Heightened market sensitivity to hyperscaler capex and AI monetization concerns
+    confidence: medium
+    langfuse_trace_id: cd573e83685026c437b734f3201d9f14
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/cd573e83685026c437b734f3201d9f14
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:14.966762'
+  as_of: '2025-03-13T00:00:00'
+  forecast_date: '2025-03-14T00:00:00'
+  payload:
+    probability: 0.18
+  metadata:
+    rationale: The recent trading sessions exhibit high volatility. NVDA closed at
+      $115.45 on March 12, marking a sharp recovery from the $106.70 low on March
+      10 (a ~8% rebound in two days). With trailing 21-day volatility elevated significantly
+      above 3.5% due to the erratic price action in late February and early March,
+      the base case moves into the 'elevated vol' bucket (~18%). Given the strong
+      recent momentum and the company's solid fundamentals (as evidenced by the February
+      26 earnings report), the bias is to the upside, though the high volatility suggests
+      potential for swings in either direction.
+    direction_bias: up
+    key_signals:
+    - Trailing 21-day volatility remains well above the 3.5% threshold
+    - Strong recovery momentum from March 10 lows ($106.70)
+    - Blackwell product cycle and hyperscaler demand remain primary fundamental drivers
+    confidence: medium
+    langfuse_trace_id: af0df48a1d72032946ff70c28b22147a
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/af0df48a1d72032946ff70c28b22147a
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:23.374087'
+  as_of: '2025-03-18T00:00:00'
+  forecast_date: '2025-03-19T00:00:00'
+  payload:
+    probability: 0.15
+  metadata:
+    rationale: The recent trailing 21-day volatility remains elevated (well above
+      3.5% annualized return deviation) given the price action from early March through
+      March 17, placing the baseline probability for a 5% move in the 15-18% range.
+      While the stock saw a significant 5% rally on March 14, it retreated slightly
+      on March 17. There are no specific scheduled micro-catalysts (e.g., earnings
+      or major conferences) for March 18. However, given the sustained volatility
+      and the sensitivity of the stock to broader hyperscaler capex narratives and
+      tech sentiment, we stay slightly above the unconditional 12% average, leaning
+      toward an upside bias as the market continues to digest recent data center growth
+      signals.
+    direction_bias: up
+    key_signals:
+    - Trailing 21-day volatility > 3.5%
+    - Recent high-volatility price swings (e.g., March 14 rally)
+    - Lack of immediate specific scheduled catalysts for March 18
+    - Strong fundamental support from hyperscaler capex trends
+    confidence: medium
+    langfuse_trace_id: d3371d14bac0ce0731ae4436bc492eca
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/d3371d14bac0ce0731ae4436bc492eca
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:32.546227'
+  as_of: '2025-04-08T00:00:00'
+  forecast_date: '2025-04-09T00:00:00'
+  payload:
+    probability: 0.18
+  metadata:
+    rationale: 'The recent price history (April 4, 2025: -7.8% drop; April 7, 2025:
+      +3.5% bounce) indicates elevated volatility consistent with the ''Elevated vol''
+      anchor. Given that the previous session on April 7 saw a partial recovery following
+      a major sell-off, market sentiment remains fragile. The stock is currently in
+      a high-volatility regime with uncertainty regarding short-term momentum. An
+      18% probability aligns with the historical frequency for elevated volatility
+      regimes outside of earnings. The downward bias reflects the persistent pressure
+      observed in late Q1 and early April 2025, where the stock struggled to regain
+      previous highs.'
+    direction_bias: down
+    key_signals:
+    - High trailing volatility (>3.5%) in the last 21 sessions
+    - Increased market sensitivity to AI hardware spending sustainability
+    - Technical instability after significant price swings on April 4 and April 7
+    confidence: medium
+    langfuse_trace_id: d5091eb18903c1e337696d2686e478eb
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/d5091eb18903c1e337696d2686e478eb
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:40.705848'
+  as_of: '2025-05-16T00:00:00'
+  forecast_date: '2025-05-19T00:00:00'
+  payload:
+    probability: 0.14
+  metadata:
+    rationale: The recent price action shows a strong recovery from the April lows,
+      with a 5.4% gain on May 14th followed by a near-flat session on May 15th. Trailing
+      volatility remains elevated as the stock digests the recent momentum. The market
+      is currently focused on hyperscaler capex and supply chain constraints, which
+      have generally favored upside surprises in the current cycle. While no major
+      single-day catalyst is scheduled for the immediate next session, the momentum
+      building toward upcoming earnings (due later in the month) and the tight supply
+      environment support a slightly elevated probability of a significant move compared
+      to the unconditional mean.
+    direction_bias: up
+    key_signals:
+    - Elevated volatility relative to long-term averages due to sharp recent recovery
+    - Positive momentum building ahead of quarterly earnings reports
+    - Persistent undersupply of critical AI components (CoWoS/HBM) keeps sentiment
+      sensitive to news
+    confidence: medium
+    langfuse_trace_id: d28dcfacb46986dc282e46ee8f7bbe92
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/d28dcfacb46986dc282e46ee8f7bbe92
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:50.745605'
+  as_of: '2025-06-02T00:00:00'
+  forecast_date: '2025-06-03T00:00:00'
+  payload:
+    probability: 0.14
+  metadata:
+    rationale: The earnings reaction phase (post-May 28) has largely concluded, and
+      the stock has stabilized. The trailing 21-day volatility remains moderate following
+      the earnings move and recent adjustments. While there is lingering sensitivity
+      to macro headlines regarding hyperscaler capex and export controls, no specific,
+      dated catalyst is scheduled for the next trading session (June 3) that would
+      warrant a higher-than-average probability of a >=5% move. We set the probability
+      slightly above the 12% unconditional baseline to account for potential residual
+      volatility from the post-earnings period.
+    direction_bias: neutral
+    key_signals:
+    - Post-earnings stabilization following May 28 report
+    - Moderate trailing volatility consistent with normal market conditions
+    - Lack of immediate scheduled catalysts (economic data/regulatory events)
+    - Continued scrutiny of hyperscaler capex guidance
+    confidence: medium
+    langfuse_trace_id: 8e23f1639818f4ea8326370b8e6f66c8
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/8e23f1639818f4ea8326370b8e6f66c8
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:55:59.777610'
+  as_of: '2025-11-07T00:00:00'
+  forecast_date: '2025-11-10T00:00:00'
+  payload:
+    probability: 0.15
+  metadata:
+    rationale: NVDA's recent price action has shown heightened volatility, with the
+      price declining from a late October peak near $206 to $187.63 on Nov 6. The
+      21-day trailing volatility is elevated given the recent range (e.g., moves from
+      206 to 198 to 194 to 187). While the broader AI demand remains strong, the market
+      is in a 'wait-and-see' mode before the upcoming earnings report. The current
+      environment is characterized by 'normal-to-elevated' volatility. Without a specific,
+      immediate catalyst (like an earnings date, which is not stated as occurring
+      on Nov 7), the probability of a >=5% move is slightly above the unconditional
+      12% baseline due to the recent active trading, but does not warrant an elevated-risk
+      premium above 15%.
+    direction_bias: neutral
+    key_signals:
+    - Recent elevated price volatility (10% pullback from late Oct highs)
+    - Market cautiousness ahead of Q3 FY26 earnings
+    - Strong hyperscaler capex supports long-term outlook, limiting severe downside
+      panic
+    confidence: medium
+    langfuse_trace_id: b336bd7137e0c950bfa1e00fed20800a
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/b336bd7137e0c950bfa1e00fed20800a
+- predictor_id: agent_predictor_nvda_analyst_multitask_notopics_gemini-3.1-flash-lite-preview_discrete
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-05T13:56:09.657300'
+  as_of: '2025-12-01T00:00:00'
+  forecast_date: '2025-12-02T00:00:00'
+  payload:
+    probability: 0.14
+  metadata:
+    rationale: NVDA's recent price action has shown heightened volatility, consistent
+      with a correction phase following a peak near $206 in early November. With the
+      21-day trailing volatility elevated, we look to the 'elevated vol' anchor (~18%).
+      However, the immediate period around late November 2025 lacks a specific, high-impact
+      catalyst (no earnings, no major regulatory surprise) to push the probability
+      toward the higher end of the distribution. Given the ongoing consolidation near
+      $176, a 5% move remains a distinct possibility but is not the baseline expectation
+      for a single session, leading to a moderate estimate slightly above the long-term
+      average.
+    direction_bias: neutral
+    key_signals:
+    - Trailing 21-day volatility remains elevated compared to historical averages
+    - Post-peak consolidation pattern with no immediate earnings or macro shock triggers
+    - Continued hyperscaler capex sensitivity amidst broader market caution
+    confidence: medium
+    langfuse_trace_id: 388ce9c95501712525e949c859868130
+    langfuse_trace_url: https://us.cloud.langfuse.com/project/cmqqo0s1h05mjad0df2pzqxxb/traces/388ce9c95501712525e949c859868130
+scores:
+- 0.6724000000000001
+- 0.019600000000000003
+- 0.7395999999999999
+- 0.6724000000000001
+- 0.0225
+- 0.6724000000000001
+- 0.019600000000000003
+- 0.019600000000000003
+- 0.7224999999999999
+- 0.019600000000000003
+metric: brier
+mean_score: 0.35802
+ran_at: '2026-10-05T13:56:09.941391'
+skipped_origins: 0

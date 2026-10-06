@@ -4,6 +4,16 @@ The end-of-day demo for Phase 0: NVDA plumbed through the harness, and the agent
 retargeted from WTI. Two speakers, one hand-off. Have every file listed under "Show" open in a
 tab before starting, and **run nothing live**.
 
+> **Superseded figures.** This is the script as delivered at the Phase 0 demo. Three things in
+> it have changed since, and the use-case README has the current numbers:
+> - The shock threshold is now **±5%**, not 7%. At 7% the clean post-cutoff holdout held only
+>   4 events. The shock-task anchors were regenerated to match: about 12% of sessions, and 50%
+>   of earnings reactions.
+> - The AutoARIMA baseline was **diagnosed and refitted**. A market-holiday gap reached the
+>   model as a missing value. With the fix and a log-return fit it scores CRPS 8.17, not 10.03.
+> - Its intervals turned out to be too *wide*, not too narrow. The earlier coverage figures
+>   came from a 60% interval mislabelled as 80%.
+
 ## 0:00–0:20 · Framing (lead)
 
 > "We're building a forecaster that learns which news predicts large NVDA moves. It only keeps
@@ -17,8 +27,9 @@ tab before starting, and **run nothing live**.
 > "NVDA's split-adjusted daily closes go through the same cutoff-safe `DataService` as every
 > other series in the repo. Two numerical baselines ran over 51 weekly origins in 2025."
 
-**Show:** `01_leaderboard_and_calibration.ipynb`, first the leaderboard and then the
-coverage-vs-sharpness chart.
+**Show:** `04_systematic_backtest_eval.ipynb` (then called `01_leaderboard_and_calibration.ipynb`),
+first the leaderboard and then the coverage-vs-sharpness chart. The numbers below are the Phase 0
+raw-price baseline, since replaced by the log-return one.
 
 - AutoARIMA leads on CRPS: **10.03 vs 10.67**.
 - **But** its MAE is worse than the random walk, and its 80% intervals cover only **14.5%**.

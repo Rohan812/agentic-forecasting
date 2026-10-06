@@ -1,0 +1,17 @@
+experiment_id: exp07_semis_peers
+proposed_on: '2026-10-06'
+questions:
+- question_id: exp07_semis_peers_q1
+  question: Did any of NVIDIA's key semiconductor peers (TSMC, ASML, AMD, Broadcom,
+    or Micron) release earnings, updated financial guidance, or monthly sales figures?
+  direction: either
+  rationale: Financial disclosures from major industry peers often signal broader
+    sector health or competitive shifts that can trigger significant volatility in
+    NVIDIA's stock.
+- question_id: exp07_semis_peers_q2
+  question: Were there any reports concerning AI-chip supply chain constraints, such
+    as packaging capacity bottlenecks or production delays for critical components?
+  direction: either
+  rationale: News regarding supply chain disruptions directly impacts NVIDIA's ability
+    to meet high demand, which can lead to sudden market reassessments of the company's
+    growth trajectory.

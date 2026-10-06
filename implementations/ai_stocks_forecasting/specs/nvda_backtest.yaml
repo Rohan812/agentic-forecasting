@@ -12,16 +12,17 @@
 # The first few January origins sit closest to the cutoff and should be read
 # with that in mind. See LLM_CUTOFFS.md.
 #
-# This window contains 7 single-day moves of at least ±7% (the shock threshold
-# in ai_stocks_forecasting.paths), clustered in Jan–Apr 2025 — enough shock
-# events for a meaningful per-regime error split.
+# This window contains 19 single-day moves of at least ±5% (the shock threshold
+# in ai_stocks_forecasting.paths), 8 up and 11 down, which merge into 15 events
+# once consecutive-day shocks are grouped. That is enough for a meaningful
+# per-regime error split.
 
 spec_id: nvda_backtest
 
 description: >-
   Weekly rolling backtest in 2025 for daily NVDA stock price forecasting.
   Evaluates trajectory forecasts (5, 10, 21 business days) with CRPS/MAE and
-  binary shock forecasts (a move of at least ±7% in one business day) with
+  binary shock forecasts (a move of at least ±5% in one business day) with
   Brier Score. Used to select the top contender models before the protected
   2026 evaluation.
 

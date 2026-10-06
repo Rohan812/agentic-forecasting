@@ -1,0 +1,1275 @@
+question_id: exp07_semis_peers_q1
+question: Did any of NVIDIA's key semiconductor peers (TSMC, ASML, AMD, Broadcom,
+  or Micron) release earnings, updated financial guidance, or monthly sales figures?
+labels:
+  '2020-02-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-02-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-02-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-02-26':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-03-03':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-03-06':
+    answer: 'yes'
+    evidence: On March 5, 2020, AMD held its Financial Analyst Day, where it detailed
+      its multi-generational high-performance CPU and GPU roadmaps and growth strategy.
+    search: ok
+  '2020-03-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-03-27':
+    answer: 'yes'
+    evidence: On March 25, 2020, Micron announced its financial results for the second
+      quarter of fiscal year 2020
+    search: ok
+  '2020-03-31':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-03':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-28':
+    answer: 'yes'
+    evidence: On April 28, 2020, AMD announced its financial results for the first
+      quarter of 2020. In the same announcement, the company updated its annual financial
+      guidance
+    search: ok
+  '2020-04-29':
+    answer: 'yes'
+    evidence: On April 28, 2020, AMD reported its financial results for the first
+      quarter of 2020.
+    search: ok
+  '2020-04-30':
+    answer: 'yes'
+    evidence: On April 28, 2020, AMD announced its financial results for the first
+      quarter of 2020.
+    search: ok
+  '2020-05-01':
+    answer: 'yes'
+    evidence: news coverage and analysis published on April 29, 2020, highlighted
+      that while the company maintained its annual guidance for gross margin, it had
+      eased its expectations for 2020 sales
+    search: ok
+  '2020-05-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-05-07':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-05-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-05-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-05-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-06-04':
+    answer: 'yes'
+    evidence: On June 4, 2020, Broadcom announced its financial results for the second
+      quarter of fiscal year 2020 (which ended May 3, 2020) and provided financial
+      guidance for the third quarter of its fiscal year 2020.
+    search: ok
+  '2020-06-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-06-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-06-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-07-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-07-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-07-30':
+    answer: 'yes'
+    evidence: On July 28, 2020, AMD announced its financial results for the second
+      quarter of 2020.
+    search: ok
+  '2020-07-31':
+    answer: 'no'
+    evidence: While the report was released on July 28, the company's performance
+      and updated full-year revenue outlook were the primary financial news for the
+      peer group during the requested window.
+    search: ok
+  '2020-08-11':
+    answer: 'no'
+    evidence: there were no earnings releases, updated financial guidance, or monthly
+      sales figures reported by the specific semiconductor peers requested
+    search: ok
+  '2020-08-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-09-02':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-09-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-09-11':
+    answer: 'yes'
+    evidence: While it did release its August 2020 revenue report, it was filed with
+      the SEC on September 10, 2020.
+    search: ok
+  '2020-09-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-09-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-09-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-10-27':
+    answer: 'yes'
+    evidence: On October 27, 2020, AMD announced its financial results for the third
+      quarter of 2020.
+    search: ok
+  '2020-11-03':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-11-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-11-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-12-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-12-22':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2021-01-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-01-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-02-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-02-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-03-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-03-31':
+    answer: 'yes'
+    evidence: On March 31, 2021, Micron Technology, Inc. announced its financial results
+      for the second quarter of fiscal 2021
+    search: ok
+  '2021-04-09':
+    answer: 'no'
+    evidence: No earnings releases, updated financial guidance, or monthly sales figures
+      were found for TSMC, ASML, AMD, or Broadcom during this specific three-day window.
+    search: ok
+  '2021-04-14':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2021-05-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-06-09':
+    answer: 'no'
+    evidence: None of these companies released earnings, updated financial guidance,
+      or monthly sales figures during the period of June 7, 2021, to June 9, 2021.
+    search: ok
+  '2021-06-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-07-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-08-02':
+    answer: 'no'
+    evidence: There were no earnings releases, updated financial guidance, or monthly
+      sales figures reported for these companies during the period of July 31, 2021,
+      to August 2, 2021.
+    search: ok
+  '2021-08-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-08-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-09-21':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2021-09-28':
+    answer: 'yes'
+    evidence: On September 28, 2021, Micron Technology, Inc. announced its financial
+      results for the fourth quarter and full fiscal year 2021
+    search: ok
+  '2021-10-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-10-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-11-03':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-11-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-11-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-11-10':
+    answer: 'yes'
+    evidence: On November 10, 2021, TSMC announced its net revenue for October 2021.
+    search: ok
+  '2021-11-11':
+    answer: 'yes'
+    evidence: On November 10, 2021, TSMC released its monthly sales figures for October
+      2021.
+    search: ok
+  '2021-11-17':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-11-26':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-10':
+    answer: 'yes'
+    evidence: On December 9, 2021, Broadcom announced its financial results for the
+      fourth quarter and fiscal year 2021
+    search: ok
+  '2021-12-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-21':
+    answer: 'yes'
+    evidence: On December 20, 2021, Micron reported its financial results for the
+      first quarter of fiscal 2022 and provided forward-looking guidance for the second
+      quarter of fiscal 2022.
+    search: ok
+  '2021-12-22':
+    answer: 'yes'
+    evidence: Micron reported its financial results for the first quarter of fiscal
+      year 2022 and provided forward-looking guidance for the second quarter of 2022.
+    search: ok
+  '2021-12-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2021-12-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-01-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-01-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-01-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-01-19':
+    answer: 'yes'
+    evidence: On January 19, 2022, ASML published its 2021 fourth-quarter and full-year
+      financial results.
+    search: ok
+  '2022-01-20':
+    answer: 'yes'
+    evidence: On January 19, 2022, ASML released its financial results for the fourth
+      quarter and full year 2021.
+    search: ok
+  '2022-01-21':
+    answer: 'yes'
+    evidence: On January 19, 2022, ASML published its 2021 fourth-quarter and full-year
+      financial results.
+    search: ok
+  '2022-01-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-01-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-02-02':
+    answer: 'yes'
+    evidence: On February 1, 2022, AMD announced its financial results for the fourth
+      quarter and full year of 2021.
+    search: ok
+  '2022-02-08':
+    answer: 'no'
+    evidence: There were no earnings releases, updated financial guidance, or monthly
+      sales figures reported for these companies between February 6, 2022, and February
+      8, 2022.
+    search: ok
+  '2022-02-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-02-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-02-16':
+    answer: 'no'
+    evidence: None of these companies released earnings, updated financial guidance,
+      or monthly sales figures between February 14, 2022, and February 16, 2022.
+    search: ok
+  '2022-02-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-02-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-17':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-03-28':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, or Broadcom)
+      released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2022-03-29':
+    answer: 'yes'
+    evidence: On March 29, 2022, Micron reported its financial results for the second
+      quarter of fiscal year 2022
+    search: ok
+  '2022-04-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-04-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-04-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-04-20':
+    answer: 'yes'
+    evidence: On April 20, 2022, ASML published its first-quarter 2022 financial results.
+    search: ok
+  '2022-04-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-04-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-05-04':
+    answer: 'yes'
+    evidence: On May 3, 2022, AMD announced its financial results for the first quarter
+      of 2022.
+    search: ok
+  '2022-05-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-05-10':
+    answer: 'yes'
+    evidence: On May 10, 2022, TSMC announced its net revenue for April 2022.
+    search: ok
+  '2022-05-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-05-16':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-05-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-06-01':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-06-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-06-15':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-06-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-06-27':
+    answer: 'yes'
+    evidence: Micron Technology was the only company among the specified peers to
+      release earnings and financial guidance.
+    search: ok
+  '2022-06-30':
+    answer: 'yes'
+    evidence: On June 30, 2022, Micron announced its financial results for the third
+      quarter of fiscal year 2022
+    search: ok
+  '2022-07-01':
+    answer: 'yes'
+    evidence: On June 30, 2022, Micron reported its financial results for the third
+      quarter of fiscal year 2022. During the same announcement, the company provided
+      forward-looking financial guidance for its fourth quarter of 2022
+    search: ok
+  '2022-07-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-06':
+    answer: 'no'
+    evidence: no earnings, updated financial guidance, or monthly sales figures were
+      reported for TSMC, ASML, Broadcom, or Micron during this specific three-day
+      window
+    search: ok
+  '2022-07-07':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-08':
+    answer: 'no'
+    evidence: No earnings releases, updated financial guidance, or monthly sales figures
+      were reported for TSMC, ASML, Broadcom, or Micron during the period of July
+      6, 2022, to July 8, 2022.
+    search: ok
+  '2022-07-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-26':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-07-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-01':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-05':
+    answer: 'no'
+    evidence: None of these companies released earnings, updated financial guidance,
+      or monthly sales figures between August 3, 2022, and August 5, 2022.
+    search: ok
+  '2022-08-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-15':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-16':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-17':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-19':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2022-08-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-08-31':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-09-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-09-15':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-09-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-09-26':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-09-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-10-03':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-10-06':
+    answer: 'yes'
+    evidence: On October 6, 2022, AMD announced preliminary financial results for
+      the third quarter of 2022.
+    search: ok
+  '2022-10-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-10-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-10-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-10-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-11-03':
+    answer: 'yes'
+    evidence: On November 1, 2022, AMD reported its financial results for the third
+      quarter of 2022.
+    search: ok
+  '2022-11-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-11-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-11-16':
+    answer: 'yes'
+    evidence: On November 16, 2022, Micron announced that it was reducing its DRAM
+      and NAND wafer starts by approximately 20% compared to its fiscal fourth quarter
+      of 2022 in response to market conditions.
+    search: ok
+  '2022-11-18':
+    answer: 'yes'
+    evidence: 'Micron Technology: On November 16, 2022, Micron announced further actions
+      to address market conditions... and provided an updated outlook for calendar
+      year 2023'
+    search: ok
+  '2022-11-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-11-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-07':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-14':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-15':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2022-12-21':
+    answer: 'yes'
+    evidence: On December 21, 2022, Micron reported its financial results for the
+      first quarter of fiscal 2023 and provided forward-looking guidance for the second
+      quarter of fiscal 2023.
+    search: ok
+  '2022-12-23':
+    answer: 'yes'
+    evidence: On December 21, 2022, Micron Technology announced its financial results
+      for the first quarter of fiscal year 2023
+    search: ok
+  '2022-12-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-01-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-01-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-01-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-01-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-01-27':
+    answer: 'yes'
+    evidence: On January 25, 2023, ASML reported its fourth-quarter and full-year
+      2022 earnings.
+    search: ok
+  '2023-01-31':
+    answer: 'yes'
+    evidence: Its fourth-quarter 2022 earnings were released on January 31, 2023.
+    search: ok
+  '2023-02-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-02-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-02-22':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings reports, updated financial guidance, or monthly
+      sales figures.
+    search: ok
+  '2023-02-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-01':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-07':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-15':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2023-03-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-23':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-03-31':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-05-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-05-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-06-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-06-27':
+    answer: 'yes'
+    evidence: Micron Technology was the only one to provide a significant financial
+      update, specifically regarding its upcoming earnings release and guidance.
+    search: ok
+  '2023-08-03':
+    answer: 'yes'
+    evidence: On August 1, 2023, AMD announced its financial results for the second
+      quarter of 2023
+    search: ok
+  '2023-08-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-08-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-09-28':
+    answer: 'yes'
+    evidence: On September 27, 2023, Micron reported its financial results for the
+      fourth quarter and full fiscal year 2023.
+    search: ok
+  '2023-10-19':
+    answer: 'yes'
+    evidence: On October 18, 2023, ASML released its earnings for the third quarter
+      of 2023.
+    search: ok
+  '2023-10-30':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2024-01-05':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-02-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-02-26':
+    answer: 'no'
+    evidence: none of the specified semiconductor peers (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2024-02-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-03-07':
+    answer: 'yes'
+    evidence: On March 7, 2024, Broadcom Inc. reported its financial results for the
+      first quarter of fiscal year 2024 (ended February 4, 2024) and provided updated
+      financial guidance for its fiscal year 2024.
+    search: ok
+  '2024-03-11':
+    answer: 'yes'
+    evidence: On March 11, 2024, it was reported that TSMC announced its revenue for
+      February 2024.
+    search: ok
+  '2024-03-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-03-20':
+    answer: 'yes'
+    evidence: On March 20, 2024, Micron announced its financial results for the second
+      quarter of fiscal 2024
+    search: ok
+  '2024-04-01':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-04-08':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-04-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-04-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-04-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-05-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-05-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-06-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-06-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-06-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-06-12':
+    answer: 'yes'
+    evidence: On June 12, 2024, Broadcom announced its financial results for the second
+      quarter of fiscal year 2024.
+    search: ok
+  '2024-06-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-06-27':
+    answer: 'yes'
+    evidence: On June 26, 2024, Micron reported its financial results for the third
+      quarter of fiscal 2024.
+    search: ok
+  '2024-06-28':
+    answer: 'yes'
+    evidence: Micron had reported its fiscal third-quarter 2024 financial results
+      shortly before this period, on June 26, 2024.
+    search: ok
+  '2024-07-02':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-07-10':
+    answer: 'yes'
+    evidence: TSMC released its June 2024 monthly sales figures on July 10, 2024.
+    search: ok
+  '2024-07-16':
+    answer: 'no'
+    evidence: Broadcom and Micron did not release earnings or updated financial guidance
+      during this specific three-day window.
+    search: ok
+  '2024-07-23':
+    answer: 'no'
+    evidence: None of these companies released earnings, updated financial guidance,
+      or monthly sales figures between July 21, 2024, and July 23, 2024.
+    search: ok
+  '2024-07-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-08-02':
+    answer: 'no'
+    evidence: No earnings, updated financial guidance, or monthly sales figures were
+      released by TSMC, ASML, Broadcom, or Micron within the strict July 31, 2024,
+      to August 2, 2024, window.
+    search: ok
+  '2024-08-06':
+    answer: 'no'
+    evidence: There were no earnings releases, updated financial guidance, or monthly
+      sales figures reported for these companies during the specific window of August
+      4, 2024, to August 6, 2024.
+    search: ok
+  '2024-08-12':
+    answer: 'no'
+    evidence: No earnings releases, updated financial guidance, or monthly sales figures
+      were published for ASML, AMD, Broadcom, or Micron during the specified window
+      of August 10, 2024, to August 12, 2024.
+    search: ok
+  '2024-08-16':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-08-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-08-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-08-30':
+    answer: 'yes'
+    evidence: the only relevant financial announcement among the specified semiconductor
+      peers was from Micron Technology.
+    search: ok
+  '2024-09-10':
+    answer: 'yes'
+    evidence: On September 10, 2024, TSMC announced its net revenue for August 2024.
+    search: ok
+  '2024-09-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-09-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-10-01':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2024-11-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-01-06':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-01-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-01-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-04':
+    answer: 'yes'
+    evidence: On February 4, 2025, AMD released its financial results for the fourth
+      quarter and full year of 2024.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-02-10':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-13':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: Between February 12, 2025, and February 14, 2025, none of the specified
+      semiconductor companies (TSMC, ASML, AMD, Broadcom, or Micron) released earnings,
+      updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-05':
+    answer: 'yes'
+    evidence: On March 3, 2025, Micron Technology raised its sales and earnings guidance
+      for the quarter.
+    search: ok
+  '2025-03-07':
+    answer: 'yes'
+    evidence: On March 6, 2025, Broadcom Inc. announced its financial results for
+      the first quarter of fiscal year 2025 and provided its business outlook.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: the only relevant news from NVIDIA's key semiconductor peers was an
+      announcement from AMD regarding its upcoming earnings report.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: None of these companies released earnings, updated financial guidance,
+      or monthly sales figures during the specific window of April 13, 2025, to April
+      15, 2025.
+    search: ok
+  '2025-04-21':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-04-23':
+    answer: 'no'
+    evidence: There were no earnings releases, updated financial guidance, or monthly
+      sales figures reported for these companies during the specified period
+    search: ok
+  '2025-04-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-04-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-04-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-02':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-09':
+    answer: 'yes'
+    evidence: AMD filed its first-quarter 2025 financial results on May 7, 2025.
+    search: ok
+  '2025-05-15':
+    answer: 'no'
+    evidence: Between May 13, 2025, and May 15, 2025, none of the specified semiconductor
+      companies (TSMC, ASML, AMD, Broadcom, or Micron) released earnings, updated
+      financial guidance, or monthly sales figures.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-22':
+    answer: 'no'
+    evidence: none of the specified semiconductor peers (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-05-28':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: none of the specified semiconductor peers (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: No earnings releases, updated financial guidance, or monthly sales figures
+      were reported for TSMC, ASML, AMD, or Micron within the specific window of June
+      1, 2025, to June 3, 2025.
+    search: ok
+  '2025-06-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: none
+    search: failed
+  '2025-06-06':
+    answer: 'yes'
+    evidence: Broadcom was the only company among the specified peers to release earnings.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-10':
+    answer: 'no'
+    evidence: none of the specified semiconductor peers (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-18':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-25':
+    answer: 'no'
+    evidence: No earnings releases, updated financial guidance, or monthly sales figures
+      were reported for TSMC, ASML, AMD, or Broadcom during the specified period of
+      June 23–25, 2025.
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-09-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-10-30':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok
+  '2025-11-12':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-11-17':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-12-03':
+    answer: 'no'
+    evidence: none of the specified semiconductor companies (TSMC, ASML, AMD, Broadcom,
+      or Micron) released earnings, updated financial guidance, or monthly sales figures.
+    search: ok

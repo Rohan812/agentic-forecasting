@@ -1,0 +1,15 @@
+experiment_id: exp06_macro_rates
+proposed_on: '2026-10-06'
+questions:
+- question_id: exp06_macro_rates_q1
+  question: Was there a release of a US Consumer Price Index (CPI) report that deviated
+    from consensus analyst expectations in the three days prior?
+  direction: either
+  rationale: Unexpected inflation data significantly impacts discount rates for high-growth
+    tech stocks like NVIDIA, potentially triggering large volatility.
+- question_id: exp06_macro_rates_q2
+  question: Did the Federal Reserve issue an official policy statement or did a voting
+    member provide public commentary signaling a shift in interest rate expectations?
+  direction: either
+  rationale: Changes in monetary policy outlook directly influence the valuation models
+    of semiconductor companies, often leading to sharp price adjustments.
