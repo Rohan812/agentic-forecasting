@@ -28,7 +28,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
 | `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
 | `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
-| `01`–`04` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest (see [Notebooks](#notebooks)) |
+| `01`–`05` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
@@ -753,7 +753,8 @@ seconds and call no LLM. Run them from `implementations/` after
 | [`02_intro_agentic_predictor.ipynb`](02_intro_agentic_predictor.ipynb) | The news-grounded agent beside the baselines at two origins: the morning of the DeepSeek sell-off (2025-01-27) and the Monday after the tariff crash (2025-04-07), with its rationale |
 | [`03_one_agent_two_tasks.ipynb`](03_one_agent_two_tasks.ipynb) | One identity, two task specs: the system prompt and fenced `search_web`, a trajectory answer, three shock answers for 2025-04-09, and the search-fence leak and its fix |
 | [`04_systematic_backtest_eval.ipynb`](04_systematic_backtest_eval.ipynb) | The full 2025 scorecard: CRPS leaderboard and paired comparison, coverage vs sharpness, CRPS by shock window and volatility regime, predicted vs actual, every prediction, and the shock task |
-| `05`, `06` | To come: adaptive agent training (Phase 2) and the protected 2026 evaluation |
+| [`05_discovery_loop.ipynb`](05_discovery_loop.ipynb) | The Phase 2 discovery loop: study windows, the gate, how a fenced news label is made, all fifteen candidates with why each failed, the "both halves of the gate" chart, and the holdout power analysis |
+| `06` | To come: the protected 2026 evaluation |
 | [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) | Appendix: the raw-price baseline's −77% forecast, traced to a single holiday `NaN` |
 
 **The trajectory agent on the 2025 backtest** (`agent_backtest.py`, all 51 weekly origins,

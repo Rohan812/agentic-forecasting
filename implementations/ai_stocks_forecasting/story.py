@@ -286,7 +286,14 @@ def regime_crps_chart(
     ax.set_xlabel("Mean CRPS (USD/share), lower is better", color=INK_SECONDARY, fontsize=10)
     ax.set_title(title, loc="left", fontsize=13, color=INK_PRIMARY, fontweight="600", pad=10)
     ax.legend(loc="lower right", frameon=False, fontsize=9, labelcolor=INK_SECONDARY)
-    fig.tight_layout()
+    fig.text(
+        0.01,
+        0.01,
+        "* scored on every 2025 session, which is not volatility-matched; see the notes.",
+        fontsize=8.5,
+        color=INK_MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
     return fig, ax
 
 
@@ -367,3 +374,151 @@ def shock_forecast_records(
                         }
                     )
     return pd.DataFrame(rows)
+
+
+# ── Discovery loop (notebook 05) ──────────────────────────────────────────────
+
+
+def _train_passes(t: dict[str, Any] | None) -> bool:
+    if not t:
+        return False
+    return (
+        t["n_matches"] >= signals.MIN_MATCHES
+        and t["lift"] >= signals.MIN_LIFT
+        and t["p_value"] < signals.MAX_P_VALUE
+        and t["ci_low"] > 1
+    )
+
+
+def _holdout_passes(h: dict[str, Any]) -> bool:
+    lift = h["lift"]
+    return not np.isnan(lift) and lift >= signals.MIN_HOLDOUT_LIFT and h["p_value"] < signals.MAX_HOLDOUT_P_VALUE
+
+
+def failure_group(entry: dict[str, Any]) -> str:
+    """Classify why a candidate did not graduate, from its recorded evidence."""
+    t, h = entry.get("train"), entry["holdout"]
+    if entry.get("graduated"):
+        return "graduated"
+    if _train_passes(t) and not _holdout_passes(h):
+        return "real before the cutoff, not after"
+    if _holdout_passes(h) and not _train_passes(t):
+        return "real after the cutoff, not before"
+    if h["n_matches"] == 1 and h["n_hits"] == 1:
+        return "one event"
+    return "no effect"
+
+
+def discovery_results(experiments_dir: Any = None) -> pd.DataFrame:
+    """Every candidate's current evidence from the experiment trails, one row each."""
+    import yaml  # noqa: PLC0415
+    from ai_stocks_forecasting.discovery import EXPERIMENTS_DIR  # noqa: PLC0415
+
+    rows = []
+    for path in sorted((experiments_dir or EXPERIMENTS_DIR).glob("*/trail.yaml")):
+        trail = yaml.safe_load(path.read_text())
+        for c in trail["candidates"]:
+            t, h = c.get("train") or {}, c["holdout"]
+            rows.append(
+                {
+                    "experiment": trail["experiment_id"],
+                    "candidate": c["pattern_id"].replace(f"{trail['experiment_id']}_", ""),
+                    "cue": c["cue"],
+                    "direction": c["direction"],
+                    "holdout_design": c.get("holdout_design", ""),
+                    "train_lift": t.get("lift", np.nan),
+                    "train_p": t.get("p_value", np.nan),
+                    "holdout_matches": h["n_matches"],
+                    "holdout_hits": h["n_hits"],
+                    "holdout_lift": h["lift"],
+                    "holdout_p": h["p_value"],
+                    "why_not": failure_group(c),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+SHORT_NAMES: dict[tuple[str, str], str] = {
+    ("exp01_earnings", "P-1"): "earnings",
+    ("exp01_earnings", "P-3"): "high volatility*",
+    ("exp03_hyperscaler_capex", "q2"): "capex caution (down)",
+    ("exp07_semis_peers", "q1"): "peer results",
+}
+"""Readable labels for the candidates worth naming on the chart; the rest are counted in the legend."""
+
+
+def two_halves_chart(results: pd.DataFrame, title: str = "Both halves of the gate must pass") -> tuple[Figure, Axes]:
+    """Plot every candidate by its holdout p-value (x) and training p-value (y), one marker per failure group.
+
+    The pass region is the bottom-left corner: training p < 0.05 and holdout
+    p < 0.10.  Candidates screened out on the holdout have no training test;
+    they sit on a strip along the top, at "not tested".
+    """
+    fig, ax = plt.subplots(figsize=(10.5, 6.2))
+    fig.patch.set_facecolor(SURFACE)
+    _style(ax)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    untested_y = 1.6
+    ax.axvspan(
+        1e-3, signals.MAX_HOLDOUT_P_VALUE, ymin=0, ymax=0.48, color=FAMILY_COLORS["LLM / Agent"], alpha=0.08, zorder=0
+    )
+    ax.axvline(signals.MAX_HOLDOUT_P_VALUE, color=INK_MUTED, linestyle="--", linewidth=1)
+    ax.axhline(signals.MAX_P_VALUE, color=INK_MUTED, linestyle="--", linewidth=1)
+    ax.text(1.1e-3, 1.2e-3 * 1.4, "graduates here\n(nothing yet)", fontsize=9.5, color=INK_SECONDARY, va="bottom")
+    styles = {
+        "no effect": ("o", FAMILY_COLORS["Other"]),
+        "one event": ("D", FAMILY_COLORS["Numerical ML"]),
+        "real before the cutoff, not after": ("s", FAMILY_COLORS["Baseline"]),
+        "real after the cutoff, not before": ("^", FAMILY_COLORS["LLM / Agent"]),
+        "graduated": ("*", INK_PRIMARY),
+    }
+    jitter = np.random.default_rng(3)
+    for group, (marker, color) in styles.items():
+        sub = results[results["why_not"] == group]
+        if sub.empty:
+            continue
+        xs = sub["holdout_p"].clip(lower=1.5e-3).to_numpy() * np.exp(jitter.uniform(-0.08, 0.08, len(sub)))
+        ys = sub["train_p"].fillna(untested_y).clip(lower=1.5e-3).to_numpy() * np.exp(
+            jitter.uniform(-0.12, 0.12, len(sub))
+        )
+        ax.scatter(
+            xs,
+            ys,
+            marker=marker,
+            s=90,
+            color=color,
+            edgecolor=SURFACE,
+            linewidth=1.5,
+            zorder=3,
+            label=f"{group} ({len(sub)})",
+        )
+        for x, y, (_, row) in zip(xs, ys, sub.iterrows(), strict=True):
+            if group != "no effect":
+                ax.annotate(
+                    f"{row['experiment'][:5]} {row['candidate']}",
+                    (x, y),
+                    xytext=(6, 4),
+                    textcoords="offset points",
+                    fontsize=8.5,
+                    color=INK_SECONDARY,
+                )
+    ax.set_xlim(1e-3, 2.5)
+    ax.set_ylim(1e-3, 3)
+    ax.set_yticks(
+        [1e-3, 1e-2, signals.MAX_P_VALUE, 0.3, 1, untested_y], ["0.001", "0.01", "0.05", "0.3", "1", "not tested"]
+    )
+    ax.set_xticks([1e-3, 1e-2, signals.MAX_HOLDOUT_P_VALUE, 0.3, 1], ["0.001", "0.01", "0.10", "0.3", "1"])
+    ax.set_xlabel("Holdout p-value (2025, after the model cutoff)  →  weaker", color=INK_SECONDARY, fontsize=10)
+    ax.set_ylabel("Training p-value (2020–Jan 2025)  →  weaker", color=INK_SECONDARY, fontsize=10)
+    ax.set_title(title, loc="left", fontsize=13.5, color=INK_PRIMARY, fontweight="600", pad=10)
+    ax.legend(loc="lower right", frameon=False, fontsize=9, labelcolor=INK_SECONDARY)
+    fig.text(
+        0.01,
+        0.01,
+        "* scored on every 2025 session, which is not volatility-matched; see the notes.",
+        fontsize=8.5,
+        color=INK_MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return fig, ax

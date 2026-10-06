@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from ai_stocks_forecasting.story import regime_crps_table, shock_window_crps
+from ai_stocks_forecasting.story import failure_group, regime_crps_table, shock_window_crps
 
 
 def _prices(returns_pct: list[float], start: str = "2024-01-01") -> pd.DataFrame:
@@ -50,3 +50,19 @@ def test_regime_label_comes_from_the_session_before_the_origin() -> None:
     frame = pd.DataFrame({"predictor": ["A"], "as_of": [origin], "crps": [1.0]})
     table = regime_crps_table(frame, prices)
     assert not any(col.startswith("high") for col in table.columns)
+
+
+def test_failure_groups_follow_the_evidence_on_each_half() -> None:
+    """Each recorded candidate lands in the group its two halves of evidence imply."""
+    strong_train = {"n_matches": 11, "lift": 3.2, "p_value": 0.03, "ci_low": 1.2}
+    weak_train = {"n_matches": 49, "lift": 0.77, "p_value": 0.9, "ci_low": 0.46}
+    strong_holdout = {"n_matches": 5, "n_hits": 4, "lift": 6.8, "p_value": 0.011}
+    weak_holdout = {"n_matches": 4, "n_hits": 1, "lift": 3.6, "p_value": 0.25}
+    single_hit = {"n_matches": 1, "n_hits": 1, "lift": 25.6, "p_value": 0.135}
+
+    assert failure_group({"train": strong_train, "holdout": weak_holdout}) == "real before the cutoff, not after"
+    assert failure_group({"train": weak_train, "holdout": strong_holdout}) == "real after the cutoff, not before"
+    assert failure_group({"holdout": single_hit}) == "one event"
+    assert (
+        failure_group({"holdout": {"n_matches": 0, "n_hits": 0, "lift": float("nan"), "p_value": 1.0}}) == "no effect"
+    )

@@ -20,6 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
 from functools import cached_property
+from math import comb
 from pathlib import Path
 from typing import Literal
 
@@ -289,3 +290,52 @@ def upsert_candidate(trail: dict, entry: dict) -> None:
         trail["candidates"].remove(previous)
     trail["candidates"].append(entry)
     trail["candidates_tested"] = len(trail["candidates"])
+
+
+# ── Holdout power ─────────────────────────────────────────────────────────────
+
+
+def _fisher_p(hits: int, n_shocks: int, n_controls: int, control_hits: int) -> float:
+    matches, total = hits + control_hits, n_shocks + n_controls
+    upper = min(matches, n_shocks)
+    return sum(comb(n_shocks, k) * comb(n_controls, matches - k) for k in range(hits, upper + 1)) / comb(total, matches)
+
+
+def holdout_pass_rate(
+    shock_share: float,
+    control_share: float,
+    n_shocks: int = 13,
+    controls_per_shock: int = HOLDOUT_CONTROLS_PER_SHOCK,
+    base_rate: float = 0.0696,
+) -> float:
+    """Probability that a pattern passes the holdout criteria (lift >= 1.5 and p < 0.10).
+
+    ``shock_share`` and ``control_share`` are how often the pattern appears
+    before shocks and before calm sessions.  Equal shares mean no effect, so
+    the result is the false-pass rate; unequal shares give the power to
+    confirm a real pattern.  Computed exactly by enumerating every outcome.
+    """
+    from scipy.stats import binom  # noqa: PLC0415
+
+    n_controls = n_shocks * controls_per_shock
+    total = 0.0
+    for hits in range(1, n_shocks + 1):
+        p_hits = binom.pmf(hits, n_shocks, shock_share)
+        for control_hits in range(n_controls + 1):
+            weight = p_hits * binom.pmf(control_hits, n_controls, control_share)
+            if weight < 1e-12:
+                continue
+            sens, fmr = hits / n_shocks, control_hits / n_controls
+            lift = sens / (sens * base_rate + fmr * (1 - base_rate))
+            if (
+                lift >= signals.MIN_HOLDOUT_LIFT
+                and _fisher_p(hits, n_shocks, n_controls, control_hits) < signals.MAX_HOLDOUT_P_VALUE
+            ):
+                total += weight
+    return total
+
+
+def share_before_shocks(population_lift: float, control_share: float, base_rate: float = 0.0696) -> float:
+    """How often a pattern with this population lift appears before shocks, given its calm-day share."""
+    precision = min(population_lift * base_rate, 0.99)
+    return min(precision * control_share * (1 - base_rate) / (base_rate * (1 - precision)), 1.0)
