@@ -1,0 +1,282 @@
+question_id: exp06_macro_rates_q2
+question: Did the Federal Reserve issue an official policy statement or did a voting
+  member provide public commentary signaling a shift in interest rate expectations?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: No official policy statement signaling a new shift or public commentary
+      from a voting member signaling a change in interest rate expectations was reported
+      between February 5 and February 7, 2025
+    search: ok
+  '2025-02-10':
+    answer: 'yes'
+    evidence: the Committee judged that 'downward risks to employment and inflation
+      have increased'
+    search: ok
+  '2025-02-11':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue a new policy statement signaling a
+      shift in interest rate expectations, nor did a voting member provide public
+      commentary to that effect.
+    search: ok
+  '2025-02-13':
+    answer: 'yes'
+    evidence: the report highlighted that with inflation easing and the unemployment
+      rate having increased somewhat, the policy rate prescriptions of most simple
+      monetary policy rules had generally declined since 2023.
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: these appearances involved commentary on economic conditions rather
+      than an official policy shift or a formal signaling of a change in interest
+      rate expectations.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-02-20':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement signaling
+      a shift in interest rate expectations, nor did a voting member provide public
+      commentary to that effect.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement, nor
+      did a voting member provide public commentary signaling a shift in interest
+      rate expectations.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement or provide
+      public commentary signaling a shift in interest rate expectations.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: none
+    search: failed
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement issued, nor was
+      there a specific shift in interest rate expectations signaled by a voting member
+      during those three days.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-04-21':
+    answer: 'yes'
+    evidence: news reports from April 21, 2025, indicate that U.S. stocks experienced
+      downward pressure following public commentary from Federal Reserve officials.
+      These comments contributed to market reactions regarding interest rate expectations
+    search: ok
+  '2025-04-23':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public signals
+      from voting members indicating a shift in interest rate expectations.
+    search: ok
+  '2025-04-28':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-04-29':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement signaling a shift
+      in interest rate expectations.
+    search: ok
+  '2025-04-30':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-05-02':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: the Fed's communication did not provide specific clues on the timing
+      of potential future rate cuts, with the central bank maintaining a "wait and
+      see" approach.
+    search: ok
+  '2025-05-15':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement, nor
+      did a voting member provide public commentary signaling a shift in interest
+      rate expectations.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement signaling
+      a shift in interest rate expectations, nor did a voting member provide public
+      commentary to that effect.
+    search: ok
+  '2025-05-20':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-05-22':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-05-28':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members that signaled a shift in interest rate expectations.
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: Between May 27, 2025, and May 29, 2025, there was no official Federal
+      Reserve policy statement or public commentary from a voting member signaling
+      a shift in interest rate expectations.
+    search: ok
+  '2025-05-30':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement signaling
+      a shift in interest rate expectations, nor did a voting member provide public
+      commentary signaling such a shift.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-06-04':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement, nor
+      did a voting member provide public commentary signaling a shift in interest
+      rate expectations.
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-06-06':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations
+    search: ok
+  '2025-06-10':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: the Committee's current stance left it "well positioned to wait for
+      more clarity on the outlook for inflation and economic activity"
+    search: ok
+  '2025-06-18':
+    answer: 'yes'
+    evidence: the projections showed a revision to the 2026 outlook, with officials
+      signaling expectations for 25 basis points of rate cuts, down from the previously
+      projected 50 basis points.
+    search: ok
+  '2025-06-25':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue a new official policy statement, nor
+      did a voting member provide public commentary signaling a shift in interest
+      rate expectations.
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-09-22':
+    answer: 'no'
+    evidence: there were no official Federal Reserve policy statements or public commentaries
+      from voting members signaling a shift in interest rate expectations.
+    search: ok
+  '2025-10-30':
+    answer: 'yes'
+    evidence: On October 29, 2025, the Federal Reserve issued an official policy statement
+      following its Federal Open Market Committee (FOMC) meeting. In this statement,
+      the Committee announced a decision to lower the target range for the federal
+      funds rate by 1/4 percentage point
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: there was no official Federal Reserve policy statement or public commentary
+      from a voting member signaling a shift in interest rate expectations.
+    search: ok
+  '2025-11-12':
+    answer: 'no'
+    evidence: the Federal Reserve did not issue an official policy statement, nor
+      did a voting member provide public commentary signaling a shift in interest
+      rate expectations.
+    search: ok
+  '2025-11-17':
+    answer: 'yes'
+    evidence: Federal Reserve Governor Christopher Waller provided public commentary
+      that signaled a shift in interest rate expectations.
+    search: ok
+  '2025-12-03':
+    answer: 'yes'
+    evidence: public commentary from voting members and market analysis highlighted
+      a shift in expectations regarding the upcoming December interest rate decision.
+    search: ok

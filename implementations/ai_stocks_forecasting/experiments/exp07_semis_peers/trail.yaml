@@ -1,0 +1,57 @@
+experiment_id: exp07_semis_peers
+candidates:
+- pattern_id: exp07_semis_peers_q1
+  cue: Did any of NVIDIA's key semiconductor peers (TSMC, ASML, AMD, Broadcom, or
+    Micron) release earnings, updated financial guidance, or monthly sales figures?
+  rule: 'news label: labels/exp07_semis_peers_q1.yaml'
+  direction: either
+  evaluated_on: '2026-10-06'
+  graduated: false
+  rejection_reasons:
+  - training lift 0.77 is below 2
+  - training p-value 0.9 is not below 0.05
+  - training lift interval starts at 0.46, which does not exclude 1 (no effect)
+  holdout_design: matched, 3 controls per shock
+  train:
+    n_windows: 238
+    n_matches: 49
+    n_hits: 21
+    precision: 0.0932
+    base_rate: 0.1205
+    lift: 0.7733
+    p_value: 0.9003
+    ci_low: 0.4559
+    ci_high: 1.2054
+  holdout:
+    n_windows: 52
+    n_matches: 5
+    n_hits: 4
+    precision: 0.4729
+    base_rate: 0.0696
+    lift: 6.798
+    p_value: 0.0112
+    ci_low: 1.8699
+    ci_high: 14.375
+- pattern_id: exp07_semis_peers_q2
+  cue: Were there any reports concerning AI-chip supply chain constraints, such as
+    packaging capacity bottlenecks or production delays for critical components?
+  rule: 'news label: labels/exp07_semis_peers_q2.yaml'
+  direction: either
+  evaluated_on: '2026-10-06'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.96 is below 1.5
+  - holdout p-value 0.695 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 33
+    n_hits: 8
+    precision: 0.067
+    base_rate: 0.0696
+    lift: 0.9627
+    p_value: 0.6945
+    ci_low: 0.5397
+    ci_high: 1.4496
+candidates_tested: 2

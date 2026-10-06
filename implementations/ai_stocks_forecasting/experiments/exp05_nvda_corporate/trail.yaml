@@ -1,0 +1,47 @@
+experiment_id: exp05_nvda_corporate
+candidates:
+- pattern_id: exp05_nvda_corporate_q1
+  cue: Was there a public announcement regarding a new product, hardware architecture,
+    or software platform launch by NVIDIA?
+  rule: 'news label: labels/exp05_nvda_corporate_q1.yaml'
+  direction: up
+  evaluated_on: '2026-10-06'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 1.27 is below 1.5
+  - holdout p-value 0.6 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 7
+    n_hits: 1
+    precision: 0.0386
+    base_rate: 0.0304
+    lift: 1.2671
+    p_value: 0.5999
+    ci_low: 0.0
+    ci_high: 5.0237
+- pattern_id: exp05_nvda_corporate_q2
+  cue: Were there reports of new regulatory investigations, antitrust probes, or formal
+    legal actions initiated against NVIDIA by government authorities?
+  rule: 'news label: labels/exp05_nvda_corporate_q2.yaml'
+  direction: down
+  evaluated_on: '2026-10-06'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.00 is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 1
+    n_hits: 0
+    precision: 0.0
+    base_rate: 0.0391
+    lift: 0.0
+    p_value: 1.0
+    ci_low: 0.0
+    ci_high: 0.0
+candidates_tested: 2

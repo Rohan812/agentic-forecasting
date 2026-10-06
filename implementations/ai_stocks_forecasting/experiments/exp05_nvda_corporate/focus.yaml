@@ -1,0 +1,8 @@
+experiment_id: exp05_nvda_corporate
+focus: >-
+  NVIDIA's own non-earnings events. Do NVIDIA product or platform launches (for
+  example GTC keynotes or a new GPU architecture), major customer or partnership
+  deals, or regulatory and legal actions against NVIDIA (antitrust probes,
+  subpoenas, lawsuits) reported in the days before as_of predict a ±5% move?
+data: fenced news labels per window (cutoff = the window's as_of)
+round: 2 (pre-registered 2026-10-06, after round 1 found nothing)

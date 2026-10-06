@@ -1,5 +1,5 @@
 cap_usd: 30.0
-spent_usd: 6.3355
+spent_usd: 16.2317
 entries:
 - what: pilot_export_controls
   usd: 0.0491
@@ -53,3 +53,31 @@ entries:
   usd: 0.5703
   windows: 31
   searches: 31
+- what: exp05_nvda_corporate_q1
+  usd: 0.9607
+  windows: 52
+  searches: 57
+- what: exp05_nvda_corporate_q2
+  usd: 0.9064
+  windows: 52
+  searches: 52
+- what: exp06_macro_rates_q1
+  usd: 0.8674
+  windows: 52
+  searches: 52
+- what: exp06_macro_rates_q2
+  usd: 0.9073
+  windows: 52
+  searches: 53
+- what: exp07_semis_peers_q1
+  usd: 0.9706
+  windows: 52
+  searches: 53
+- what: exp07_semis_peers_q1
+  usd: 4.2731
+  windows: 238
+  searches: 238
+- what: exp07_semis_peers_q2
+  usd: 1.0107
+  windows: 52
+  searches: 55

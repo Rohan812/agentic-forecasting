@@ -678,9 +678,11 @@ $0.016 per window. Tests are in `test_discovery.py` and `test_news_labels.py`.
 
 ### Results: nothing has graduated
 
-Nine candidates tested across four experiments, **$6.34** spent of the $30 cap. Results on the
-current design (three controls per holdout shock; population holdout for calendar and price
-rules):
+Fifteen candidates tested across seven experiments in two rounds, **$16.23** spent of the $30
+cap. Results on the current design (three controls per holdout shock; population holdout for
+calendar and price rules). Round 2 (experiments 05–07) was pre-registered after round 1 found
+nothing, with new focus files and questions fixed before labelling; no round 1 question was
+revised against the holdout.
 
 | Candidate | Training (2020–Jan 2025) | Holdout (2025) | Why it did not pass |
 |---|---|---|---|
@@ -693,16 +695,25 @@ rules):
 | exp03 q2 (down): hyperscaler cuts capex or questions AI returns | not labelled | 1 match, 1 shock: lift 25.6, p 0.135 | **Closest to passing, but one event.** Its only holdout match preceded a down shock; a single match cannot be significant |
 | exp04 q1 (down): rival launches an AI accelerator | not labelled | 3 matches, 0 shocks | **No effect** |
 | exp04 q2 (down): AI efficiency breakthrough cuts compute needs | not labelled | 5 matches, 0 shocks | **No effect**: the DeepSeek sell-off is the famous case, but it falls in the training period, and in 2025 such reports preceded only calm days |
+| exp05 q1 (up): NVIDIA product, architecture or platform launch | not labelled | 7 matches, 1 shock: lift 1.27, p 0.60 | **No effect**: NVIDIA announces products constantly |
+| exp05 q2 (down): new regulatory or antitrust action against NVIDIA | not labelled | 1 match, 0 shocks | **No effect** |
+| exp06 q1: US CPI report that surprised consensus | not labelled | 1 match, 0 shocks | **No effect** |
+| exp06 q2: Fed statement or official signalling a rate shift | not labelled | 7 matches, 0 shocks | **No effect** |
+| exp07 q1: TSMC, ASML, AMD, Broadcom or Micron report results, guidance or sales | lift 0.77, p 0.90, CI 0.46–1.21: **fails** | 5 matches, 4 shocks: lift 6.80, p 0.011: **passes** | **A 2025 coincidence.** Four of five 2025 peer reports preceded NVDA shocks, but over 2020–24 peer reports preceded shocks less often than calm days (21 of 49) |
+| exp07 q2: AI-chip supply constraints (packaging, production delays) | not labelled | 33 matches, 8 shocks: lift 0.96, p 0.70 | **No effect**: constant background news |
 
-The failures fall into three groups:
+The failures fall into four groups:
 
-1. **No effect.** Five news questions match calm days at least as often as shocks. The holdout
+1. **No effect.** Ten news questions match calm days at least as often as shocks. The holdout
    is not too small for these: they show no edge at all.
 2. **One event.** Hyperscaler capex caution (down) matched once, and that once was a shock. A
    single match cannot reach p < 0.10 under any design, so it stays a lead, not a pattern.
 3. **Real before the cutoff, not after.** Earnings passes every training criterion, but 2025
    did not repeat it. This is what the post-cutoff holdout exists to catch: a pattern the
    models may remember from 2020–24 has to hold on data they cannot have seen.
+4. **Real after the cutoff, not before.** Peer results passed the holdout strongly (4 of 5) and
+   failed training outright (lift 0.77 over 49 matches). This is why the gate needs both halves:
+   a small holdout can line up by chance, and five years of history are the check on it.
 
 ### The holdout redesign
 
@@ -724,8 +735,10 @@ fix is more post-cutoff shocks, from the protected 2026 window or from more tick
 
 **Multiple testing.** A candidate must pass training (p < 0.05 and a lift interval above 1)
 *and* the holdout, so a pattern with no effect gets through both with probability well under 1%.
-Nine candidates have been tested; the trail counts them so any future graduation can be judged
-against that number.
+Fifteen candidates have been tested; the trails count them so any future graduation can be
+judged against that number. Experiment 07's peer-results question is the first to pass the
+holdout, and with fifteen candidates screened, about one such holdout pass is expected by chance
+alone, which the training half then rejected.
 
 ## Notebooks
 

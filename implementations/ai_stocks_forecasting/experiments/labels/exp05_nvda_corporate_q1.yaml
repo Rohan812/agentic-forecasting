@@ -1,0 +1,291 @@
+question_id: exp05_nvda_corporate_q1
+question: Was there a public announcement regarding a new product, hardware architecture,
+  or software platform launch by NVIDIA?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 2, 2025,
+      and February 4, 2025.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: Between February 5, 2025, and February 7, 2025, there were no major
+      public announcements regarding a new product, hardware architecture, or software
+      platform launch by NVIDIA.
+    search: ok
+  '2025-02-10':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 8, 2025,
+      and February 10, 2025.
+    search: ok
+  '2025-02-11':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 9, 2025,
+      and February 11, 2025.
+    search: ok
+  '2025-02-13':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 11, 2025,
+      and February 13, 2025.
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 12, 2025,
+      and February 14, 2025.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between February
+      16, 2025, and February 18, 2025.
+    search: ok
+  '2025-02-20':
+    answer: 'yes'
+    evidence: NVIDIA launched the GeForce RTX 5070 Ti graphics card on February 20,
+      2025.
+    search: ok
+  '2025-02-26':
+    answer: 'yes'
+    evidence: NVIDIA was involved in the release of several software tools developed
+      for its GPUs during an "Open Source Week".
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: Between February 26, 2025, and February 28, 2025, there were no public
+      announcements regarding the launch of a new NVIDIA product, hardware architecture,
+      or software platform.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between March 3, 2025, and
+      March 5, 2025.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: there is no record of a new product, hardware architecture, or software
+      platform launch occurring within the specific three-day window of March 5–7,
+      2025.
+    search: ok
+  '2025-03-11':
+    answer: 'yes'
+    evidence: NVIDIA made a notable announcement regarding its industrial ecosystem.
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new NVIDIA product,
+      hardware architecture, or software platform launches.
+    search: ok
+  '2025-03-18':
+    answer: 'yes'
+    evidence: Jensen Huang shared previously unreleased specifications for upcoming
+      GPU architectures, including the "Rubin" GPU (planned for 2026), "Rubin Ultra"
+      (2027), and the "Feynman" GPU (2028).
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA specifically between March
+      23, 2025, and March 25, 2025.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between March 31, 2025,
+      and April 2, 2025.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of April
+      6, 2025, to April 8, 2025.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between April
+      13, 2025, and April 15, 2025.
+    search: ok
+  '2025-04-21':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 19, 2025,
+      and April 21, 2025.
+    search: ok
+  '2025-04-23':
+    answer: 'no'
+    evidence: Between April 21, 2025, and April 23, 2025, there were no public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2025-04-28':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 26, 2025,
+      and April 28, 2025.
+    search: ok
+  '2025-04-29':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 27, 2025,
+      and April 29, 2025.
+    search: ok
+  '2025-04-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-02':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 30, 2025,
+      and May 2, 2025.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between May 7, 2025, and
+      May 9, 2025.
+    search: ok
+  '2025-05-15':
+    answer: 'no'
+    evidence: No new product, hardware architecture, or software platform launches
+      were announced by NVIDIA during this specific three-day window.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between May 14, 2025, and
+      May 16, 2025.
+    search: ok
+  '2025-05-20':
+    answer: 'yes'
+    evidence: Yes, there was a public announcement regarding a new product by NVIDIA
+      during the specified period.
+    search: ok
+  '2025-05-21':
+    answer: 'yes'
+    evidence: NVIDIA made several public announcements regarding new products and
+      platforms.
+    search: ok
+  '2025-05-22':
+    answer: 'no'
+    evidence: none
+    search: failed
+  '2025-05-28':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: Between May 27, 2025, and May 29, 2025, there were no major public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2025-05-30':
+    answer: 'no'
+    evidence: There were no announcements of new product, hardware, or software platform
+      launches during these specific dates.
+    search: ok
+  '2025-06-02':
+    answer: 'yes'
+    evidence: NVIDIA made a notable announcement regarding a new product initiative
+      at Computex 2025.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no public announcements regarding new product, hardware architecture,
+      or software platform launches by NVIDIA.
+    search: ok
+  '2025-06-04':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 2, 2025, and
+      June 4, 2025.
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new NVIDIA hardware
+      architecture or software platform launch.
+    search: ok
+  '2025-06-06':
+    answer: 'no'
+    evidence: Between June 4, 2025, and June 6, 2025, there were no major public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA specifically between June
+      7, 2025, and June 9, 2025
+    search: ok
+  '2025-06-10':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: No public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA was recorded for the period of June 9,
+      2025, to June 11, 2025.
+    search: ok
+  '2025-06-18':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 16, 2025, and
+      June 18, 2025.
+    search: ok
+  '2025-06-25':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: no new product, hardware, or software platform launches were recorded
+      during the specific three-day window requested.
+    search: ok
+  '2025-09-22':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between September 20, 2025,
+      and September 22, 2025.
+    search: ok
+  '2025-10-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between November
+      5, 2025, and November 7, 2025.
+    search: ok
+  '2025-11-12':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between November 10, 2025,
+      and November 12, 2025.
+    search: ok
+  '2025-11-17':
+    answer: 'no'
+    evidence: there were no public announcements regarding the launch of a new NVIDIA
+      product, hardware architecture, or software platform.
+    search: ok
+  '2025-12-03':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 1, 2025,
+      and December 3, 2025.
+    search: ok

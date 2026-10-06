@@ -1,0 +1,279 @@
+question_id: exp05_nvda_corporate_q2
+question: Were there reports of new regulatory investigations, antitrust probes, or
+  formal legal actions initiated against NVIDIA by government authorities?
+labels:
+  '2025-02-04':
+    answer: 'yes'
+    evidence: On February 4, 2025, it was reported that China planned to initiate
+      an antitrust investigation into NVIDIA
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: no new actions were reported during the specific three-day window requested.
+    search: ok
+  '2025-02-10':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-02-11':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-02-13':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      February 11, 2025, and February 13, 2025.
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: no new government-initiated actions were reported during the specific
+      three-day window requested
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: there were no reports of new, formal antitrust probes or regulatory
+      investigations initiated by government authorities against NVIDIA.
+    search: ok
+  '2025-02-20':
+    answer: 'no'
+    evidence: there were no reports of *new* regulatory investigations, antitrust
+      probes, or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: no new actions were initiated within the specific three-day window requested
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: no new government-initiated actions were reported within the specified
+      three-day window
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities during
+      the period from March 3, 2025, to March 5, 2025.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      March 5, 2025, and March 7, 2025.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: no new government-initiated actions were reported during the specific
+      three-day window requested
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      March 11, 2025, and March 13, 2025.
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities during
+      the period of March 16, 2025, to March 18, 2025.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      March 17, 2025, and March 19, 2025.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no reports of new antitrust probes or regulatory investigations
+      initiated against NVIDIA by government authorities
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: Between March 31, 2025, and April 2, 2025, there were no reports of
+      new regulatory investigations, antitrust probes, or formal legal actions initiated
+      against NVIDIA by government authorities.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      April 6, 2025, and April 8, 2025.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: Between April 13, 2025, and April 15, 2025, there were no reports of
+      new antitrust probes or formal legal actions initiated against NVIDIA by government
+      authorities.
+    search: ok
+  '2025-04-21':
+    answer: 'no'
+    evidence: Between April 19, 2025, and April 21, 2025, there were no reports of
+      new regulatory investigations, antitrust probes, or formal legal actions initiated
+      against NVIDIA by government authorities.
+    search: ok
+  '2025-04-23':
+    answer: 'no'
+    evidence: there were no reports of new antitrust probes or formal legal actions
+      initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-04-28':
+    answer: 'no'
+    evidence: Between April 26, 2025, and April 28, 2025, there were no reports of
+      new antitrust probes or formal legal actions initiated against NVIDIA by government
+      authorities.
+    search: ok
+  '2025-04-29':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-04-30':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-02':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: there were no reports of new antitrust probes, regulatory investigations,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-05-15':
+    answer: 'no'
+    evidence: Between May 13, 2025, and May 15, 2025, there were no reports of new
+      regulatory investigations, antitrust probes, or formal legal actions initiated
+      against NVIDIA by government authorities.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities during
+      the period of May 14, 2025, to May 16, 2025.
+    search: ok
+  '2025-05-20':
+    answer: 'no'
+    evidence: Between May 18, 2025, and May 20, 2025, there were no reports of new
+      regulatory investigations, antitrust probes, or formal legal actions initiated
+      against NVIDIA by government authorities.
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities during
+      the period of May 19, 2025, to May 21, 2025.
+    search: ok
+  '2025-05-22':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities during
+      the period of May 20, 2025, to May 22, 2025.
+    search: ok
+  '2025-05-28':
+    answer: 'no'
+    evidence: no new actions were initiated within the specific three-day window requested.
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: no new formal actions of this nature were reported during the requested
+      dates of May 27–29, 2025.
+    search: ok
+  '2025-05-30':
+    answer: 'no'
+    evidence: there were no reports of new, formal antitrust probes or regulatory
+      investigations initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      May 31, 2025, and June 2, 2025.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-04':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      June 3, 2025, and June 5, 2025.
+    search: ok
+  '2025-06-06':
+    answer: 'no'
+    evidence: there were no reports of new, formal antitrust probes or regulatory
+      investigations initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-10':
+    answer: 'no'
+    evidence: there were no reports of new antitrust probes or formal legal actions
+      initiated against NVIDIA by government authorities
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: there were no reports of *new* antitrust probes or formal legal actions
+      initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-18':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-06-25':
+    answer: 'no'
+    evidence: There were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities between
+      June 23, 2025, and June 25, 2025.
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: no reports of new regulatory investigations, antitrust probes, or formal
+      legal actions initiated against NVIDIA by government authorities
+    search: ok
+  '2025-09-22':
+    answer: 'no'
+    evidence: there were no reports of *new* regulatory investigations, antitrust
+      probes, or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-10-30':
+    answer: 'no'
+    evidence: there were no reports of new regulatory investigations, antitrust probes,
+      or formal legal actions initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: Between November 5, 2025, and November 7, 2025, there were no reports
+      of new regulatory investigations, antitrust probes, or formal legal actions
+      initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-11-12':
+    answer: 'no'
+    evidence: there were no reports of new, formal antitrust probes or regulatory
+      investigations initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-11-17':
+    answer: 'no'
+    evidence: there were no reports of *new* regulatory investigations or antitrust
+      probes initiated against NVIDIA by government authorities.
+    search: ok
+  '2025-12-03':
+    answer: 'no'
+    evidence: there were no reports of new antitrust probes or formal legal actions
+      initiated against NVIDIA by government authorities.
+    search: ok
