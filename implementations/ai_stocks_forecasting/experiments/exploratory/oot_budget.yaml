@@ -1,0 +1,11 @@
+cap_usd: 20.0
+spent_usd: 9.8061
+entries:
+- what: agent_predictor_nvda_analyst_multitask_close_gemini-3.1-flash-lite-preview_discrete
+  usd: 4.8865
+  windows: 182
+  searches: 190
+- what: agent_predictor_nvda_analyst_multitask_close_patterns_gemini-3.1-flash-lite-preview_discrete
+  usd: 4.9196
+  windows: 182
+  searches: 191
