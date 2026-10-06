@@ -37,8 +37,9 @@ EARNINGS_ANNOUNCEMENTS: tuple[str, ...] = (
     "2023-02-22", "2023-05-24", "2023-08-23", "2023-11-21",
     "2024-02-21", "2024-05-22", "2024-08-28", "2024-11-20",
     "2025-02-26", "2025-05-28", "2025-08-27", "2025-11-19",
+    "2026-02-25", "2026-05-20", "2026-08-26",
 )  # fmt: skip
-"""NVDA quarterly results dates, 2020-2025 (yfinance ``get_earnings_dates``).
+"""NVDA quarterly results dates, 2020-2026 (yfinance ``get_earnings_dates``).
 
 NVDA reports after the close, so the price reaction is the **next** session.
 The dates are scheduled weeks in advance, so using them at a window's

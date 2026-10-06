@@ -1,5 +1,5 @@
 cap_usd: 30.0
-spent_usd: 16.2317
+spent_usd: 28.4075
 entries:
 - what: pilot_export_controls
   usd: 0.0491
@@ -81,3 +81,15 @@ entries:
   usd: 1.0107
   windows: 52
   searches: 55
+- what: exp03_hyperscaler_capex_q2
+  usd: 4.023
+  windows: 238
+  searches: 238
+- what: exp05_nvda_corporate_q1
+  usd: 4.045
+  windows: 238
+  searches: 239
+- what: exp02_export_controls_q1
+  usd: 4.1078
+  windows: 238
+  searches: 238

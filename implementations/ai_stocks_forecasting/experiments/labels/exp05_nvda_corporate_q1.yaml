@@ -2,6 +2,1289 @@ question_id: exp05_nvda_corporate_q1
 question: Was there a public announcement regarding a new product, hardware architecture,
   or software platform launch by NVIDIA?
 labels:
+  '2020-02-13':
+    answer: 'no'
+    evidence: no new product or architecture launches were announced during these
+      three days.
+    search: ok
+  '2020-02-18':
+    answer: 'yes'
+    evidence: On February 17, 2020, NVIDIA officially announced the GeForce RTX 2080
+      Ti "Cyberpunk 2077 Edition".
+    search: ok
+  '2020-02-21':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2020-02-26':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 24, 2020,
+      and February 26, 2020.
+    search: ok
+  '2020-03-03':
+    answer: 'no'
+    evidence: No, there was no public announcement regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between March 1, 2020, and
+      March 3, 2020.
+    search: ok
+  '2020-03-06':
+    answer: 'no'
+    evidence: no official product or platform launches were announced by the company
+      during the specified three-day window.
+    search: ok
+  '2020-03-23':
+    answer: 'no'
+    evidence: NVIDIA did not make a public announcement regarding a new product, hardware
+      architecture, or software platform launch between March 21, 2020, and March
+      23, 2020.
+    search: ok
+  '2020-03-27':
+    answer: 'no'
+    evidence: Between March 25, 2020, and March 27, 2020, there were no public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2020-03-31':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2020-04-03':
+    answer: 'no'
+    evidence: No, there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 1, 2020, and
+      April 3, 2020.
+    search: ok
+  '2020-04-13':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of April
+      11, 2020, to April 13, 2020.
+    search: ok
+  '2020-04-20':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2020-04-24':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2020-04-27':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2020-04-28':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2020-04-29':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA during the period of April 27, 2020, to
+      April 29, 2020.
+    search: ok
+  '2020-04-30':
+    answer: 'no'
+    evidence: there were no product or platform launches announced within the specific
+      three-day window you requested.
+    search: ok
+  '2020-05-01':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new hardware architectures
+      or software platforms by NVIDIA
+    search: ok
+  '2020-05-06':
+    answer: 'no'
+    evidence: No, there was no public announcement regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between May 4, 2020, and
+      May 6, 2020.
+    search: ok
+  '2020-05-07':
+    answer: 'no'
+    evidence: No, there was no public announcement regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between May 5, 2020, and
+      May 7, 2020.
+    search: ok
+  '2020-05-14':
+    answer: 'yes'
+    evidence: NVIDIA officially unveiled its Ampere GPU architecture.
+    search: ok
+  '2020-05-19':
+    answer: 'no'
+    evidence: NVIDIA did not make a public announcement regarding a new product, hardware
+      architecture, or software platform launch between May 17, 2020, and May 19,
+      2020.
+    search: ok
+  '2020-05-29':
+    answer: 'no'
+    evidence: Between May 27, 2020, and May 29, 2020, there were no major public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2020-06-04':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2020-06-10':
+    answer: 'no'
+    evidence: Between June 8, 2020, and June 10, 2020, there were no major public
+      announcements regarding a new product, hardware architecture, or software platform
+      launch by NVIDIA.
+    search: ok
+  '2020-06-18':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 16, 2020, and
+      June 18, 2020.
+    search: ok
+  '2020-06-25':
+    answer: 'yes'
+    evidence: NVIDIA and Mercedes-Benz announced a partnership to build a software-defined
+      vehicle architecture.
+    search: ok
+  '2020-07-08':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new hardware architecture
+      or software platform launch by NVIDIA
+    search: ok
+  '2020-07-13':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new NVIDIA product,
+      hardware architecture, or software platform launch.
+    search: ok
+  '2020-07-30':
+    answer: 'no'
+    evidence: Between July 28, 2020, and July 30, 2020, there were no public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2020-07-31':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of July
+      29, 2020, to July 31, 2020.
+    search: ok
+  '2020-08-11':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between August 9, 2020,
+      and August 11, 2020.
+    search: ok
+  '2020-08-14':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform
+    search: ok
+  '2020-09-02':
+    answer: 'yes'
+    evidence: On September 1, 2020, NVIDIA officially announced its GeForce RTX 30
+      series graphics cards.
+    search: ok
+  '2020-09-04':
+    answer: 'yes'
+    evidence: On September 2, 2020, NVIDIA officially unveiled its GeForce RTX 30
+      series graphics cards, which were based on the new Ampere architecture.
+    search: ok
+  '2020-09-11':
+    answer: 'no'
+    evidence: Between September 9, 2020, and September 11, 2020, there were no major
+      public announcements from NVIDIA regarding a new product, hardware architecture,
+      or software platform launch.
+    search: ok
+  '2020-09-21':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new hardware architectures
+      or software platforms from NVIDIA
+    search: ok
+  '2020-09-22':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2020-09-25':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between September 23, 2020,
+      and September 25, 2020.
+    search: ok
+  '2020-10-27':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new product, hardware
+      architecture, or software platform launches by NVIDIA
+    search: ok
+  '2020-11-03':
+    answer: 'no'
+    evidence: There were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between November 1, 2020,
+      and November 3, 2020.
+    search: ok
+  '2020-11-06':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2020-11-25':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2020-12-08':
+    answer: 'no'
+    evidence: there were no major product, hardware architecture, or software platform
+      launches announced by NVIDIA on those specific dates
+    search: ok
+  '2020-12-22':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 20, 2020,
+      and December 22, 2020.
+    search: ok
+  '2021-01-05':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2021-01-11':
+    answer: 'no'
+    evidence: NVIDIA did not make a formal product launch announcement.
+    search: ok
+  '2021-02-05':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2021-02-24':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new hardware architecture or software platform
+      launch.
+    search: ok
+  '2021-03-05':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2021-03-31':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA specifically between March
+      29, 2021, and March 31, 2021.
+    search: ok
+  '2021-04-09':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2021-04-14':
+    answer: 'yes'
+    evidence: On April 12, 2021, NVIDIA introduced a new class of "NVIDIA-Certified
+      Systems" designed to bring AI to enterprise data center infrastructure.
+    search: ok
+  '2021-05-12':
+    answer: 'no'
+    evidence: Between May 10, 2021, and May 12, 2021, there was no major public announcement
+      from NVIDIA regarding a new product, hardware architecture, or software platform
+      launch.
+    search: ok
+  '2021-06-09':
+    answer: 'yes'
+    evidence: NVIDIA announced new products, enhancements, and features across its
+      consumer-facing applications, data centers, and enterprise products.
+    search: ok
+  '2021-06-25':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of June
+      23, 2021, to June 25, 2021.
+    search: ok
+  '2021-07-06':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 4, 2021, and
+      July 6, 2021.
+    search: ok
+  '2021-08-02':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 31, 2021, and
+      August 2, 2021.
+    search: ok
+  '2021-08-09':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2021-08-19':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2021-09-21':
+    answer: 'no'
+    evidence: no new hardware or software launches were recorded in the company's
+      news archives for these dates
+    search: ok
+  '2021-09-28':
+    answer: 'no'
+    evidence: No public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA was recorded between September 26, 2021,
+      and September 28, 2021.
+    search: ok
+  '2021-10-18':
+    answer: 'no'
+    evidence: there were no significant product or platform launches during those
+      specific dates
+    search: ok
+  '2021-10-25':
+    answer: 'yes'
+    evidence: NVIDIA announced the launch of Isaac ROS, a collection of hardware-accelerated
+      robotics packages
+    search: ok
+  '2021-11-03':
+    answer: 'no'
+    evidence: there were no public announcements regarding new NVIDIA product, hardware
+      architecture, or software platform launches.
+    search: ok
+  '2021-11-08':
+    answer: 'no'
+    evidence: NVIDIA did not make a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2021-11-09':
+    answer: 'yes'
+    evidence: NVIDIA unveiled the Jetson AGX Orin, a new robotics computer built on
+      the NVIDIA Ampere architecture.
+    search: ok
+  '2021-11-10':
+    answer: 'yes'
+    evidence: On November 9, 2021, NVIDIA announced this technology platform designed
+      for generating interactive AI avatars.
+    search: ok
+  '2021-11-11':
+    answer: 'yes'
+    evidence: 'During this event, NVIDIA announced several new products, software
+      platforms, and initiatives, including: Omniverse Avatar: A platform for generating
+      interactive AI avatars'
+    search: ok
+  '2021-11-17':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2021-11-26':
+    answer: 'no'
+    evidence: No further product or platform launches were announced during the specific
+      three-day window requested.
+    search: ok
+  '2021-12-06':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 4, 2021,
+      and December 6, 2021.
+    search: ok
+  '2021-12-10':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new hardware architecture or software platform
+      launch.
+    search: ok
+  '2021-12-14':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new hardware architecture or software platform.
+    search: ok
+  '2021-12-20':
+    answer: 'no'
+    evidence: there were no public announcements regarding the launch of a new NVIDIA
+      product, hardware architecture, or software platform.
+    search: ok
+  '2021-12-21':
+    answer: 'no'
+    evidence: Between December 19, 2021, and December 21, 2021, there were no public
+      announcements from NVIDIA regarding the launch of a new product, hardware architecture,
+      or software platform.
+    search: ok
+  '2021-12-22':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 20, 2021,
+      and December 22, 2021.
+    search: ok
+  '2021-12-23':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 21, 2021,
+      and December 23, 2021.
+    search: ok
+  '2021-12-27':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 25, 2021,
+      and December 27, 2021.
+    search: ok
+  '2021-12-28':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 26, 2021,
+      and December 28, 2021.
+    search: ok
+  '2021-12-29':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA during the period of December 27, 2021,
+      to December 29, 2021.
+    search: ok
+  '2022-01-04':
+    answer: 'yes'
+    evidence: On January 4, 2022, NVIDIA held a virtual special address where they
+      announced a range of new hardware and platform updates
+    search: ok
+  '2022-01-12':
+    answer: 'no'
+    evidence: no new product or platform launches were announced by the company within
+      the specific window of January 10–12, 2022.
+    search: ok
+  '2022-01-18':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-01-19':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new product, hardware
+      architecture, or software platform launches by NVIDIA.
+    search: ok
+  '2022-01-20':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-01-21':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-01-24':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of January
+      22, 2022, to January 24, 2022.
+    search: ok
+  '2022-01-28':
+    answer: 'no'
+    evidence: it was an industry-wide standard rather than a proprietary product launch
+    search: ok
+  '2022-02-02':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between January 31, 2022, and February
+      2, 2022.
+    search: ok
+  '2022-02-08':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2022-02-10':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-02-14':
+    answer: 'no'
+    evidence: No, there was no public announcement regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 12, 2022,
+      and February 14, 2022.
+    search: ok
+  '2022-02-16':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-02-23':
+    answer: 'no'
+    evidence: Between February 21, 2022, and February 23, 2022, there were no public
+      announcements regarding a new product, hardware architecture, or software platform
+      launch by NVIDIA.
+    search: ok
+  '2022-02-28':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between February 26, 2022,
+      and February 28, 2022.
+    search: ok
+  '2022-03-04':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-03-08':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2022-03-14':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA during the period of March 12, 2022, to
+      March 14, 2022.
+    search: ok
+  '2022-03-17':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-03-23':
+    answer: 'yes'
+    evidence: NVIDIA made significant product and hardware architecture announcements
+      during the specified period of March 21–23, 2022
+    search: ok
+  '2022-03-28':
+    answer: 'yes'
+    evidence: Reports published between March 26 and March 28, 2022, provided further
+      analysis and summaries of these hardware and software launches
+    search: ok
+  '2022-03-29':
+    answer: 'no'
+    evidence: Regarding the specific window of March 27, 2022, to March 29, 2022,
+      there were no public announcements of new product, hardware architecture, or
+      software platform launches by NVIDIA.
+    search: ok
+  '2022-04-04':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between April
+      2, 2022, and April 4, 2022.
+    search: ok
+  '2022-04-08':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of April
+      6, 2022, to April 8, 2022.
+    search: ok
+  '2022-04-13':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2022-04-20':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 18, 2022,
+      and April 20, 2022.
+    search: ok
+  '2022-04-25':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-04-27':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of April
+      25, 2022, to April 27, 2022.
+    search: ok
+  '2022-05-04':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between May 2, 2022, and
+      May 4, 2022.
+    search: ok
+  '2022-05-06':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-05-10':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-05-12':
+    answer: 'yes'
+    evidence: NVIDIA announced the release of open-source GPU kernel modules for the
+      Linux community.
+    search: ok
+  '2022-05-16':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between May 14, 2022, and May 16, 2022.
+    search: ok
+  '2022-05-24':
+    answer: 'no'
+    evidence: NVIDIA did not hold a major product launch event
+    search: ok
+  '2022-06-01':
+    answer: 'no'
+    evidence: There were no major new product, hardware architecture, or software
+      platform launches specifically announced by NVIDIA as a new public launch event
+      during the May 30–June 1, 2022, window itself.
+    search: ok
+  '2022-06-09':
+    answer: 'no'
+    evidence: no new product launches were announced during the specific window of
+      June 7–9, 2022.
+    search: ok
+  '2022-06-15':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 13, 2022, and
+      June 15, 2022.
+    search: ok
+  '2022-06-23':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 21, 2022, and
+      June 23, 2022.
+    search: ok
+  '2022-06-27':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 25, 2022, and
+      June 27, 2022.
+    search: ok
+  '2022-06-30':
+    answer: 'no'
+    evidence: there were no major public announcements regarding the launch of a new
+      hardware architecture or software platform by NVIDIA
+    search: ok
+  '2022-07-01':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between June 29, 2022, and
+      July 1, 2022.
+    search: ok
+  '2022-07-05':
+    answer: 'no'
+    evidence: There were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of July
+      3, 2022, to July 5, 2022.
+    search: ok
+  '2022-07-06':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 4, 2022, and
+      July 6, 2022.
+    search: ok
+  '2022-07-07':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of July
+      5, 2022, to July 7, 2022.
+    search: ok
+  '2022-07-08':
+    answer: 'no'
+    evidence: no new product launches occurred during the specific three-day window
+      requested
+    search: ok
+  '2022-07-11':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 9, 2022, and
+      July 11, 2022.
+    search: ok
+  '2022-07-12':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 10, 2022, and
+      July 12, 2022.
+    search: ok
+  '2022-07-18':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 16, 2022, and
+      July 18, 2022.
+    search: ok
+  '2022-07-26':
+    answer: 'no'
+    evidence: there were no major public announcements regarding the launch of a new
+      NVIDIA product, hardware architecture, or software platform.
+    search: ok
+  '2022-07-29':
+    answer: 'no'
+    evidence: Between July 27, 2022, and July 29, 2022, there was no major public
+      announcement regarding a new hardware architecture or software platform launch
+      by NVIDIA.
+    search: ok
+  '2022-08-01':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 30, 2022, and
+      August 1, 2022.
+    search: ok
+  '2022-08-05':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new hardware architecture or a new software platform.
+    search: ok
+  '2022-08-09':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-08-12':
+    answer: 'no'
+    evidence: Between August 10, 2022, and August 12, 2022, there were no public announcements
+      from NVIDIA regarding the launch of a new product, hardware architecture, or
+      software platform.
+    search: ok
+  '2022-08-15':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2022-08-16':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new hardware architecture or software platform.
+    search: ok
+  '2022-08-17':
+    answer: 'no'
+    evidence: there were no major public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2022-08-18':
+    answer: 'yes'
+    evidence: NVIDIA announced that its "Hopper" H100 GPU would ship with five active
+      HBM3 sites
+    search: ok
+  '2022-08-19':
+    answer: 'no'
+    evidence: there were no product or platform launches reported during those specific
+      dates.
+    search: ok
+  '2022-08-25':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-08-31':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-09-12':
+    answer: 'no'
+    evidence: there were no major public product, hardware architecture, or software
+      platform launches announced by NVIDIA
+    search: ok
+  '2022-09-15':
+    answer: 'no'
+    evidence: NVIDIA did not make a major public launch of a new product, hardware
+      architecture, or software platform.
+    search: ok
+  '2022-09-21':
+    answer: 'yes'
+    evidence: NVIDIA officially unveiled its next-generation RTX 40-series graphics
+      cards, headlined by the RTX 4090.
+    search: ok
+  '2022-09-26':
+    answer: 'no'
+    evidence: Between September 24, 2022, and September 26, 2022, there were no new
+      major product, hardware architecture, or software platform launches announced
+      by NVIDIA.
+    search: ok
+  '2022-09-27':
+    answer: 'yes'
+    evidence: NVIDIA announced several significant innovations, including the RTX
+      40-series graphics cards (such as the RTX 4090) and DLSS 3 technology.
+    search: ok
+  '2022-10-03':
+    answer: 'no'
+    evidence: the keynote and major product reveals occurred shortly before October
+    search: ok
+  '2022-10-06':
+    answer: 'no'
+    evidence: the period of October 4–6, 2022, did not feature similar product launch
+      events.
+    search: ok
+  '2022-10-13':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between October 11, 2022,
+      and October 13, 2022.
+    search: ok
+  '2022-10-24':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2022-10-27':
+    answer: 'no'
+    evidence: there was no major public announcement from NVIDIA regarding a new product,
+      hardware architecture, or software platform launch.
+    search: ok
+  '2022-10-28':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between October 26, 2022,
+      and October 28, 2022.
+    search: ok
+  '2022-11-03':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between November 1, 2022,
+      and November 3, 2022.
+    search: ok
+  '2022-11-08':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA specifically between November
+      6, 2022, and November 8, 2022.
+    search: ok
+  '2022-11-14':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between November 12, 2022,
+      and November 14, 2022.
+    search: ok
+  '2022-11-16':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2022-11-18':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2022-11-22':
+    answer: 'no'
+    evidence: there were no major public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2022-11-29':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2022-12-07':
+    answer: 'no'
+    evidence: Between December 5, 2022, and December 7, 2022, there were no public
+      announcements regarding the launch of a new NVIDIA product, hardware architecture,
+      or software platform.
+    search: ok
+  '2022-12-12':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 10, 2022,
+      and December 12, 2022.
+    search: ok
+  '2022-12-13':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between December 11, 2022, and December
+      13, 2022.
+    search: ok
+  '2022-12-14':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2022-12-15':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between December 13, 2022, and December
+      15, 2022.
+    search: ok
+  '2022-12-21':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between December 19, 2022,
+      and December 21, 2022.
+    search: ok
+  '2022-12-23':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2022-12-30':
+    answer: 'no'
+    evidence: there were no official public announcements from NVIDIA regarding the
+      launch of a new product, hardware architecture, or software platform.
+    search: ok
+  '2023-01-06':
+    answer: 'yes'
+    evidence: NVIDIA announced its new GeForce RTX 40 Series Laptop GPUs.
+    search: ok
+  '2023-01-11':
+    answer: 'no'
+    evidence: Between January 9, 2023, and January 11, 2023, there were no major public
+      announcements regarding new product, hardware architecture, or software platform
+      launches by NVIDIA.
+    search: ok
+  '2023-01-12':
+    answer: 'no'
+    evidence: No further product, hardware, or software platform launches were announced
+      by the company in the specific window of January 10–12, 2023.
+    search: ok
+  '2023-01-19':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2023-01-27':
+    answer: 'no'
+    evidence: Between January 25, 2023, and January 27, 2023, there were no major
+      public announcements regarding a new product, hardware architecture, or software
+      platform launch by NVIDIA.
+    search: ok
+  '2023-01-31':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between January 29, 2023,
+      and January 31, 2023.
+    search: ok
+  '2023-02-06':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2023-02-13':
+    answer: 'no'
+    evidence: No public announcement regarding a new product, hardware architecture,
+      or software platform launch was made by NVIDIA between February 11, 2023, and
+      February 13, 2023.
+    search: ok
+  '2023-02-22':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2023-02-27':
+    answer: 'no'
+    evidence: no new product launches occurred during the specific window of February
+      25–27, 2023.
+    search: ok
+  '2023-03-01':
+    answer: 'no'
+    evidence: there were no major public announcements regarding the launch of a new
+      product, hardware architecture, or software platform by NVIDIA.
+    search: ok
+  '2023-03-07':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between March
+      5, 2023, and March 7, 2023.
+    search: ok
+  '2023-03-09':
+    answer: 'no'
+    evidence: Between March 7, 2023, and March 9, 2023, there were no public announcements
+      regarding new product, hardware architecture, or software platform launches
+      by NVIDIA.
+    search: ok
+  '2023-03-15':
+    answer: 'no'
+    evidence: No, there was no public announcement regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between March 13, 2023,
+      and March 15, 2023.
+    search: ok
+  '2023-03-20':
+    answer: 'no'
+    evidence: there were no public announcements regarding new NVIDIA product, hardware
+      architecture, or software platform launches.
+    search: ok
+  '2023-03-22':
+    answer: 'yes'
+    evidence: On March 21, 2023, NVIDIA announced the "DGX Quantum," a system developed
+      with Quantum Machines that provides a new architecture for high-performance,
+      low-latency quantum-classical computing.
+    search: ok
+  '2023-03-23':
+    answer: 'yes'
+    evidence: On March 21, 2023, NVIDIA announced the DGX Quantum system, described
+      as the world’s first GPU-accelerated quantum computing system.
+    search: ok
+  '2023-03-31':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new product, hardware
+      architecture, or software platform launches by NVIDIA.
+    search: ok
+  '2023-05-24':
+    answer: 'yes'
+    evidence: NVIDIA announced a collaboration with Microsoft to integrate its NVIDIA
+      AI Enterprise software into Microsoft’s cloud platform.
+    search: ok
+  '2023-05-30':
+    answer: 'yes'
+    evidence: NVIDIA announced the DGX GH200, a new class of large-memory AI supercomputer.
+    search: ok
+  '2023-06-20':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between June 18, 2023, and June 20, 2023.
+    search: ok
+  '2023-06-27':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of June
+      25, 2023, to June 27, 2023.
+    search: ok
+  '2023-08-03':
+    answer: 'yes'
+    evidence: On August 1, 2023, NVIDIA announced that it had joined forces with Pixar,
+      Adobe, Apple, and Autodesk to form the Alliance for OpenUSD (AOUSD).
+    search: ok
+  '2023-08-11':
+    answer: 'yes'
+    evidence: NVIDIA unveiled an upgraded version of its GH200 Grace Hopper Superchip,
+      designed for large-scale generative AI workloads, featuring increased memory
+      capacity and bandwidth.
+    search: ok
+  '2023-08-18':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2023-09-28':
+    answer: 'no'
+    evidence: Between September 26, 2023, and September 28, 2023, there was no major
+      public announcement from NVIDIA regarding a new hardware architecture or software
+      platform launch.
+    search: ok
+  '2023-10-19':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2023-10-30':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between October 28, 2023,
+      and October 30, 2023.
+    search: ok
+  '2024-01-05':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding new product,
+      hardware architecture, or software platform launches
+    search: ok
+  '2024-02-21':
+    answer: 'no'
+    evidence: there were no public announcements regarding the launch of a new NVIDIA
+      product, hardware architecture, or software platform.
+    search: ok
+  '2024-02-26':
+    answer: 'no'
+    evidence: Between February 24, 2024, and February 26, 2024, there were no public
+      announcements from NVIDIA regarding the launch of a new product, hardware architecture,
+      or software platform.
+    search: ok
+  '2024-02-29':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of February
+      27, 2024, to February 29, 2024.
+    search: ok
+  '2024-03-07':
+    answer: 'no'
+    evidence: No, there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA published between March
+      5, 2024, and March 7, 2024.
+    search: ok
+  '2024-03-11':
+    answer: 'no'
+    evidence: No, there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between March 9, 2024, and
+      March 11, 2024.
+    search: ok
+  '2024-03-18':
+    answer: 'yes'
+    evidence: On March 18, 2024, at the opening keynote of its GTC 2024 conference
+      in San Jose, California, NVIDIA officially unveiled the Blackwell platform.
+    search: ok
+  '2024-03-20':
+    answer: 'yes'
+    evidence: On March 18, 2024, NVIDIA officially unveiled its new Blackwell GPU
+      architecture.
+    search: ok
+  '2024-04-01':
+    answer: 'no'
+    evidence: Between March 30, 2024, and April 1, 2024, there were no public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2024-04-08':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between April 6, 2024, and
+      April 8, 2024.
+    search: ok
+  '2024-04-10':
+    answer: 'no'
+    evidence: there were no major public announcements regarding new product, hardware
+      architecture, or software platform launches by NVIDIA
+    search: ok
+  '2024-04-18':
+    answer: 'no'
+    evidence: Between April 16, 2024, and April 18, 2024, there were no public announcements
+      regarding a new product, hardware architecture, or software platform launch
+      by NVIDIA.
+    search: ok
+  '2024-04-25':
+    answer: 'no'
+    evidence: the period of April 23–25, 2024, did not feature similar high-profile
+      product launches.
+    search: ok
+  '2024-05-22':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2024-05-24':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2024-06-04':
+    answer: 'yes'
+    evidence: On June 2, 2024, NVIDIA and major computer manufacturers (including
+      ASUS, GIGABYTE, Supermicro, and others) unveiled a wide array of systems powered
+      by the NVIDIA Blackwell architecture.
+    search: ok
+  '2024-06-10':
+    answer: 'no'
+    evidence: NVIDIA did not hold a major launch event for a new product, hardware
+      architecture, or software platform.
+    search: ok
+  '2024-06-11':
+    answer: 'no'
+    evidence: Between June 9, 2024, and June 11, 2024, there were no major public
+      announcements regarding a new NVIDIA product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2024-06-12':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2024-06-21':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of June
+      19, 2024, to June 21, 2024.
+    search: ok
+  '2024-06-27':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform launch.
+    search: ok
+  '2024-06-28':
+    answer: 'no'
+    evidence: Between June 26, 2024, and June 28, 2024, NVIDIA did not announce any
+      new product, hardware architecture, or software platform.
+    search: ok
+  '2024-07-02':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the period of June
+      30, 2024, to July 2, 2024.
+    search: ok
+  '2024-07-10':
+    answer: 'no'
+    evidence: Between July 8, 2024, and July 10, 2024, there were no public announcements
+      from NVIDIA regarding the launch of a new product, hardware architecture, or
+      software platform.
+    search: ok
+  '2024-07-16':
+    answer: 'no'
+    evidence: there were no new product or platform launches during those specific
+      three days
+    search: ok
+  '2024-07-23':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between July 21, 2024, and
+      July 23, 2024.
+    search: ok
+  '2024-07-29':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA specifically between July
+      27, 2024, and July 29, 2024.
+    search: ok
+  '2024-08-02':
+    answer: 'no'
+    evidence: There was no public announcement regarding a new product, hardware architecture,
+      or software platform launch by NVIDIA between July 31, 2024, and August 2, 2024.
+    search: ok
+  '2024-08-06':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between August 4, 2024,
+      and August 6, 2024.
+    search: ok
+  '2024-08-12':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between August 10, 2024,
+      and August 12, 2024.
+    search: ok
+  '2024-08-16':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2024-08-22':
+    answer: 'no'
+    evidence: there were no public announcements from NVIDIA regarding the launch
+      of a new product, hardware architecture, or software platform.
+    search: ok
+  '2024-08-28':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2024-08-30':
+    answer: 'no'
+    evidence: NVIDIA did not announce a new product, hardware architecture, or software
+      platform.
+    search: ok
+  '2024-09-10':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between September 8, 2024,
+      and September 10, 2024.
+    search: ok
+  '2024-09-13':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA.
+    search: ok
+  '2024-09-20':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA between September 18, 2024,
+      and September 20, 2024.
+    search: ok
+  '2024-10-01':
+    answer: 'no'
+    evidence: there were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA
+    search: ok
+  '2024-11-20':
+    answer: 'yes'
+    evidence: on November 18, 2024, NVIDIA made several product and technology announcements
+      at the SC24 supercomputing conference in Atlanta.
+    search: ok
+  '2025-01-06':
+    answer: 'yes'
+    evidence: NVIDIA made several major product and platform announcements during
+      its keynote at CES 2025, which took place on January 6, 2025.
+    search: ok
+  '2025-01-10':
+    answer: 'yes'
+    evidence: NVIDIA officially unveiled its new GeForce RTX 50 Series graphics cards,
+      powered by the Blackwell architecture.
+    search: ok
+  '2025-01-24':
+    answer: 'no'
+    evidence: There were no public announcements regarding a new product, hardware
+      architecture, or software platform launch by NVIDIA during the specific window
+      of January 22, 2025, to January 24, 2025.
+    search: ok
   '2025-02-04':
     answer: 'no'
     evidence: There were no public announcements regarding a new product, hardware

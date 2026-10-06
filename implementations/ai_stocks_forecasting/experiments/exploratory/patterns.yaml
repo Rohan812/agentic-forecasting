@@ -1,0 +1,10 @@
+gate: A (exploratory; see preregistration.md)
+written_on: '2026-10-06'
+patterns:
+- pattern_id: X-1
+  cue: NVDA reports quarterly results after the close
+  rule: earnings_after_close
+  direction: either
+  train_precision: 0.38139790864061646
+  train_lift: 3.1651073197578428
+  holdout_lift: 3.5811403508771926
