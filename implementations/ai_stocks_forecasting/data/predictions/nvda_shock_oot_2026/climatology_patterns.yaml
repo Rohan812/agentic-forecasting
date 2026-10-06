@@ -1,0 +1,2395 @@
+spec:
+  task:
+    task_id: nvda_shock_1d
+    target_series_id: nvda_shock_1d
+    horizons:
+    - 1
+    frequency: B
+    description: P(|NVDA close-to-close return| >= 5%) over the 1 session(s) after
+      as_of
+    payload_type: binary
+    categories: null
+    resolution_fn: observed_value_at_resolution_timestamp
+  start: '2026-01-02T20:00:00'
+  end: '2026-10-02T20:00:00'
+  stride: 1
+  origin_dates:
+  - '2026-01-02T20:00:00'
+  - '2026-01-05T20:00:00'
+  - '2026-01-06T20:00:00'
+  - '2026-01-07T20:00:00'
+  - '2026-01-08T20:00:00'
+  - '2026-01-09T20:00:00'
+  - '2026-01-12T20:00:00'
+  - '2026-01-13T20:00:00'
+  - '2026-01-14T20:00:00'
+  - '2026-01-15T20:00:00'
+  - '2026-01-20T20:00:00'
+  - '2026-01-21T20:00:00'
+  - '2026-01-22T20:00:00'
+  - '2026-01-23T20:00:00'
+  - '2026-01-26T20:00:00'
+  - '2026-01-27T20:00:00'
+  - '2026-01-28T20:00:00'
+  - '2026-01-29T20:00:00'
+  - '2026-01-30T20:00:00'
+  - '2026-02-02T20:00:00'
+  - '2026-02-03T20:00:00'
+  - '2026-02-04T20:00:00'
+  - '2026-02-05T20:00:00'
+  - '2026-02-06T20:00:00'
+  - '2026-02-09T20:00:00'
+  - '2026-02-10T20:00:00'
+  - '2026-02-11T20:00:00'
+  - '2026-02-12T20:00:00'
+  - '2026-02-17T20:00:00'
+  - '2026-02-18T20:00:00'
+  - '2026-02-19T20:00:00'
+  - '2026-02-20T20:00:00'
+  - '2026-02-23T20:00:00'
+  - '2026-02-24T20:00:00'
+  - '2026-02-25T20:00:00'
+  - '2026-02-26T20:00:00'
+  - '2026-02-27T20:00:00'
+  - '2026-03-02T20:00:00'
+  - '2026-03-03T20:00:00'
+  - '2026-03-04T20:00:00'
+  - '2026-03-05T20:00:00'
+  - '2026-03-06T20:00:00'
+  - '2026-03-09T20:00:00'
+  - '2026-03-10T20:00:00'
+  - '2026-03-11T20:00:00'
+  - '2026-03-12T20:00:00'
+  - '2026-03-13T20:00:00'
+  - '2026-03-16T20:00:00'
+  - '2026-03-17T20:00:00'
+  - '2026-03-18T20:00:00'
+  - '2026-03-19T20:00:00'
+  - '2026-03-20T20:00:00'
+  - '2026-03-23T20:00:00'
+  - '2026-03-24T20:00:00'
+  - '2026-03-25T20:00:00'
+  - '2026-03-26T20:00:00'
+  - '2026-03-27T20:00:00'
+  - '2026-03-30T20:00:00'
+  - '2026-03-31T20:00:00'
+  - '2026-04-01T20:00:00'
+  - '2026-04-06T20:00:00'
+  - '2026-04-07T20:00:00'
+  - '2026-04-08T20:00:00'
+  - '2026-04-09T20:00:00'
+  - '2026-04-10T20:00:00'
+  - '2026-04-13T20:00:00'
+  - '2026-04-14T20:00:00'
+  - '2026-04-15T20:00:00'
+  - '2026-04-16T20:00:00'
+  - '2026-04-17T20:00:00'
+  - '2026-04-20T20:00:00'
+  - '2026-04-21T20:00:00'
+  - '2026-04-22T20:00:00'
+  - '2026-04-23T20:00:00'
+  - '2026-04-24T20:00:00'
+  - '2026-04-27T20:00:00'
+  - '2026-04-28T20:00:00'
+  - '2026-04-29T20:00:00'
+  - '2026-04-30T20:00:00'
+  - '2026-05-01T20:00:00'
+  - '2026-05-04T20:00:00'
+  - '2026-05-05T20:00:00'
+  - '2026-05-06T20:00:00'
+  - '2026-05-07T20:00:00'
+  - '2026-05-08T20:00:00'
+  - '2026-05-11T20:00:00'
+  - '2026-05-12T20:00:00'
+  - '2026-05-13T20:00:00'
+  - '2026-05-14T20:00:00'
+  - '2026-05-15T20:00:00'
+  - '2026-05-18T20:00:00'
+  - '2026-05-19T20:00:00'
+  - '2026-05-20T20:00:00'
+  - '2026-05-21T20:00:00'
+  - '2026-05-26T20:00:00'
+  - '2026-05-27T20:00:00'
+  - '2026-05-28T20:00:00'
+  - '2026-05-29T20:00:00'
+  - '2026-06-01T20:00:00'
+  - '2026-06-02T20:00:00'
+  - '2026-06-03T20:00:00'
+  - '2026-06-04T20:00:00'
+  - '2026-06-05T20:00:00'
+  - '2026-06-08T20:00:00'
+  - '2026-06-09T20:00:00'
+  - '2026-06-10T20:00:00'
+  - '2026-06-11T20:00:00'
+  - '2026-06-12T20:00:00'
+  - '2026-06-15T20:00:00'
+  - '2026-06-16T20:00:00'
+  - '2026-06-17T20:00:00'
+  - '2026-06-22T20:00:00'
+  - '2026-06-23T20:00:00'
+  - '2026-06-24T20:00:00'
+  - '2026-06-25T20:00:00'
+  - '2026-06-26T20:00:00'
+  - '2026-06-29T20:00:00'
+  - '2026-06-30T20:00:00'
+  - '2026-07-01T20:00:00'
+  - '2026-07-06T20:00:00'
+  - '2026-07-07T20:00:00'
+  - '2026-07-08T20:00:00'
+  - '2026-07-09T20:00:00'
+  - '2026-07-10T20:00:00'
+  - '2026-07-13T20:00:00'
+  - '2026-07-14T20:00:00'
+  - '2026-07-15T20:00:00'
+  - '2026-07-16T20:00:00'
+  - '2026-07-17T20:00:00'
+  - '2026-07-20T20:00:00'
+  - '2026-07-21T20:00:00'
+  - '2026-07-22T20:00:00'
+  - '2026-07-23T20:00:00'
+  - '2026-07-24T20:00:00'
+  - '2026-07-27T20:00:00'
+  - '2026-07-28T20:00:00'
+  - '2026-07-29T20:00:00'
+  - '2026-07-30T20:00:00'
+  - '2026-07-31T20:00:00'
+  - '2026-08-03T20:00:00'
+  - '2026-08-04T20:00:00'
+  - '2026-08-05T20:00:00'
+  - '2026-08-06T20:00:00'
+  - '2026-08-07T20:00:00'
+  - '2026-08-10T20:00:00'
+  - '2026-08-11T20:00:00'
+  - '2026-08-12T20:00:00'
+  - '2026-08-13T20:00:00'
+  - '2026-08-14T20:00:00'
+  - '2026-08-17T20:00:00'
+  - '2026-08-18T20:00:00'
+  - '2026-08-19T20:00:00'
+  - '2026-08-20T20:00:00'
+  - '2026-08-21T20:00:00'
+  - '2026-08-24T20:00:00'
+  - '2026-08-25T20:00:00'
+  - '2026-08-26T20:00:00'
+  - '2026-08-27T20:00:00'
+  - '2026-08-28T20:00:00'
+  - '2026-08-31T20:00:00'
+  - '2026-09-01T20:00:00'
+  - '2026-09-02T20:00:00'
+  - '2026-09-03T20:00:00'
+  - '2026-09-08T20:00:00'
+  - '2026-09-09T20:00:00'
+  - '2026-09-10T20:00:00'
+  - '2026-09-11T20:00:00'
+  - '2026-09-14T20:00:00'
+  - '2026-09-15T20:00:00'
+  - '2026-09-16T20:00:00'
+  - '2026-09-17T20:00:00'
+  - '2026-09-18T20:00:00'
+  - '2026-09-21T20:00:00'
+  - '2026-09-22T20:00:00'
+  - '2026-09-23T20:00:00'
+  - '2026-09-24T20:00:00'
+  - '2026-09-25T20:00:00'
+  - '2026-09-28T20:00:00'
+  - '2026-09-29T20:00:00'
+  - '2026-09-30T20:00:00'
+  - '2026-10-01T20:00:00'
+  - '2026-10-02T20:00:00'
+  warmup: 250
+  description: 'One-time 2026 evaluation of the exploratory tier: 182 after-close
+    origins, 7 shocks'
+predictor_id: climatology_patterns
+predictions:
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.252187'
+  as_of: '2026-01-02T20:00:00'
+  forecast_date: '2026-01-05T00:00:00'
+  payload:
+    probability: 0.12643847742696962
+  metadata:
+    n_observations: 6778
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.286448'
+  as_of: '2026-01-05T20:00:00'
+  forecast_date: '2026-01-06T00:00:00'
+  payload:
+    probability: 0.12641982593302847
+  metadata:
+    n_observations: 6779
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.320210'
+  as_of: '2026-01-06T20:00:00'
+  forecast_date: '2026-01-07T00:00:00'
+  payload:
+    probability: 0.12640117994100294
+  metadata:
+    n_observations: 6780
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.352998'
+  as_of: '2026-01-07T20:00:00'
+  forecast_date: '2026-01-08T00:00:00'
+  payload:
+    probability: 0.12638253944845892
+  metadata:
+    n_observations: 6781
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.387010'
+  as_of: '2026-01-08T20:00:00'
+  forecast_date: '2026-01-09T00:00:00'
+  payload:
+    probability: 0.12636390445296372
+  metadata:
+    n_observations: 6782
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.422345'
+  as_of: '2026-01-09T20:00:00'
+  forecast_date: '2026-01-12T00:00:00'
+  payload:
+    probability: 0.12634527495208608
+  metadata:
+    n_observations: 6783
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.456266'
+  as_of: '2026-01-12T20:00:00'
+  forecast_date: '2026-01-13T00:00:00'
+  payload:
+    probability: 0.12632665094339623
+  metadata:
+    n_observations: 6784
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.489305'
+  as_of: '2026-01-13T20:00:00'
+  forecast_date: '2026-01-14T00:00:00'
+  payload:
+    probability: 0.12630803242446573
+  metadata:
+    n_observations: 6785
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.522446'
+  as_of: '2026-01-14T20:00:00'
+  forecast_date: '2026-01-15T00:00:00'
+  payload:
+    probability: 0.12628941939286767
+  metadata:
+    n_observations: 6786
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.554704'
+  as_of: '2026-01-15T20:00:00'
+  forecast_date: '2026-01-16T00:00:00'
+  payload:
+    probability: 0.1262708118461765
+  metadata:
+    n_observations: 6787
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.587795'
+  as_of: '2026-01-20T20:00:00'
+  forecast_date: '2026-01-21T00:00:00'
+  payload:
+    probability: 0.12623361319782
+  metadata:
+    n_observations: 6789
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.621177'
+  as_of: '2026-01-21T20:00:00'
+  forecast_date: '2026-01-22T00:00:00'
+  payload:
+    probability: 0.12621502209131075
+  metadata:
+    n_observations: 6790
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.654617'
+  as_of: '2026-01-22T20:00:00'
+  forecast_date: '2026-01-23T00:00:00'
+  payload:
+    probability: 0.12619643646002063
+  metadata:
+    n_observations: 6791
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.687892'
+  as_of: '2026-01-23T20:00:00'
+  forecast_date: '2026-01-26T00:00:00'
+  payload:
+    probability: 0.12617785630153122
+  metadata:
+    n_observations: 6792
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.720855'
+  as_of: '2026-01-26T20:00:00'
+  forecast_date: '2026-01-27T00:00:00'
+  payload:
+    probability: 0.12615928161342557
+  metadata:
+    n_observations: 6793
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.753964'
+  as_of: '2026-01-27T20:00:00'
+  forecast_date: '2026-01-28T00:00:00'
+  payload:
+    probability: 0.1261407123932882
+  metadata:
+    n_observations: 6794
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.788333'
+  as_of: '2026-01-28T20:00:00'
+  forecast_date: '2026-01-29T00:00:00'
+  payload:
+    probability: 0.12612214863870494
+  metadata:
+    n_observations: 6795
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.821621'
+  as_of: '2026-01-29T20:00:00'
+  forecast_date: '2026-01-30T00:00:00'
+  payload:
+    probability: 0.1261035903472631
+  metadata:
+    n_observations: 6796
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.856879'
+  as_of: '2026-01-30T20:00:00'
+  forecast_date: '2026-02-02T00:00:00'
+  payload:
+    probability: 0.12608503751655142
+  metadata:
+    n_observations: 6797
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.889915'
+  as_of: '2026-02-02T20:00:00'
+  forecast_date: '2026-02-03T00:00:00'
+  payload:
+    probability: 0.12606649014416005
+  metadata:
+    n_observations: 6798
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.922942'
+  as_of: '2026-02-03T20:00:00'
+  forecast_date: '2026-02-04T00:00:00'
+  payload:
+    probability: 0.12604794822768053
+  metadata:
+    n_observations: 6799
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.956795'
+  as_of: '2026-02-04T20:00:00'
+  forecast_date: '2026-02-05T00:00:00'
+  payload:
+    probability: 0.1260294117647059
+  metadata:
+    n_observations: 6800
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:32.989819'
+  as_of: '2026-02-05T20:00:00'
+  forecast_date: '2026-02-06T00:00:00'
+  payload:
+    probability: 0.12601088075283046
+  metadata:
+    n_observations: 6801
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.030313'
+  as_of: '2026-02-06T20:00:00'
+  forecast_date: '2026-02-09T00:00:00'
+  payload:
+    probability: 0.12613937077330198
+  metadata:
+    n_observations: 6802
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.067447'
+  as_of: '2026-02-09T20:00:00'
+  forecast_date: '2026-02-10T00:00:00'
+  payload:
+    probability: 0.1261208290460091
+  metadata:
+    n_observations: 6803
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.101003'
+  as_of: '2026-02-10T20:00:00'
+  forecast_date: '2026-02-11T00:00:00'
+  payload:
+    probability: 0.12610229276895943
+  metadata:
+    n_observations: 6804
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.499386'
+  as_of: '2026-02-11T20:00:00'
+  forecast_date: '2026-02-12T00:00:00'
+  payload:
+    probability: 0.12608376193975018
+  metadata:
+    n_observations: 6805
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.535690'
+  as_of: '2026-02-12T20:00:00'
+  forecast_date: '2026-02-13T00:00:00'
+  payload:
+    probability: 0.12606523655598
+  metadata:
+    n_observations: 6806
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.570167'
+  as_of: '2026-02-17T20:00:00'
+  forecast_date: '2026-02-18T00:00:00'
+  payload:
+    probability: 0.12602820211515864
+  metadata:
+    n_observations: 6808
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.604124'
+  as_of: '2026-02-18T20:00:00'
+  forecast_date: '2026-02-19T00:00:00'
+  payload:
+    probability: 0.1260096930533118
+  metadata:
+    n_observations: 6809
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.638875'
+  as_of: '2026-02-19T20:00:00'
+  forecast_date: '2026-02-20T00:00:00'
+  payload:
+    probability: 0.12599118942731277
+  metadata:
+    n_observations: 6810
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.672834'
+  as_of: '2026-02-20T20:00:00'
+  forecast_date: '2026-02-23T00:00:00'
+  payload:
+    probability: 0.1259726912347673
+  metadata:
+    n_observations: 6811
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.705853'
+  as_of: '2026-02-23T20:00:00'
+  forecast_date: '2026-02-24T00:00:00'
+  payload:
+    probability: 0.12595419847328243
+  metadata:
+    n_observations: 6812
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.739697'
+  as_of: '2026-02-24T20:00:00'
+  forecast_date: '2026-02-25T00:00:00'
+  payload:
+    probability: 0.12593571114046676
+  metadata:
+    n_observations: 6813
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.773741'
+  as_of: '2026-02-25T20:00:00'
+  forecast_date: '2026-02-26T00:00:00'
+  payload:
+    probability: 0.38139790864061646
+  metadata:
+    n_observations: 6814
+    window: null
+    patterns_fired:
+    - X-1
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.807372'
+  as_of: '2026-02-26T20:00:00'
+  forecast_date: '2026-02-27T00:00:00'
+  payload:
+    probability: 0.1260454878943507
+  metadata:
+    n_observations: 6815
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.841393'
+  as_of: '2026-02-27T20:00:00'
+  forecast_date: '2026-03-02T00:00:00'
+  payload:
+    probability: 0.1260269953051643
+  metadata:
+    n_observations: 6816
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.874939'
+  as_of: '2026-03-02T20:00:00'
+  forecast_date: '2026-03-03T00:00:00'
+  payload:
+    probability: 0.12600850814141118
+  metadata:
+    n_observations: 6817
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.908906'
+  as_of: '2026-03-03T20:00:00'
+  forecast_date: '2026-03-04T00:00:00'
+  payload:
+    probability: 0.12599002640070403
+  metadata:
+    n_observations: 6818
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.942748'
+  as_of: '2026-03-04T20:00:00'
+  forecast_date: '2026-03-05T00:00:00'
+  payload:
+    probability: 0.125971550080657
+  metadata:
+    n_observations: 6819
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:33.976047'
+  as_of: '2026-03-05T20:00:00'
+  forecast_date: '2026-03-06T00:00:00'
+  payload:
+    probability: 0.12595307917888562
+  metadata:
+    n_observations: 6820
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.009923'
+  as_of: '2026-03-06T20:00:00'
+  forecast_date: '2026-03-09T00:00:00'
+  payload:
+    probability: 0.1259346136930069
+  metadata:
+    n_observations: 6821
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.044004'
+  as_of: '2026-03-09T20:00:00'
+  forecast_date: '2026-03-10T00:00:00'
+  payload:
+    probability: 0.1259161536206391
+  metadata:
+    n_observations: 6822
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.077369'
+  as_of: '2026-03-10T20:00:00'
+  forecast_date: '2026-03-11T00:00:00'
+  payload:
+    probability: 0.12589769895940203
+  metadata:
+    n_observations: 6823
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.110158'
+  as_of: '2026-03-11T20:00:00'
+  forecast_date: '2026-03-12T00:00:00'
+  payload:
+    probability: 0.12587924970691677
+  metadata:
+    n_observations: 6824
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.143000'
+  as_of: '2026-03-12T20:00:00'
+  forecast_date: '2026-03-13T00:00:00'
+  payload:
+    probability: 0.12586080586080586
+  metadata:
+    n_observations: 6825
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.176413'
+  as_of: '2026-03-13T20:00:00'
+  forecast_date: '2026-03-16T00:00:00'
+  payload:
+    probability: 0.12584236741869323
+  metadata:
+    n_observations: 6826
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.210052'
+  as_of: '2026-03-16T20:00:00'
+  forecast_date: '2026-03-17T00:00:00'
+  payload:
+    probability: 0.1258239343782042
+  metadata:
+    n_observations: 6827
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.243169'
+  as_of: '2026-03-17T20:00:00'
+  forecast_date: '2026-03-18T00:00:00'
+  payload:
+    probability: 0.12580550673696544
+  metadata:
+    n_observations: 6828
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.276509'
+  as_of: '2026-03-18T20:00:00'
+  forecast_date: '2026-03-19T00:00:00'
+  payload:
+    probability: 0.12578708449260506
+  metadata:
+    n_observations: 6829
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.309482'
+  as_of: '2026-03-19T20:00:00'
+  forecast_date: '2026-03-20T00:00:00'
+  payload:
+    probability: 0.12576866764275257
+  metadata:
+    n_observations: 6830
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.342765'
+  as_of: '2026-03-20T20:00:00'
+  forecast_date: '2026-03-23T00:00:00'
+  payload:
+    probability: 0.1257502561850388
+  metadata:
+    n_observations: 6831
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.377036'
+  as_of: '2026-03-23T20:00:00'
+  forecast_date: '2026-03-24T00:00:00'
+  payload:
+    probability: 0.125731850117096
+  metadata:
+    n_observations: 6832
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.410474'
+  as_of: '2026-03-24T20:00:00'
+  forecast_date: '2026-03-25T00:00:00'
+  payload:
+    probability: 0.12571344943655788
+  metadata:
+    n_observations: 6833
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.444079'
+  as_of: '2026-03-25T20:00:00'
+  forecast_date: '2026-03-26T00:00:00'
+  payload:
+    probability: 0.12569505414105941
+  metadata:
+    n_observations: 6834
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.477671'
+  as_of: '2026-03-26T20:00:00'
+  forecast_date: '2026-03-27T00:00:00'
+  payload:
+    probability: 0.125676664228237
+  metadata:
+    n_observations: 6835
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.510853'
+  as_of: '2026-03-27T20:00:00'
+  forecast_date: '2026-03-30T00:00:00'
+  payload:
+    probability: 0.1256582796957285
+  metadata:
+    n_observations: 6836
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.544362'
+  as_of: '2026-03-30T20:00:00'
+  forecast_date: '2026-03-31T00:00:00'
+  payload:
+    probability: 0.12563990054117302
+  metadata:
+    n_observations: 6837
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.578253'
+  as_of: '2026-03-31T20:00:00'
+  forecast_date: '2026-04-01T00:00:00'
+  payload:
+    probability: 0.12576776835331968
+  metadata:
+    n_observations: 6838
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.612408'
+  as_of: '2026-04-01T20:00:00'
+  forecast_date: '2026-04-02T00:00:00'
+  payload:
+    probability: 0.12574937856411755
+  metadata:
+    n_observations: 6839
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.645284'
+  as_of: '2026-04-06T20:00:00'
+  forecast_date: '2026-04-07T00:00:00'
+  payload:
+    probability: 0.1257126151147493
+  metadata:
+    n_observations: 6841
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.679645'
+  as_of: '2026-04-07T20:00:00'
+  forecast_date: '2026-04-08T00:00:00'
+  payload:
+    probability: 0.12569424144986846
+  metadata:
+    n_observations: 6842
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.713010'
+  as_of: '2026-04-08T20:00:00'
+  forecast_date: '2026-04-09T00:00:00'
+  payload:
+    probability: 0.12567587315504897
+  metadata:
+    n_observations: 6843
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.746792'
+  as_of: '2026-04-09T20:00:00'
+  forecast_date: '2026-04-10T00:00:00'
+  payload:
+    probability: 0.1256575102279369
+  metadata:
+    n_observations: 6844
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.779916'
+  as_of: '2026-04-10T20:00:00'
+  forecast_date: '2026-04-13T00:00:00'
+  payload:
+    probability: 0.1256391526661797
+  metadata:
+    n_observations: 6845
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.813279'
+  as_of: '2026-04-13T20:00:00'
+  forecast_date: '2026-04-14T00:00:00'
+  payload:
+    probability: 0.12562080046742624
+  metadata:
+    n_observations: 6846
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.846447'
+  as_of: '2026-04-14T20:00:00'
+  forecast_date: '2026-04-15T00:00:00'
+  payload:
+    probability: 0.1256024536293267
+  metadata:
+    n_observations: 6847
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.879809'
+  as_of: '2026-04-15T20:00:00'
+  forecast_date: '2026-04-16T00:00:00'
+  payload:
+    probability: 0.12558411214953272
+  metadata:
+    n_observations: 6848
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.912968'
+  as_of: '2026-04-16T20:00:00'
+  forecast_date: '2026-04-17T00:00:00'
+  payload:
+    probability: 0.12556577602569718
+  metadata:
+    n_observations: 6849
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.946072'
+  as_of: '2026-04-17T20:00:00'
+  forecast_date: '2026-04-20T00:00:00'
+  payload:
+    probability: 0.12554744525547445
+  metadata:
+    n_observations: 6850
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:34.979245'
+  as_of: '2026-04-20T20:00:00'
+  forecast_date: '2026-04-21T00:00:00'
+  payload:
+    probability: 0.1255291198365202
+  metadata:
+    n_observations: 6851
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.012412'
+  as_of: '2026-04-21T20:00:00'
+  forecast_date: '2026-04-22T00:00:00'
+  payload:
+    probability: 0.12551079976649154
+  metadata:
+    n_observations: 6852
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.046731'
+  as_of: '2026-04-22T20:00:00'
+  forecast_date: '2026-04-23T00:00:00'
+  payload:
+    probability: 0.12549248504304683
+  metadata:
+    n_observations: 6853
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.079939'
+  as_of: '2026-04-23T20:00:00'
+  forecast_date: '2026-04-24T00:00:00'
+  payload:
+    probability: 0.12547417566384592
+  metadata:
+    n_observations: 6854
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.113032'
+  as_of: '2026-04-24T20:00:00'
+  forecast_date: '2026-04-27T00:00:00'
+  payload:
+    probability: 0.12545587162654998
+  metadata:
+    n_observations: 6855
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.147229'
+  as_of: '2026-04-27T20:00:00'
+  forecast_date: '2026-04-28T00:00:00'
+  payload:
+    probability: 0.12543757292882146
+  metadata:
+    n_observations: 6856
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.180415'
+  as_of: '2026-04-28T20:00:00'
+  forecast_date: '2026-04-29T00:00:00'
+  payload:
+    probability: 0.12541927956832433
+  metadata:
+    n_observations: 6857
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.213453'
+  as_of: '2026-04-29T20:00:00'
+  forecast_date: '2026-04-30T00:00:00'
+  payload:
+    probability: 0.12540099154272383
+  metadata:
+    n_observations: 6858
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.246161'
+  as_of: '2026-04-30T20:00:00'
+  forecast_date: '2026-05-01T00:00:00'
+  payload:
+    probability: 0.12538270884968655
+  metadata:
+    n_observations: 6859
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.279490'
+  as_of: '2026-05-01T20:00:00'
+  forecast_date: '2026-05-04T00:00:00'
+  payload:
+    probability: 0.12536443148688048
+  metadata:
+    n_observations: 6860
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.312919'
+  as_of: '2026-05-04T20:00:00'
+  forecast_date: '2026-05-05T00:00:00'
+  payload:
+    probability: 0.12534615945197494
+  metadata:
+    n_observations: 6861
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.345838'
+  as_of: '2026-05-05T20:00:00'
+  forecast_date: '2026-05-06T00:00:00'
+  payload:
+    probability: 0.12532789274264064
+  metadata:
+    n_observations: 6862
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.383773'
+  as_of: '2026-05-06T20:00:00'
+  forecast_date: '2026-05-07T00:00:00'
+  payload:
+    probability: 0.12545534023022
+  metadata:
+    n_observations: 6863
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.423649'
+  as_of: '2026-05-07T20:00:00'
+  forecast_date: '2026-05-08T00:00:00'
+  payload:
+    probability: 0.12543706293706294
+  metadata:
+    n_observations: 6864
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.459078'
+  as_of: '2026-05-08T20:00:00'
+  forecast_date: '2026-05-11T00:00:00'
+  payload:
+    probability: 0.12541879096868172
+  metadata:
+    n_observations: 6865
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.493069'
+  as_of: '2026-05-11T20:00:00'
+  forecast_date: '2026-05-12T00:00:00'
+  payload:
+    probability: 0.12540052432274978
+  metadata:
+    n_observations: 6866
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.529951'
+  as_of: '2026-05-12T20:00:00'
+  forecast_date: '2026-05-13T00:00:00'
+  payload:
+    probability: 0.12538226299694188
+  metadata:
+    n_observations: 6867
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.562348'
+  as_of: '2026-05-13T20:00:00'
+  forecast_date: '2026-05-14T00:00:00'
+  payload:
+    probability: 0.12536400698893418
+  metadata:
+    n_observations: 6868
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.594834'
+  as_of: '2026-05-14T20:00:00'
+  forecast_date: '2026-05-15T00:00:00'
+  payload:
+    probability: 0.12534575629640413
+  metadata:
+    n_observations: 6869
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.628494'
+  as_of: '2026-05-15T20:00:00'
+  forecast_date: '2026-05-18T00:00:00'
+  payload:
+    probability: 0.12532751091703057
+  metadata:
+    n_observations: 6870
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.661533'
+  as_of: '2026-05-18T20:00:00'
+  forecast_date: '2026-05-19T00:00:00'
+  payload:
+    probability: 0.12530927084849366
+  metadata:
+    n_observations: 6871
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.695476'
+  as_of: '2026-05-19T20:00:00'
+  forecast_date: '2026-05-20T00:00:00'
+  payload:
+    probability: 0.12529103608847497
+  metadata:
+    n_observations: 6872
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.728594'
+  as_of: '2026-05-20T20:00:00'
+  forecast_date: '2026-05-21T00:00:00'
+  payload:
+    probability: 0.38139790864061646
+  metadata:
+    n_observations: 6873
+    window: null
+    patterns_fired:
+    - X-1
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.761500'
+  as_of: '2026-05-21T20:00:00'
+  forecast_date: '2026-05-22T00:00:00'
+  payload:
+    probability: 0.12525458248472504
+  metadata:
+    n_observations: 6874
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.795418'
+  as_of: '2026-05-26T20:00:00'
+  forecast_date: '2026-05-27T00:00:00'
+  payload:
+    probability: 0.12521815008726003
+  metadata:
+    n_observations: 6876
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.829163'
+  as_of: '2026-05-27T20:00:00'
+  forecast_date: '2026-05-28T00:00:00'
+  payload:
+    probability: 0.12519994183510252
+  metadata:
+    n_observations: 6877
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.862723'
+  as_of: '2026-05-28T20:00:00'
+  forecast_date: '2026-05-29T00:00:00'
+  payload:
+    probability: 0.1251817388775807
+  metadata:
+    n_observations: 6878
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.896156'
+  as_of: '2026-05-29T20:00:00'
+  forecast_date: '2026-06-01T00:00:00'
+  payload:
+    probability: 0.12516354121238552
+  metadata:
+    n_observations: 6879
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.929457'
+  as_of: '2026-06-01T20:00:00'
+  forecast_date: '2026-06-02T00:00:00'
+  payload:
+    probability: 0.1252906976744186
+  metadata:
+    n_observations: 6880
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.963786'
+  as_of: '2026-06-02T20:00:00'
+  forecast_date: '2026-06-03T00:00:00'
+  payload:
+    probability: 0.12527248946374073
+  metadata:
+    n_observations: 6881
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:35.997623'
+  as_of: '2026-06-03T20:00:00'
+  forecast_date: '2026-06-04T00:00:00'
+  payload:
+    probability: 0.12525428654460913
+  metadata:
+    n_observations: 6882
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.390968'
+  as_of: '2026-06-04T20:00:00'
+  forecast_date: '2026-06-05T00:00:00'
+  payload:
+    probability: 0.1252360889147174
+  metadata:
+    n_observations: 6883
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.425136'
+  as_of: '2026-06-05T20:00:00'
+  forecast_date: '2026-06-08T00:00:00'
+  payload:
+    probability: 0.12536316095293434
+  metadata:
+    n_observations: 6884
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.458850'
+  as_of: '2026-06-08T20:00:00'
+  forecast_date: '2026-06-09T00:00:00'
+  payload:
+    probability: 0.1253449527959332
+  metadata:
+    n_observations: 6885
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.493867'
+  as_of: '2026-06-09T20:00:00'
+  forecast_date: '2026-06-10T00:00:00'
+  payload:
+    probability: 0.1253267499273889
+  metadata:
+    n_observations: 6886
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.528334'
+  as_of: '2026-06-10T20:00:00'
+  forecast_date: '2026-06-11T00:00:00'
+  payload:
+    probability: 0.12530855234499783
+  metadata:
+    n_observations: 6887
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.561574'
+  as_of: '2026-06-11T20:00:00'
+  forecast_date: '2026-06-12T00:00:00'
+  payload:
+    probability: 0.1252903600464576
+  metadata:
+    n_observations: 6888
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.594671'
+  as_of: '2026-06-12T20:00:00'
+  forecast_date: '2026-06-15T00:00:00'
+  payload:
+    probability: 0.12527217302946728
+  metadata:
+    n_observations: 6889
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.627691'
+  as_of: '2026-06-15T20:00:00'
+  forecast_date: '2026-06-16T00:00:00'
+  payload:
+    probability: 0.12525399129172715
+  metadata:
+    n_observations: 6890
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.660741'
+  as_of: '2026-06-16T20:00:00'
+  forecast_date: '2026-06-17T00:00:00'
+  payload:
+    probability: 0.1252358148309389
+  metadata:
+    n_observations: 6891
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.693378'
+  as_of: '2026-06-17T20:00:00'
+  forecast_date: '2026-06-18T00:00:00'
+  payload:
+    probability: 0.12521764364480556
+  metadata:
+    n_observations: 6892
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.726364'
+  as_of: '2026-06-22T20:00:00'
+  forecast_date: '2026-06-23T00:00:00'
+  payload:
+    probability: 0.1251813170873223
+  metadata:
+    n_observations: 6894
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.759727'
+  as_of: '2026-06-23T20:00:00'
+  forecast_date: '2026-06-24T00:00:00'
+  payload:
+    probability: 0.12516316171138506
+  metadata:
+    n_observations: 6895
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.792414'
+  as_of: '2026-06-24T20:00:00'
+  forecast_date: '2026-06-25T00:00:00'
+  payload:
+    probability: 0.12514501160092809
+  metadata:
+    n_observations: 6896
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.824909'
+  as_of: '2026-06-25T20:00:00'
+  forecast_date: '2026-06-26T00:00:00'
+  payload:
+    probability: 0.12512686675366103
+  metadata:
+    n_observations: 6897
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.858041'
+  as_of: '2026-06-26T20:00:00'
+  forecast_date: '2026-06-29T00:00:00'
+  payload:
+    probability: 0.12510872716729488
+  metadata:
+    n_observations: 6898
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.891565'
+  as_of: '2026-06-29T20:00:00'
+  forecast_date: '2026-06-30T00:00:00'
+  payload:
+    probability: 0.12509059283954196
+  metadata:
+    n_observations: 6899
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.925403'
+  as_of: '2026-06-30T20:00:00'
+  forecast_date: '2026-07-01T00:00:00'
+  payload:
+    probability: 0.12507246376811595
+  metadata:
+    n_observations: 6900
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.958884'
+  as_of: '2026-07-01T20:00:00'
+  forecast_date: '2026-07-02T00:00:00'
+  payload:
+    probability: 0.12505433995073179
+  metadata:
+    n_observations: 6901
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:36.991856'
+  as_of: '2026-07-06T20:00:00'
+  forecast_date: '2026-07-07T00:00:00'
+  payload:
+    probability: 0.12501810806895552
+  metadata:
+    n_observations: 6903
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.025240'
+  as_of: '2026-07-07T20:00:00'
+  forecast_date: '2026-07-08T00:00:00'
+  payload:
+    probability: 0.125
+  metadata:
+    n_observations: 6904
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.058790'
+  as_of: '2026-07-08T20:00:00'
+  forecast_date: '2026-07-09T00:00:00'
+  payload:
+    probability: 0.12498189717595945
+  metadata:
+    n_observations: 6905
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.092329'
+  as_of: '2026-07-09T20:00:00'
+  forecast_date: '2026-07-10T00:00:00'
+  payload:
+    probability: 0.12496379959455546
+  metadata:
+    n_observations: 6906
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.125565'
+  as_of: '2026-07-10T20:00:00'
+  forecast_date: '2026-07-13T00:00:00'
+  payload:
+    probability: 0.12494570725351094
+  metadata:
+    n_observations: 6907
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.159134'
+  as_of: '2026-07-13T20:00:00'
+  forecast_date: '2026-07-14T00:00:00'
+  payload:
+    probability: 0.12492762015055009
+  metadata:
+    n_observations: 6908
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.192601'
+  as_of: '2026-07-14T20:00:00'
+  forecast_date: '2026-07-15T00:00:00'
+  payload:
+    probability: 0.12490953828339847
+  metadata:
+    n_observations: 6909
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.225580'
+  as_of: '2026-07-15T20:00:00'
+  forecast_date: '2026-07-16T00:00:00'
+  payload:
+    probability: 0.12489146164978292
+  metadata:
+    n_observations: 6910
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.260032'
+  as_of: '2026-07-16T20:00:00'
+  forecast_date: '2026-07-17T00:00:00'
+  payload:
+    probability: 0.12487339024743163
+  metadata:
+    n_observations: 6911
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.293368'
+  as_of: '2026-07-17T20:00:00'
+  forecast_date: '2026-07-20T00:00:00'
+  payload:
+    probability: 0.12485532407407407
+  metadata:
+    n_observations: 6912
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.326031'
+  as_of: '2026-07-20T20:00:00'
+  forecast_date: '2026-07-21T00:00:00'
+  payload:
+    probability: 0.12483726312744105
+  metadata:
+    n_observations: 6913
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.358850'
+  as_of: '2026-07-21T20:00:00'
+  forecast_date: '2026-07-22T00:00:00'
+  payload:
+    probability: 0.12481920740526468
+  metadata:
+    n_observations: 6914
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.392190'
+  as_of: '2026-07-22T20:00:00'
+  forecast_date: '2026-07-23T00:00:00'
+  payload:
+    probability: 0.12480115690527838
+  metadata:
+    n_observations: 6915
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.425088'
+  as_of: '2026-07-23T20:00:00'
+  forecast_date: '2026-07-24T00:00:00'
+  payload:
+    probability: 0.1247831116252169
+  metadata:
+    n_observations: 6916
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.457898'
+  as_of: '2026-07-24T20:00:00'
+  forecast_date: '2026-07-27T00:00:00'
+  payload:
+    probability: 0.12476507156281624
+  metadata:
+    n_observations: 6917
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.491159'
+  as_of: '2026-07-27T20:00:00'
+  forecast_date: '2026-07-28T00:00:00'
+  payload:
+    probability: 0.12474703671581382
+  metadata:
+    n_observations: 6918
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.524311'
+  as_of: '2026-07-28T20:00:00'
+  forecast_date: '2026-07-29T00:00:00'
+  payload:
+    probability: 0.12472900708194826
+  metadata:
+    n_observations: 6919
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.556955'
+  as_of: '2026-07-29T20:00:00'
+  forecast_date: '2026-07-30T00:00:00'
+  payload:
+    probability: 0.12471098265895954
+  metadata:
+    n_observations: 6920
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.591731'
+  as_of: '2026-07-30T20:00:00'
+  forecast_date: '2026-07-31T00:00:00'
+  payload:
+    probability: 0.12469296344458894
+  metadata:
+    n_observations: 6921
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.625407'
+  as_of: '2026-07-31T20:00:00'
+  forecast_date: '2026-08-03T00:00:00'
+  payload:
+    probability: 0.12467494943657903
+  metadata:
+    n_observations: 6922
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.658617'
+  as_of: '2026-08-03T20:00:00'
+  forecast_date: '2026-08-04T00:00:00'
+  payload:
+    probability: 0.1246569406326737
+  metadata:
+    n_observations: 6923
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.692474'
+  as_of: '2026-08-04T20:00:00'
+  forecast_date: '2026-08-05T00:00:00'
+  payload:
+    probability: 0.12463893703061814
+  metadata:
+    n_observations: 6924
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.727467'
+  as_of: '2026-08-05T20:00:00'
+  forecast_date: '2026-08-06T00:00:00'
+  payload:
+    probability: 0.12462093862815884
+  metadata:
+    n_observations: 6925
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.762809'
+  as_of: '2026-08-06T20:00:00'
+  forecast_date: '2026-08-07T00:00:00'
+  payload:
+    probability: 0.1246029454230436
+  metadata:
+    n_observations: 6926
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.797380'
+  as_of: '2026-08-07T20:00:00'
+  forecast_date: '2026-08-10T00:00:00'
+  payload:
+    probability: 0.12458495741302152
+  metadata:
+    n_observations: 6927
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.831235'
+  as_of: '2026-08-10T20:00:00'
+  forecast_date: '2026-08-11T00:00:00'
+  payload:
+    probability: 0.12456697459584296
+  metadata:
+    n_observations: 6928
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.864441'
+  as_of: '2026-08-11T20:00:00'
+  forecast_date: '2026-08-12T00:00:00'
+  payload:
+    probability: 0.12454899696925964
+  metadata:
+    n_observations: 6929
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.898879'
+  as_of: '2026-08-12T20:00:00'
+  forecast_date: '2026-08-13T00:00:00'
+  payload:
+    probability: 0.12453102453102453
+  metadata:
+    n_observations: 6930
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.932848'
+  as_of: '2026-08-13T20:00:00'
+  forecast_date: '2026-08-14T00:00:00'
+  payload:
+    probability: 0.12451305727889193
+  metadata:
+    n_observations: 6931
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:37.967485'
+  as_of: '2026-08-14T20:00:00'
+  forecast_date: '2026-08-17T00:00:00'
+  payload:
+    probability: 0.12449509521061743
+  metadata:
+    n_observations: 6932
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.000718'
+  as_of: '2026-08-17T20:00:00'
+  forecast_date: '2026-08-18T00:00:00'
+  payload:
+    probability: 0.12447713832395789
+  metadata:
+    n_observations: 6933
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.033722'
+  as_of: '2026-08-18T20:00:00'
+  forecast_date: '2026-08-19T00:00:00'
+  payload:
+    probability: 0.12445918661667148
+  metadata:
+    n_observations: 6934
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.066838'
+  as_of: '2026-08-19T20:00:00'
+  forecast_date: '2026-08-20T00:00:00'
+  payload:
+    probability: 0.12444124008651766
+  metadata:
+    n_observations: 6935
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.099793'
+  as_of: '2026-08-20T20:00:00'
+  forecast_date: '2026-08-21T00:00:00'
+  payload:
+    probability: 0.12442329873125721
+  metadata:
+    n_observations: 6936
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.132455'
+  as_of: '2026-08-21T20:00:00'
+  forecast_date: '2026-08-24T00:00:00'
+  payload:
+    probability: 0.12440536254865216
+  metadata:
+    n_observations: 6937
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.165056'
+  as_of: '2026-08-24T20:00:00'
+  forecast_date: '2026-08-25T00:00:00'
+  payload:
+    probability: 0.12438743153646584
+  metadata:
+    n_observations: 6938
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.198308'
+  as_of: '2026-08-25T20:00:00'
+  forecast_date: '2026-08-26T00:00:00'
+  payload:
+    probability: 0.1243695056924629
+  metadata:
+    n_observations: 6939
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.231259'
+  as_of: '2026-08-26T20:00:00'
+  forecast_date: '2026-08-27T00:00:00'
+  payload:
+    probability: 0.38139790864061646
+  metadata:
+    n_observations: 6940
+    window: null
+    patterns_fired:
+    - X-1
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.264091'
+  as_of: '2026-08-27T20:00:00'
+  forecast_date: '2026-08-28T00:00:00'
+  payload:
+    probability: 0.12447774095951591
+  metadata:
+    n_observations: 6941
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.296821'
+  as_of: '2026-08-28T20:00:00'
+  forecast_date: '2026-08-31T00:00:00'
+  payload:
+    probability: 0.12445980985306827
+  metadata:
+    n_observations: 6942
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.329157'
+  as_of: '2026-08-31T20:00:00'
+  forecast_date: '2026-09-01T00:00:00'
+  payload:
+    probability: 0.12444188391185367
+  metadata:
+    n_observations: 6943
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.361488'
+  as_of: '2026-09-01T20:00:00'
+  forecast_date: '2026-09-02T00:00:00'
+  payload:
+    probability: 0.12442396313364056
+  metadata:
+    n_observations: 6944
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.395263'
+  as_of: '2026-09-02T20:00:00'
+  forecast_date: '2026-09-03T00:00:00'
+  payload:
+    probability: 0.1244060475161987
+  metadata:
+    n_observations: 6945
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.427815'
+  as_of: '2026-09-03T20:00:00'
+  forecast_date: '2026-09-04T00:00:00'
+  payload:
+    probability: 0.12438813705729916
+  metadata:
+    n_observations: 6946
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.460315'
+  as_of: '2026-09-08T20:00:00'
+  forecast_date: '2026-09-09T00:00:00'
+  payload:
+    probability: 0.12435233160621761
+  metadata:
+    n_observations: 6948
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.492781'
+  as_of: '2026-09-09T20:00:00'
+  forecast_date: '2026-09-10T00:00:00'
+  payload:
+    probability: 0.12433443660958411
+  metadata:
+    n_observations: 6949
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.526105'
+  as_of: '2026-09-10T20:00:00'
+  forecast_date: '2026-09-11T00:00:00'
+  payload:
+    probability: 0.12431654676258992
+  metadata:
+    n_observations: 6950
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.558267'
+  as_of: '2026-09-11T20:00:00'
+  forecast_date: '2026-09-14T00:00:00'
+  payload:
+    probability: 0.12429866206301252
+  metadata:
+    n_observations: 6951
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.590772'
+  as_of: '2026-09-14T20:00:00'
+  forecast_date: '2026-09-15T00:00:00'
+  payload:
+    probability: 0.12428078250863062
+  metadata:
+    n_observations: 6952
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.623699'
+  as_of: '2026-09-15T20:00:00'
+  forecast_date: '2026-09-16T00:00:00'
+  payload:
+    probability: 0.12426290809722422
+  metadata:
+    n_observations: 6953
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.656139'
+  as_of: '2026-09-16T20:00:00'
+  forecast_date: '2026-09-17T00:00:00'
+  payload:
+    probability: 0.12424503882657463
+  metadata:
+    n_observations: 6954
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.688895'
+  as_of: '2026-09-17T20:00:00'
+  forecast_date: '2026-09-18T00:00:00'
+  payload:
+    probability: 0.12422717469446441
+  metadata:
+    n_observations: 6955
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.721516'
+  as_of: '2026-09-18T20:00:00'
+  forecast_date: '2026-09-21T00:00:00'
+  payload:
+    probability: 0.1242093156986774
+  metadata:
+    n_observations: 6956
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.754705'
+  as_of: '2026-09-21T20:00:00'
+  forecast_date: '2026-09-22T00:00:00'
+  payload:
+    probability: 0.12419146183699871
+  metadata:
+    n_observations: 6957
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.789173'
+  as_of: '2026-09-22T20:00:00'
+  forecast_date: '2026-09-23T00:00:00'
+  payload:
+    probability: 0.12417361310721471
+  metadata:
+    n_observations: 6958
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.822355'
+  as_of: '2026-09-23T20:00:00'
+  forecast_date: '2026-09-24T00:00:00'
+  payload:
+    probability: 0.12415576950711309
+  metadata:
+    n_observations: 6959
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.855039'
+  as_of: '2026-09-24T20:00:00'
+  forecast_date: '2026-09-25T00:00:00'
+  payload:
+    probability: 0.12413793103448276
+  metadata:
+    n_observations: 6960
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:38.887750'
+  as_of: '2026-09-25T20:00:00'
+  forecast_date: '2026-09-28T00:00:00'
+  payload:
+    probability: 0.12412009768711392
+  metadata:
+    n_observations: 6961
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:39.278062'
+  as_of: '2026-09-28T20:00:00'
+  forecast_date: '2026-09-29T00:00:00'
+  payload:
+    probability: 0.12410226946279805
+  metadata:
+    n_observations: 6962
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:39.311134'
+  as_of: '2026-09-29T20:00:00'
+  forecast_date: '2026-09-30T00:00:00'
+  payload:
+    probability: 0.12408444635932787
+  metadata:
+    n_observations: 6963
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:39.344179'
+  as_of: '2026-09-30T20:00:00'
+  forecast_date: '2026-10-01T00:00:00'
+  payload:
+    probability: 0.12406662837449742
+  metadata:
+    n_observations: 6964
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:39.378770'
+  as_of: '2026-10-01T20:00:00'
+  forecast_date: '2026-10-02T00:00:00'
+  payload:
+    probability: 0.12404881550610194
+  metadata:
+    n_observations: 6965
+    window: null
+    patterns_fired: []
+- predictor_id: climatology_patterns
+  task_id: nvda_shock_1d
+  issued_at: '2026-10-06T15:21:39.412382'
+  as_of: '2026-10-02T20:00:00'
+  forecast_date: '2026-10-05T00:00:00'
+  payload:
+    probability: 0.12403100775193798
+  metadata:
+    n_observations: 6966
+    window: null
+    patterns_fired: []
+scores:
+- 0.015986688574050306
+- 0.01598197238893722
+- 0.015977258290477806
+- 0.015972546277441275
+- 0.015967836348597744
+- 0.01596312850271823
+- 0.015958422738574674
+- 0.015953719054939884
+- 0.015949017450587622
+- 0.015944317924292507
+- 0.015934925100976837
+- 0.01593023180151006
+- 0.015925540575208022
+- 0.01592085142084986
+- 0.01591616433721562
+- 0.01591147932308625
+- 0.01590679637724358
+- 0.015902115498470346
+- 0.01589743668555018
+- 0.015892759937267603
+- 0.01588808525240803
+- 0.015883412629757787
+- 0.7638569805624432
+- 0.01591114085908455
+- 0.015906463519252654
+- 0.015901788241588357
+- 0.015897115024879598
+- 0.015892443867915197
+- 0.015883107728379278
+- 0.015878442743389856
+- 0.015873779813309008
+- 0.015869118936930014
+- 0.015864460113047023
+- 0.015859803340455083
+- 0.38266854743420303
+- 0.015887465018524907
+- 0.015882803545647906
+- 0.015878144124024086
+- 0.015873486752450098
+- 0.015868831429723475
+- 0.01586417815464263
+- 0.01585952692600688
+- 0.015854877742616385
+- 0.01585023060327222
+- 0.015845585506776307
+- 0.015840942451931465
+- 0.015836301437541382
+- 0.015831662462410634
+- 0.015827025525344658
+- 0.015822390625149764
+- 0.01581775776063316
+- 0.015813126930602887
+- 0.015808498133867893
+- 0.015803871369237995
+- 0.01579924663552386
+- 0.01579462393153703
+- 0.01579000325608993
+- 0.7645055835256498
+- 0.01581753155657428
+- 0.01581290620926175
+- 0.01580366159898909
+- 0.01579904233365783
+- 0.015794425093283958
+- 0.015789809876684064
+- 0.01578519668267561
+- 0.015780585510076918
+- 0.015775976357707167
+- 0.015771369224386413
+- 0.01576676410893555
+- 0.015762161010176357
+- 0.015757559926931453
+- 0.015752960858024332
+- 0.01574836380227933
+- 0.015743768758521664
+- 0.015739175725577387
+- 0.015734584702273402
+- 0.015729995687437496
+- 0.015725408679898294
+- 0.015720823678485266
+- 0.01571624068202875
+- 0.015711659689359926
+- 0.7650512952140295
+- 0.01573904239228026
+- 0.01573445675827669
+- 0.015729873128045878
+- 0.01572529150042056
+- 0.0157207118742343
+- 0.01571613424832154
+- 0.015711558621517536
+- 0.015706984992658414
+- 0.015702413360581143
+- 0.01569784372412354
+- 0.14546436471543603
+- 0.01568871043342279
+- 0.01567958511127558
+- 0.015675025435513055
+- 0.015670467748414796
+- 0.7653388296240535
+- 0.015697758923742564
+- 0.01569319661644303
+- 0.01568863629779905
+- 0.7652119001372203
+- 0.015715922124111322
+- 0.01571135719141472
+- 0.015706794247362276
+- 0.01570223329079906
+- 0.01569767432057098
+- 0.015693117335524788
+- 0.01568856233450806
+- 0.015684009316369218
+- 0.015679458279957516
+- 0.01567036214771673
+- 0.015665817049590327
+- 0.015661273928596425
+- 0.01565673278358844
+- 0.015652193613420625
+- 0.015647656416948066
+- 0.015643121193026677
+- 0.01563858794051319
+- 0.01562952734514104
+- 0.015625
+- 0.0156204746217021
+- 0.01561595120910822
+- 0.015611429761080056
+- 0.015606910276480129
+- 0.015602392754171789
+- 0.015597877193019197
+- 0.015593363591887354
+- 0.01558885194964206
+- 0.015584342265149952
+- 0.015579834537278483
+- 0.015575328764895913
+- 0.01557082494687134
+- 0.015566323082074658
+- 0.0155618231693766
+- 0.015557325207648699
+- 0.015552829195763307
+- 0.015548335132593594
+- 0.015543843017013538
+- 0.015539352847897935
+- 0.015534864624122393
+- 0.015530378344563334
+- 0.015525894008097984
+- 0.015521411613604385
+- 0.015516931159961384
+- 0.015512452646048646
+- 0.015507976070746634
+- 0.015503501432936623
+- 0.015499028731500698
+- 0.015494557965321745
+- 0.015490089133283456
+- 0.01548562223427033
+- 0.015481157267167672
+- 0.015476694230861584
+- 0.015472233124238975
+- 0.015467773946187561
+- 0.38266854743420303
+- 0.015494707994384346
+- 0.01549024426866191
+- 0.015485782471531264
+- 0.015481322601881543
+- 0.01547686465860269
+- 0.01547240864058544
+- 0.015463502375902709
+- 0.01545905212702269
+- 0.015454603798975206
+- 0.015450157390654987
+- 0.015445712900957545
+- 0.015441270328779193
+- 0.015436829673017037
+- 0.01543239093256898
+- 0.015427954106333706
+- 0.015423519193210706
+- 0.015419086192100246
+- 0.015414655101903391
+- 0.015410225921521997
+- 0.015405798649858702
+- 0.015401373285816937
+- 0.015396949828300916
+- 0.015392528276215648
+- 0.015388108628466918
+- 0.0153836908839613
+metric: brier
+mean_score: 0.04102083947096938
+ran_at: '2026-10-06T15:21:39.428647'
+skipped_origins: 0

@@ -28,7 +28,8 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
 | `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
 | `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
-| `01`–`05` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop (see [Notebooks](#notebooks)) |
+| `exploratory.py` + `oot_eval.py` | *new* — not from energy | **done** — Gate A (loosened), the exploratory pattern tier, the climatology-plus-patterns and pattern-aware agent forecasters, and the one-time 2026 evaluation runner |
+| `01`–`06` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop, one-time 2026 evaluation (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
@@ -715,6 +716,39 @@ The failures fall into four groups:
    failed training outright (lift 0.77 over 49 matches). This is why the gate needs both halves:
    a small holdout can line up by chance, and five years of history are the check on it.
 
+### Exploratory gate and the one-time 2026 evaluation
+
+Because the strict gate graduated nothing, a pre-registered experiment
+([`experiments/exploratory/preregistration.md`](experiments/exploratory/preregistration.md),
+committed before any label or score) tested what a **looser** gate buys, on the protected 2026
+window, used once. **Gate A** keeps training significance but relaxes it: training lift ≥ 1.5,
+p < 0.10, at least 5 matches, no interval requirement; 2025 lift ≥ 1.0, no p-value requirement.
+A pattern with no effect passes it 3–5% of the time per candidate (0.1–0.2% for the strict
+gate), so its patterns live in a separate exploratory tier, never in the strict master
+strategy file. The three news candidates with 2025 lift ≥ 1.0 got training labels first
+($12.17). **One candidate graduated: earnings** (training lift 3.17, p 0.030, precision 0.38;
+2025 lift 3.58). Capex caution matched one training window and it was not a shock.
+
+The 2026 evaluation used an after-close origin on every 2026 session (182 origins, 7 shocks;
+$9.81 of a $20 cap). The earnings pattern fired on 3 origins and 2 were followed by shocks.
+
+| Forecaster | Brier | Skill vs climatology | 90% interval on difference |
+|---|---|---|---|
+| Climatology | 0.045 | — | — |
+| Climatology + patterns (no LLM) | **0.041** | +0.078 | −0.008 to +0.001 |
+| Agent (after close) | 0.055 | −0.229 | +0.003 to +0.017 (worse) |
+| Agent + patterns | 0.044 | +0.001 | −0.009 to +0.007 |
+
+Against the pre-registered rule (skill above zero and an interval entirely below zero), **no
+forecaster beat climatology**: climatology plus patterns came closest but changes only three
+forecasts. **The patterns did help the agent**: against the agent alone the Brier difference
+is −0.010 (interval −0.017 to −0.005). With the earnings evidence in its input it caught the
+2026-08-26 earnings reaction (0.14 → 0.50) and raised P above 0.3 on three calm days instead of
+ten. The pre-registration discloses that the 2026 shock days, two of them after earnings, had
+been seen before the gate was chosen. The 2026 window is now used; `specs/nvda_eval.yaml`
+carries a note. Full results: [`experiments/exploratory/results.md`](experiments/exploratory/results.md).
+Tests are in `test_exploratory.py`.
+
 ### The holdout redesign
 
 The first screens (2026-10-05, kept under `history` in each trail) used one control per
@@ -754,7 +788,7 @@ seconds and call no LLM. Run them from `implementations/` after
 | [`03_one_agent_two_tasks.ipynb`](03_one_agent_two_tasks.ipynb) | One identity, two task specs: the system prompt and fenced `search_web`, a trajectory answer, three shock answers for 2025-04-09, and the search-fence leak and its fix |
 | [`04_systematic_backtest_eval.ipynb`](04_systematic_backtest_eval.ipynb) | The full 2025 scorecard: CRPS leaderboard and paired comparison, coverage vs sharpness, CRPS by shock window and volatility regime, predicted vs actual, every prediction, and the shock task |
 | [`05_discovery_loop.ipynb`](05_discovery_loop.ipynb) | The Phase 2 discovery loop: study windows, the gate, how a fenced news label is made, all fifteen candidates with why each failed, the "both halves of the gate" chart, and the holdout power analysis |
-| `06` | To come: the protected 2026 evaluation |
+| [`06_protected_2026_eval.ipynb`](06_protected_2026_eval.ipynb) | The one-time 2026 evaluation of a loosened gate (pre-registered): Gate A's one graduate (earnings), four shock forecasters on 182 after-close 2026 origins, the earnings days, and the verdicts against the pre-registered rule |
 | [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) | Appendix: the raw-price baseline's −77% forecast, traced to a single holiday `NaN` |
 
 **The trajectory agent on the 2025 backtest** (`agent_backtest.py`, all 51 weekly origins,

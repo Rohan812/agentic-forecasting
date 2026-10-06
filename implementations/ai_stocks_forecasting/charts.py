@@ -448,6 +448,8 @@ CLIMATOLOGY_ARM = "Climatology"
 
 _SHOCK_ARMS: dict[str, str] = {
     "historical_frequency": CLIMATOLOGY_ARM,
+    "climatology_patterns": "Climatology + patterns",
+    "agent_predictor_nvda_analyst_multitask_close_patterns": "Agent + patterns",
     "agent_predictor_nvda_analyst_multitask_notopics": "Agent, no topics",
     "agent_predictor_nvda_analyst_multitask_close": "Agent, after close",
     "agent_predictor_nvda_analyst_multitask": "Agent, search topics",
