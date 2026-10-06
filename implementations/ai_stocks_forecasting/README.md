@@ -737,8 +737,8 @@ fix is more post-cutoff shocks, from the protected 2026 window or from more tick
 *and* the holdout, so a pattern with no effect gets through both with probability well under 1%.
 Fifteen candidates have been tested; the trails count them so any future graduation can be
 judged against that number. Experiment 07's peer-results question is the first to pass the
-holdout, and with fifteen candidates screened, about one such holdout pass is expected by chance
-alone, which the training half then rejected.
+holdout. At the simulated 2–6% false-pass rate, fifteen candidates with no effect would produce
+0.3 to 0.9 holdout passes by chance, so one is unremarkable, and the training half rejected it.
 
 ## Notebooks
 
