@@ -1,0 +1,286 @@
+question_id: exp07_semis_peers_q2
+question: Were there any reports concerning AI-chip supply chain constraints, such
+  as packaging capacity bottlenecks or production delays for critical components?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: reports from that specific period did not highlight new, immediate production
+      delays or supply chain disruptions
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: there were no specific news reports identified that detailed new, breaking
+      developments regarding AI-chip supply chain constraints or packaging bottlenecks
+      within that narrow three-day window.
+    search: ok
+  '2025-02-10':
+    answer: 'no'
+    evidence: no specific news reports identified that detailed new, breaking developments
+      regarding AI-chip supply chain constraints or packaging bottlenecks
+    search: ok
+  '2025-02-11':
+    answer: 'yes'
+    evidence: Industry analysis from early 2025 consistently identified advanced packaging—specifically
+      technologies like TSMC’s Chip-on-Wafer-on-Substrate (CoWoS)—as a primary constraint
+      on AI chip production.
+    search: ok
+  '2025-02-13':
+    answer: 'no'
+    evidence: no specific reports of new production delays or packaging bottlenecks
+      were published during the February 11–13, 2025, timeframe.
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: there were no specific news reports identified that detailed new, immediate
+      AI-chip supply chain constraints or packaging bottlenecks.
+    search: ok
+  '2025-02-18':
+    answer: 'yes'
+    evidence: 'Key themes reported during this timeframe included: Advanced Packaging
+      Bottlenecks: Throughout 2025, industry analysis consistently highlighted that
+      advanced packaging capacity—specifically technologies like TSMC’s CoWoS (Chip-on-Wafer-on-Substrate)—was
+      a primary constraint on AI chip production.'
+    search: ok
+  '2025-02-20':
+    answer: 'yes'
+    evidence: legal filings from this time (e.g., February 20, 2025) referenced the
+      operational complexities of managing multiple suppliers and the potential for
+      production delays when changing subcontractors or foundries.
+    search: ok
+  '2025-02-26':
+    answer: 'yes'
+    evidence: reports and industry disclosures highlighted ongoing challenges in the
+      AI-chip supply chain, specifically regarding production delays and capacity
+      constraints.
+    search: ok
+  '2025-02-28':
+    answer: 'yes'
+    evidence: 'News published on February 27, 2025, noted that the semiconductor supply
+      chain was already "stretched thin" due to lingering shortages... these pressures,
+      combined with limited global capacity for certain nodes, were identified as
+      factors that could intensify supply shortages and lead to production '
+    search: ok
+  '2025-03-05':
+    answer: 'yes'
+    evidence: AI-driven demand for high-bandwidth memory (HBM) and advanced packaging
+      capacity being identified as key areas of pressure.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-13':
+    answer: 'yes'
+    evidence: reports and industry analyses highlighted that the semiconductor supply
+      chain was facing significant constraints, particularly regarding advanced packaging
+      capacity and production delays for AI-related components.
+    search: ok
+  '2025-03-18':
+    answer: 'yes'
+    evidence: reports and industry analyses highlighted significant ongoing constraints
+      within the AI-chip supply chain, particularly regarding advanced packaging and
+      production capacity.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: there were no specific news reports identified that detailed new, breaking
+      supply chain constraints or packaging bottlenecks for AI chips
+    search: ok
+  '2025-04-02':
+    answer: 'yes'
+    evidence: Industry reporting from this timeframe identified advanced packaging—specifically
+      technologies like TSMC’s Chip-on-Wafer-on-Substrate (CoWoS)—as a primary bottleneck
+      for AI chip production.
+    search: ok
+  '2025-04-08':
+    answer: 'yes'
+    evidence: Industry reports from this timeframe noted that these packaging facilities
+      were overbooked, which limited the ability of manufacturers to meet the surging
+      demand for high-end AI GPUs.
+    search: ok
+  '2025-04-15':
+    answer: 'yes'
+    evidence: industry analysis identified advanced packaging—specifically TSMC’s
+      CoWoS (Chip-on-Wafer-on-Substrate) technology—as a critical bottleneck for AI
+      chip production.
+    search: ok
+  '2025-04-21':
+    answer: 'yes'
+    evidence: Advanced packaging, particularly TSMC’s CoWoS technology, was identified
+      as a primary constraint on AI chip production.
+    search: ok
+  '2025-04-23':
+    answer: 'yes'
+    evidence: The specific news cycle during the requested dates focused on TSMC's
+      resilience and its ongoing efforts to manage production amidst these industry-wide
+      capacity pressures.
+    search: ok
+  '2025-04-28':
+    answer: 'yes'
+    evidence: advanced packaging capacity emerging as a critical bottleneck for AI
+      chip production
+    search: ok
+  '2025-04-29':
+    answer: 'yes'
+    evidence: advanced packaging (such as CoWoS) and high-bandwidth memory (HBM) frequently
+      identified as critical bottlenecks for AI chip production.
+    search: ok
+  '2025-04-30':
+    answer: 'yes'
+    evidence: Industry reporting from this timeframe emphasized that advanced packaging—specifically
+      technologies like CoWoS (Chip-on-Wafer-on-Substrate)—had become a critical "choke
+      point" for AI chip production.
+    search: ok
+  '2025-05-02':
+    answer: 'yes'
+    evidence: reports highlighted ongoing challenges in the AI-chip supply chain,
+      specifically regarding advanced packaging and production capacity.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: there were no specific news reports identified that detailed new, breaking
+      developments regarding AI-chip supply chain constraints, packaging bottlenecks,
+      or production delays.
+    search: ok
+  '2025-05-15':
+    answer: 'no'
+    evidence: There were no specific reports concerning AI-chip supply chain constraints,
+      such as packaging capacity bottlenecks or production delays, published between
+      May 13, 2025, and May 15, 2025.
+    search: ok
+  '2025-05-16':
+    answer: 'yes'
+    evidence: advanced packaging—particularly TSMC’s CoWoS (Chip-on-Wafer-on-Substrate)
+      technology—was widely identified as a critical bottleneck for AI chip production.
+    search: ok
+  '2025-05-20':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-05-21':
+    answer: 'yes'
+    evidence: news during this period consistently pointed to a semiconductor landscape
+      where advanced packaging capacity and critical components like HBM were severely
+      constrained, creating a persistent bottleneck that impacted the production and
+      delivery of AI chips.
+    search: ok
+  '2025-05-22':
+    answer: 'yes'
+    evidence: advanced packaging—specifically TSMC’s CoWoS (Chip-on-Wafer-on-Substrate)
+      technology—was identified as a critical bottleneck for AI chip production.
+    search: ok
+  '2025-05-28':
+    answer: 'no'
+    evidence: there were no specific news reports identified that detailed new, breaking
+      developments regarding AI-chip supply chain constraints or packaging bottlenecks.
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: no specific news reports identified that detailed new, breaking instances
+      of AI-chip supply chain constraints or packaging bottlenecks
+    search: ok
+  '2025-05-30':
+    answer: 'yes'
+    evidence: advanced packaging capacity—specifically for technologies like CoWoS
+      (Chip-on-Wafer-on-Substrate)—was a critical bottleneck in the AI chip supply
+      chain.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: no specific news reports identified that detailed new, breaking instances
+      of AI-chip supply chain constraints, packaging bottlenecks, or production delays
+    search: ok
+  '2025-06-03':
+    answer: 'yes'
+    evidence: Industry reports noted that semiconductor production capacity was being
+      heavily tested by the demand for AI servers.
+    search: ok
+  '2025-06-04':
+    answer: 'yes'
+    evidence: Specifically, these industry executives identified advanced packaging
+      and memory as key constraints.
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: the specific window requested did not contain reports of new, isolated
+      incidents or announcements regarding these constraints.
+    search: ok
+  '2025-06-06':
+    answer: 'yes'
+    evidence: Industry analysis consistently identified advanced packaging—specifically
+      technologies like TSMC’s Chip-on-Wafer-on-Substrate (CoWoS)—as a critical constraint.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: the specific news cycle from June 7–9, 2025, focused on the market consequences
+      of these production dynamics rather than new, isolated reports of packaging
+      capacity bottlenecks occurring strictly within those three days.
+    search: ok
+  '2025-06-10':
+    answer: 'yes'
+    evidence: the semiconductor industry was experiencing significant supply chain
+      challenges, specifically regarding production delays and packaging capacity
+      bottlenecks.
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: there were no specific news reports detailing new, immediate AI-chip
+      supply chain constraints or packaging bottlenecks.
+    search: ok
+  '2025-06-18':
+    answer: 'yes'
+    evidence: Industry reports from mid-2025 identified advanced chip packaging (such
+      as CoWoS) as a primary bottleneck for AI hardware.
+    search: ok
+  '2025-06-25':
+    answer: 'yes'
+    evidence: A primary constraint identified during this period was the limited capacity
+      for advanced packaging technologies, such as TSMC’s Chip-on-Wafer-on-Substrate
+      (CoWoS).
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: reports from this specific three-day window did not highlight new incidents
+      or unique developments regarding these bottlenecks
+    search: ok
+  '2025-09-22':
+    answer: 'yes'
+    evidence: Capacity for advanced packaging technologies was consistently identified
+      as a primary constraint limiting the production of AI accelerators.
+    search: ok
+  '2025-10-30':
+    answer: 'yes'
+    evidence: Advanced packaging, particularly TSMC’s CoWoS (Chip-on-Wafer-on-Substrate)
+      technology, was identified as a primary bottleneck for AI chip production.
+    search: ok
+  '2025-11-07':
+    answer: 'yes'
+    evidence: the semiconductor industry faced persistent capacity constraints in
+      advanced packaging, specifically TSMC’s CoWoS (Chip-on-Wafer-on-Substrate) technology.
+      This bottleneck was widely recognized as a primary factor limiting the production
+      of high-performance AI chips.
+    search: ok
+  '2025-11-12':
+    answer: 'yes'
+    evidence: reports highlighted significant supply chain constraints in the AI chip
+      sector, specifically regarding advanced packaging capacity.
+    search: ok
+  '2025-11-17':
+    answer: 'yes'
+    evidence: The primary bottlenecks were identified as advanced packaging capacity
+      (such as TSMC’s CoWoS) and High-Bandwidth Memory (HBM).
+    search: ok
+  '2025-12-03':
+    answer: 'yes'
+    evidence: they occurred against a backdrop of broader, well-documented bottlenecks
+      in the AI chip supply chain throughout 2025, particularly regarding advanced
+      packaging capacity (such as TSMC's CoWoS).
+    search: ok

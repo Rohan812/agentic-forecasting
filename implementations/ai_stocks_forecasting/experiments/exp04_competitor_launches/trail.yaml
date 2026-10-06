@@ -1,0 +1,97 @@
+experiment_id: exp04_competitor_launches
+candidates:
+- pattern_id: exp04_competitor_launches_q1
+  cue: Did a major technology company announce the release or deployment of a new
+    proprietary AI accelerator chip intended to compete with NVIDIA's data center
+    GPUs?
+  rule: 'news label: labels/exp04_competitor_launches_q1.yaml'
+  direction: down
+  evaluated_on: '2026-10-05'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.00 is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 3
+    n_hits: 0
+    precision: 0.0
+    base_rate: 0.0391
+    lift: 0.0
+    p_value: 1.0
+    ci_low: 0.0
+    ci_high: 0.0
+  history:
+  - pattern_id: exp04_competitor_launches_q1
+    cue: Did a major technology company announce the release or deployment of a new
+      proprietary AI accelerator chip intended to compete with NVIDIA's data center
+      GPUs?
+    rule: 'news label: labels/exp04_competitor_launches_q1.yaml'
+    direction: down
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout lift 0.00 is below 1.5
+    - holdout p-value 1 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 1
+      n_hits: 0
+      precision: 0.0
+      base_rate: 0.0391
+      lift: 0.0
+      p_value: 1.0
+      ci_low: 0.0
+      ci_high: 0.0
+    holdout_design: matched, 1 control per shock
+- pattern_id: exp04_competitor_launches_q2
+  cue: Was there a report of a significant breakthrough in AI model architecture or
+    software optimization that drastically reduces the computational power required
+    for training or inference?
+  rule: 'news label: labels/exp04_competitor_launches_q2.yaml'
+  direction: down
+  evaluated_on: '2026-10-05'
+  graduated: false
+  stage: screened out on the holdout; training windows not labelled
+  rejection_reasons:
+  - holdout lift 0.00 is below 1.5
+  - holdout p-value 1 is not below 0.1
+  holdout_design: matched, 3 controls per shock
+  holdout:
+    n_windows: 52
+    n_matches: 5
+    n_hits: 0
+    precision: 0.0
+    base_rate: 0.0391
+    lift: 0.0
+    p_value: 1.0
+    ci_low: 0.0
+    ci_high: 0.0
+  history:
+  - pattern_id: exp04_competitor_launches_q2
+    cue: Was there a report of a significant breakthrough in AI model architecture
+      or software optimization that drastically reduces the computational power required
+      for training or inference?
+    rule: 'news label: labels/exp04_competitor_launches_q2.yaml'
+    direction: down
+    evaluated_on: '2026-10-05'
+    graduated: false
+    stage: screened out on the holdout; training windows not labelled
+    rejection_reasons:
+    - holdout lift 0.00 is below 1.5
+    - holdout p-value 1 is not below 0.1
+    holdout:
+      n_windows: 26
+      n_matches: 3
+      n_hits: 0
+      precision: 0.0
+      base_rate: 0.0391
+      lift: 0.0
+      p_value: 1.0
+      ci_low: 0.0
+      ci_high: 0.0
+    holdout_design: matched, 1 control per shock
+candidates_tested: 2

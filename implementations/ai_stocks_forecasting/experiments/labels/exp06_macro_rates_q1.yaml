@@ -1,0 +1,259 @@
+question_id: exp06_macro_rates_q1
+question: Was there a release of a US Consumer Price Index (CPI) report that deviated
+  from consensus analyst expectations in the three days prior?
+labels:
+  '2025-02-04':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      February 2, 2025, and February 4, 2025.
+    search: ok
+  '2025-02-07':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      February 5, 2025, and February 7, 2025.
+    search: ok
+  '2025-02-10':
+    answer: 'no'
+    evidence: no there was no release of a US Consumer Price Index (CPI) report between
+      February 8, 2025, and February 10, 2025.
+    search: ok
+  '2025-02-11':
+    answer: 'no'
+    evidence: No, there was no release of a U.S. Consumer Price Index (CPI) report
+      between February 9, 2025, and February 11, 2025.
+    search: ok
+  '2025-02-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-02-14':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      February 12, 2025, and February 14, 2025, that deviated from consensus analyst
+      expectations.
+    search: ok
+  '2025-02-18':
+    answer: 'no'
+    evidence: no there was no release of a US Consumer Price Index (CPI) report between
+      February 16, 2025, and February 18, 2025.
+    search: ok
+  '2025-02-20':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      February 18, 2025, and February 20, 2025.
+    search: ok
+  '2025-02-26':
+    answer: 'no'
+    evidence: no CPI report was issued during the specified three-day window.
+    search: ok
+  '2025-02-28':
+    answer: 'no'
+    evidence: no, there was no release of a U.S. Consumer Price Index (CPI) report
+      between February 26, 2025, and February 28, 2025.
+    search: ok
+  '2025-03-05':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      March 3, 2025, and March 5, 2025.
+    search: ok
+  '2025-03-07':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      March 5, 2025, and March 7, 2025.
+    search: ok
+  '2025-03-11':
+    answer: 'no'
+    evidence: no there was no release of a US Consumer Price Index (CPI) report between
+      March 9, 2025, and March 11, 2025
+    search: ok
+  '2025-03-13':
+    answer: 'no'
+    evidence: none
+    search: ok
+  '2025-03-18':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      March 16, 2025, and March 18, 2025.
+    search: ok
+  '2025-03-19':
+    answer: 'no'
+    evidence: there was no release of a US Consumer Price Index (CPI) report between
+      March 17, 2025, and March 19, 2025.
+    search: ok
+  '2025-03-25':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      March 23, 2025, and March 25, 2025.
+    search: ok
+  '2025-04-02':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      March 31, 2025, and April 2, 2025.
+    search: ok
+  '2025-04-08':
+    answer: 'no'
+    evidence: No, there was no US Consumer Price Index (CPI) report released between
+      April 6, 2025, and April 8, 2025.
+    search: ok
+  '2025-04-15':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      April 13, 2025, and April 15, 2025.
+    search: ok
+  '2025-04-21':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      April 19, 2025, and April 21, 2025.
+    search: ok
+  '2025-04-23':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      April 21, 2025, and April 23, 2025.
+    search: ok
+  '2025-04-28':
+    answer: 'no'
+    evidence: no CPI report was issued during the specified window of April 26–28,
+      2025.
+    search: ok
+  '2025-04-29':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      April 27, 2025, and April 29, 2025.
+    search: ok
+  '2025-04-30':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      April 28, 2025, and April 30, 2025.
+    search: ok
+  '2025-05-02':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report in
+      the three days prior to the period of April 30, 2025, to May 2, 2025.
+    search: ok
+  '2025-05-09':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      May 7, 2025, and May 9, 2025.
+    search: ok
+  '2025-05-15':
+    answer: 'yes'
+    evidence: The annual inflation rate for April 2025 was reported at 2.3%, which
+      was below the market consensus estimate of 2.4%.
+    search: ok
+  '2025-05-16':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      May 14, 2025, and May 16, 2025.
+    search: ok
+  '2025-05-20':
+    answer: 'no'
+    evidence: no CPI report was issued between May 18 and May 20, 2025
+    search: ok
+  '2025-05-21':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      May 19, 2025, and May 21, 2025.
+    search: ok
+  '2025-05-22':
+    answer: 'no'
+    evidence: no CPI report was issued during the requested three-day window
+    search: ok
+  '2025-05-28':
+    answer: 'no'
+    evidence: no CPI report was issued during the specified window of May 26–28, 2025
+    search: ok
+  '2025-05-29':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      May 27, 2025, and May 29, 2025.
+    search: ok
+  '2025-05-30':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      May 28, 2025, and May 30, 2025.
+    search: ok
+  '2025-06-02':
+    answer: 'no'
+    evidence: no, there was no release of a U.S. Consumer Price Index (CPI) report
+      in the three days prior to the period of May 31, 2025, to June 2, 2025.
+    search: ok
+  '2025-06-03':
+    answer: 'no'
+    evidence: No, there was no release of a U.S. Consumer Price Index (CPI) report
+      between June 1, 2025, and June 3, 2025.
+    search: ok
+  '2025-06-04':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 2, 2025, and June 4, 2025.
+    search: ok
+  '2025-06-05':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      June 3, 2025, and June 5, 2025.
+    search: ok
+  '2025-06-06':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 4, 2025, and June 6, 2025.
+    search: ok
+  '2025-06-09':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 7, 2025, and June 9, 2025.
+    search: ok
+  '2025-06-10':
+    answer: 'no'
+    evidence: no, there was no release of a U.S. Consumer Price Index (CPI) report
+      between June 8, 2025, and June 10, 2025.
+    search: ok
+  '2025-06-11':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 9, 2025, and June 11, 2025
+    search: ok
+  '2025-06-18':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 16, 2025, and June 18, 2025.
+    search: ok
+  '2025-06-25':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      June 23, 2025, and June 25, 2025.
+    search: ok
+  '2025-07-24':
+    answer: 'no'
+    evidence: there was no release of a US Consumer Price Index (CPI) report between
+      July 22, 2025, and July 24, 2025.
+    search: ok
+  '2025-09-22':
+    answer: 'no'
+    evidence: there was no release of a US Consumer Price Index (CPI) report between
+      September 20, 2025, and September 22, 2025.
+    search: ok
+  '2025-10-30':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report during
+      the period of October 28, 2025, to October 30, 2025.
+    search: ok
+  '2025-11-07':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      November 5, 2025, and November 7, 2025.
+    search: ok
+  '2025-11-12':
+    answer: 'no'
+    evidence: no, there was no release of a US Consumer Price Index (CPI) report between
+      November 10, 2025, and November 12, 2025.
+    search: ok
+  '2025-11-17':
+    answer: 'no'
+    evidence: No, there was no release of a US Consumer Price Index (CPI) report between
+      November 15, 2025, and November 17, 2025.
+    search: ok
+  '2025-12-03':
+    answer: 'no'
+    evidence: there was no release of a US Consumer Price Index (CPI) report between
+      December 1, 2025, and December 3, 2025.
+    search: ok

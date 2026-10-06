@@ -1,0 +1,18 @@
+experiment_id: exp04_competitor_launches
+proposed_on: '2026-10-05'
+questions:
+- question_id: exp04_competitor_launches_q1
+  question: Did a major technology company announce the release or deployment of a
+    new proprietary AI accelerator chip intended to compete with NVIDIA's data center
+    GPUs?
+  direction: down
+  rationale: The introduction of in-house silicon by major cloud customers threatens
+    NVIDIA's market share and long-term revenue growth, potentially triggering a negative
+    price shock.
+- question_id: exp04_competitor_launches_q2
+  question: Was there a report of a significant breakthrough in AI model architecture
+    or software optimization that drastically reduces the computational power required
+    for training or inference?
+  direction: down
+  rationale: Increased efficiency in AI models could lower the total addressable market
+    for high-end hardware, leading investors to reassess NVIDIA's future demand projections.

@@ -1,0 +1,19 @@
+experiment_id: exp02_export_controls
+proposed_on: '2026-10-05'
+questions:
+- question_id: exp02_export_controls_q1
+  question: Did the US Department of Commerce or the Bureau of Industry and Security
+    announce new or expanded export control restrictions specifically targeting high-performance
+    AI chips or semiconductor manufacturing equipment destined for China?
+  direction: either
+  rationale: New export restrictions directly impact NVIDIA's ability to sell its
+    flagship products in a major market, which can trigger significant volatility
+    as investors reassess revenue projections.
+- question_id: exp02_export_controls_q2
+  question: Were there official reports of new US government trade policies or tariffs
+    that specifically impose additional duties or licensing requirements on the import
+    or export of semiconductor components involving Chinese entities?
+  direction: either
+  rationale: Changes in trade policy regarding semiconductors create uncertainty in
+    the global supply chain and market access, often leading to sharp price adjustments
+    as the market prices in geopolitical risk.

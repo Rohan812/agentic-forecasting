@@ -27,8 +27,9 @@ tab before starting, and **run nothing live**.
 > "NVDA's split-adjusted daily closes go through the same cutoff-safe `DataService` as every
 > other series in the repo. Two numerical baselines ran over 51 weekly origins in 2025."
 
-**Show:** `01_leaderboard_and_calibration.ipynb`, first the leaderboard and then the
-coverage-vs-sharpness chart.
+**Show:** `04_systematic_backtest_eval.ipynb` (then called `01_leaderboard_and_calibration.ipynb`),
+first the leaderboard and then the coverage-vs-sharpness chart. The numbers below are the Phase 0
+raw-price baseline, since replaced by the log-return one.
 
 - AutoARIMA leads on CRPS: **10.03 vs 10.67**.
 - **But** its MAE is worse than the random walk, and its 80% intervals cover only **14.5%**.

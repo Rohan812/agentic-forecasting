@@ -1,0 +1,8 @@
+experiment_id: exp07_semis_peers
+focus: >-
+  Semiconductor peers and the supply chain. Do earnings, guidance or monthly sales
+  from TSMC, ASML, AMD, Broadcom or Micron, or reports of AI-chip supply
+  constraints or production problems (for example packaging capacity or a delayed
+  product), in the days before as_of predict a ±5% NVDA move?
+data: fenced news labels per window (cutoff = the window's as_of)
+round: 2 (pre-registered 2026-10-06, after round 1 found nothing)

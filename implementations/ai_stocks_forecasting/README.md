@@ -23,8 +23,13 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
 | `signals.py` | *new* — not from energy | **done** — flagging, control sampling, the train/holdout split, pattern scoring, the gate and regime labels, all tested (see below) |
-| `charts.py` + `01_leaderboard_and_calibration.ipynb` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, every prediction in full, predicted-vs-actual line chart |
-| `02_arima_root_cause.ipynb` | *new* — not from energy | **done** — diagnosis of the raw-price AutoARIMA −77% forecast |
+| `charts.py` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, predicted-vs-actual, shock leaderboard and separation chart |
+| `story.py` | *new* — not from energy | **done** — presentation charts for notebooks 01–04: annotated shock chart, one-origin forecast fans, CRPS by shock window and volatility regime |
+| `agent_backtest.py` | *new* — not from energy | **done** — runs the news-grounded agent on the trajectory task through a spec |
+| `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
+| `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
+| `01`–`05` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop (see [Notebooks](#notebooks)) |
+| `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
 | `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
 | `starter_agent/` | Hackable "build your own" agent | **pending** |
@@ -144,7 +149,7 @@ Per horizon (USD/share):
 
 ### The raw-price baseline, and why it was replaced
 
-An earlier version fitted AutoARIMA on raw prices, and every calendar gap reached the model as `NaN`. Its results are kept in [`data/predictions/archive/`](data/predictions/archive/) as evidence. They are not a baseline, and the chart loader doesn't pick them up. [`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) walks through the diagnosis. In short: NYSE was closed on 2025-01-09 for a national day of mourning. That put a `NaN` in the second-to-last training row, which flipped the selected model and produced a **−77% forecast** ($31.32 against an actual $132.45) where the gap-free series gives +2.7%. The three worst forecasts in the backtest were exactly the three origins with a holiday in that position.
+An earlier version fitted AutoARIMA on raw prices, and every calendar gap reached the model as `NaN`. Its results are kept in [`data/predictions/archive/`](data/predictions/archive/) as evidence. They are not a baseline, and the chart loader doesn't pick them up. [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) walks through the diagnosis. In short: NYSE was closed on 2025-01-09 for a national day of mourning. That put a `NaN` in the second-to-last training row, which flipped the selected model and produced a **−77% forecast** ($31.32 against an actual $132.45) where the gap-free series gives +2.7%. The three worst forecasts in the backtest were exactly the three origins with a holiday in that position.
 
 | Variant | Mean CRPS | MAE | Largest miss | 80% interval coverage |
 |---|---|---|---|---|
@@ -630,41 +635,146 @@ ids (`P-<n>`) must be unique, because a forecast names the pattern it matched by
 agent-written text is escaped, so a `|` or a line break in a cue or a source experiment can't shift or split the `SKILL.md` table. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_nvda_strategy_state.py`.
 
-## Charts
+## Discovery loop (Phase 2)
 
-[`01_leaderboard_and_calibration.ipynb`](01_leaderboard_and_calibration.ipynb) holds the
-CRPS leaderboard and the coverage-vs-sharpness chart. Both load by globbing
-`data/predictions/<spec_id>/`, so a new predictor appears the moment its YAML lands —
-re-running the notebook is the entire update path, and `SPEC_ID` switches between the 2025
-backtest and the protected 2026 window.
+[`discovery.py`](discovery.py) is the engine the study agent drives. A **candidate pattern**
+is a rule that answers yes or no for one window using only what was knowable at that window's
+`as_of`: prices up to that session, the earnings calendar (scheduled weeks in advance), or a
+fenced news label. `build_study_set` builds the windows deterministically (seed 0):
 
-The coverage chart plots realised coverage of the 80% interval against its mean width, one
-panel per horizon. On the nominal-80% line is honest, below is overconfident, above is vague;
-further left on the line is better. The log-return AutoARIMA floor sits **above** the line (its
-intervals are too wide), so an agent cannot win by widening. It can win by moving *left*:
-the same ~80% coverage from a narrower interval, which also shows up as lower CRPS.
+- **Training:** 238 windows from 2020 to January 2025, 119 shocks each with one matched control.
+- **Holdout:** 52 windows from February to December 2025, 13 shocks each with **three** matched
+  controls (see [The holdout redesign](#the-holdout-redesign) for why).
 
-The notebook also prints **every prediction** (section 3). `load_scored_frame` returns one row
-per predictor, origin and horizon, with the forecast date, point forecast, percentiles, actual
-price, error and CRPS, ready to display or save with `to_csv`. And it draws
-**`predicted_vs_actual`** (section 4): the actual daily close as a line, each predictor's
-forecasts plotted at the date they were forecasting, with 80% bands, one panel per horizon.
-On the 21-day panel the naive forecast visibly lags every turn.
+`evaluate_candidate` scores a rule on both splits through `signals.evaluate_pattern` and runs
+`signals.gate_reasons`. **The statistics are always computed by the engine**, so a study agent
+proposes rules and cannot hand in its own lift or p-value. A one-direction pattern is scored
+against the one-direction shock rate, with moves the other way counted as non-shocks, so it
+cannot borrow strength from moves it does not predict. For rules that cost nothing to evaluate
+(calendar and price rules), `holdout="population"` scores the holdout on every 2025 session
+instead of the matched windows. `record_candidate` writes every candidate, passed or rejected,
+with its evidence, the gate's reasons and the holdout design used, to
+`experiments/<id>/trail.yaml`. Re-evaluating a candidate keeps its earlier results under
+`history`, and the trail counts `candidates_tested`. Each experiment folder also holds its
+`focus.yaml` and, for news experiments, its `questions.yaml`.
 
-Section 5 covers the **shock task**. `load_shock_frame` loads every committed shock backtest
-(`SHOCK_SPECS`: smoke, fresh and fresh after-close). It scores each arm on the origins all arms
-of a spec share, and flags midnight forecasts that quote the `as_of` close they cannot know.
-`shock_leaderboard` gives Brier, Brier skill against that spec's climatology, the separation
-between mean P before shocks and before calm sessions, and a 90% paired-bootstrap interval on
-the Brier difference. With `exclude_leaked=True` it drops a leaked origin from every arm of its
-spec. `shock_separation` plots every forecast by arm, with shocks as filled triangles, calm
-sessions as hollow circles and leaked forecasts ringed in grey. A forecaster that adds
-information puts the triangles above the circles. None does yet. Tests are in
+**News labels.** [`news_labels.py`](news_labels.py) answers a yes/no news question for each
+window from a web search fenced at that window's own cutoff (news published by `as_of`, looking
+back three days), and a lite-model judge reads the verified briefing. A pilot showed the fence
+holding: on 2022-08-31 it found the A100/H100 licence notice, and on 2023-10-16 it answered
+"no" because the October 2023 rule came a day later. [`news_study.py`](news_study.py) runs an
+experiment in three steps. A lite-model call proposes at most two questions from the focus
+file, saved to `questions.yaml` before any labelling and never edited after. Each question is
+then **screened on the holdout first**: the gate needs holdout lift ≥ 1.5 and holdout p < 0.10
+as well as the training criteria, so a question that fails these cannot graduate, and its 238
+training windows are never paid for. Only a survivor is labelled and scored in full.
+
+**Cost is capped in code.** `CostMeter` prices every LLM call's tokens as it returns (Langfuse's
+per-token prices for the two proxy models) and adds $0.014 per search call for Google Search
+grounding, which those prices leave out, so it errs high. `BudgetLedger` keeps cumulative spend
+in `experiments/budget.yaml` against a $30 stage cap, labelling stops before any batch that
+would cross the cap, and every label is cached under `experiments/labels/`. Measured cost is
+$0.016 per window. Tests are in `test_discovery.py` and `test_news_labels.py`.
+
+### Results: nothing has graduated
+
+Fifteen candidates tested across seven experiments in two rounds, **$16.23** spent of the $30
+cap. Results on the current design (three controls per holdout shock; population holdout for
+calendar and price rules). Round 2 (experiments 05–07) was pre-registered after round 1 found
+nothing, with new focus files and questions fixed before labelling; no round 1 question was
+revised against the holdout.
+
+| Candidate | Training (2020–Jan 2025) | Holdout (2025) | Why it did not pass |
+|---|---|---|---|
+| exp01 P-1: NVDA reports results after the close | lift 3.17, p 0.030, CI 1.21–8.30: **passes** | every session: 4 earnings reactions, 1 shock, p 0.25 | **Not confirmed after the cutoff.** 9 of 11 earnings sessions preceded a shock in 2020–24, but only 1 of 2025's 4 did |
+| exp01 P-2: same, up moves only | lift 2.51, p 0.072, CI 0.80–7.42 | every session: 4 matches, 0 hits | **No evidence**: fails training significance, and no 2025 earnings reaction was an up shock |
+| exp01 P-3: high-volatility regime | lift 1.15, p 0.21 | every session: lift 1.91, p 0.030 | **A volatility proxy, not a shock predictor.** Against volatility-matched controls it has no edge; the population holdout is not volatility-matched, which is why it looks good there |
+| exp02 q1: new US export controls on AI chips for China | not labelled | 4 matches, 1 shock: lift 1.00, p 0.70 | **No effect**: reported as often before calm days as before shocks |
+| exp02 q2: new US chip tariffs or licensing on China trade | not labelled | 0 matches | **Too rare to test**: never reported in a holdout window |
+| exp03 q1 (up): hyperscaler raises AI capex guidance | not labelled | 4 matches, 0 shocks | **No effect** |
+| exp03 q2 (down): hyperscaler cuts capex or questions AI returns | not labelled | 1 match, 1 shock: lift 25.6, p 0.135 | **Closest to passing, but one event.** Its only holdout match preceded a down shock; a single match cannot be significant |
+| exp04 q1 (down): rival launches an AI accelerator | not labelled | 3 matches, 0 shocks | **No effect** |
+| exp04 q2 (down): AI efficiency breakthrough cuts compute needs | not labelled | 5 matches, 0 shocks | **No effect**: the DeepSeek sell-off is the famous case, but it falls in the training period, and in 2025 such reports preceded only calm days |
+| exp05 q1 (up): NVIDIA product, architecture or platform launch | not labelled | 7 matches, 1 shock: lift 1.27, p 0.60 | **No effect**: NVIDIA announces products constantly |
+| exp05 q2 (down): new regulatory or antitrust action against NVIDIA | not labelled | 1 match, 0 shocks | **No effect** |
+| exp06 q1: US CPI report that surprised consensus | not labelled | 1 match, 0 shocks | **No effect** |
+| exp06 q2: Fed statement or official signalling a rate shift | not labelled | 7 matches, 0 shocks | **No effect** |
+| exp07 q1: TSMC, ASML, AMD, Broadcom or Micron report results, guidance or sales | lift 0.77, p 0.90, CI 0.46–1.21: **fails** | 5 matches, 4 shocks: lift 6.80, p 0.011: **passes** | **A 2025 coincidence.** Four of five 2025 peer reports preceded NVDA shocks, but over 2020–24 peer reports preceded shocks less often than calm days (21 of 49) |
+| exp07 q2: AI-chip supply constraints (packaging, production delays) | not labelled | 33 matches, 8 shocks: lift 0.96, p 0.70 | **No effect**: constant background news |
+
+The failures fall into four groups:
+
+1. **No effect.** Ten news questions match calm days at least as often as shocks. The holdout
+   is not too small for these: they show no edge at all.
+2. **One event.** Hyperscaler capex caution (down) matched once, and that once was a shock. A
+   single match cannot reach p < 0.10 under any design, so it stays a lead, not a pattern.
+3. **Real before the cutoff, not after.** Earnings passes every training criterion, but 2025
+   did not repeat it. This is what the post-cutoff holdout exists to catch: a pattern the
+   models may remember from 2020–24 has to hold on data they cannot have seen.
+4. **Real after the cutoff, not before.** Peer results passed the holdout strongly (4 of 5) and
+   failed training outright (lift 0.77 over 49 matches). This is why the gate needs both halves:
+   a small holdout can line up by chance, and five years of history are the check on it.
+
+### The holdout redesign
+
+The first screens (2026-10-05, kept under `history` in each trail) used one control per
+holdout shock, 26 windows. Under that design a pattern reaches holdout p < 0.10 only if it
+precedes **at least 4 of the 13** holdout shocks with no false alarm. That is a sample-size
+limit, not a strict threshold: no specific news event recurs that often, so the gate could not
+have confirmed one however real. In simulation, a pattern that triples the shock rate and
+appears before 3% of calm days passed the holdout criteria 3% of the time.
+
+The holdout now draws **three controls per shock** (`HOLDOUT_CONTROLS_PER_SHOCK`), which
+lowers the bar to 2 of 13 shocks (3 with one false alarm). The same simulated pattern passes
+22% of the time, while a pattern with no effect passes 2–6% of the time, still under the
+nominal 10%. Five controls add almost nothing (25%). No threshold changed, the training
+windows are identical (a test checks this), and the six news questions were re-screened
+exactly as first proposed. The change was made after seeing the first screens, which is why
+both results are kept. Even now, most real rare patterns will not be confirmed: the remaining
+fix is more post-cutoff shocks, from the protected 2026 window or from more tickers (Phase 4).
+
+**Multiple testing.** A candidate must pass training (p < 0.05 and a lift interval above 1)
+*and* the holdout, so a pattern with no effect gets through both with probability well under 1%.
+Fifteen candidates have been tested; the trails count them so any future graduation can be
+judged against that number. Experiment 07's peer-results question is the first to pass the
+holdout. At the simulated 2–6% false-pass rate, fifteen candidates with no effect would produce
+0.3 to 0.9 holdout passes by chance, so one is unremarkable, and the training half rejected it.
+
+## Notebooks
+
+The notebooks follow energy/oil's numbered series, each opening with a "Part N of 6"
+banner and a link to the previous one. They read committed artefacts only, so they run in
+seconds and call no LLM. Run them from `implementations/` after
+`uv run python scripts/fetch_nvda.py`.
+
+| Notebook | What it shows |
+|---|---|
+| [`01_nvda_case_study.ipynb`](01_nvda_case_study.ipynb) | The story in four acts: AutoARIMA forecasting blind, the 19 shock sessions of 2025 with their documented causes, how the baseline did (its error doubles in shock windows), and the information a better forecaster would need |
+| [`02_intro_agentic_predictor.ipynb`](02_intro_agentic_predictor.ipynb) | The news-grounded agent beside the baselines at two origins: the morning of the DeepSeek sell-off (2025-01-27) and the Monday after the tariff crash (2025-04-07), with its rationale |
+| [`03_one_agent_two_tasks.ipynb`](03_one_agent_two_tasks.ipynb) | One identity, two task specs: the system prompt and fenced `search_web`, a trajectory answer, three shock answers for 2025-04-09, and the search-fence leak and its fix |
+| [`04_systematic_backtest_eval.ipynb`](04_systematic_backtest_eval.ipynb) | The full 2025 scorecard: CRPS leaderboard and paired comparison, coverage vs sharpness, CRPS by shock window and volatility regime, predicted vs actual, every prediction, and the shock task |
+| [`05_discovery_loop.ipynb`](05_discovery_loop.ipynb) | The Phase 2 discovery loop: study windows, the gate, how a fenced news label is made, all fifteen candidates with why each failed, the "both halves of the gate" chart, and the holdout power analysis |
+| `06` | To come: the protected 2026 evaluation |
+| [`90_arima_root_cause.ipynb`](90_arima_root_cause.ipynb) | Appendix: the raw-price baseline's −77% forecast, traced to a single holiday `NaN` |
+
+**The trajectory agent on the 2025 backtest** (`agent_backtest.py`, all 51 weekly origins,
+$0.012 per origin). The news-grounded agent ties AutoARIMA on CRPS (8.01 against 8.17, inside
+one standard error; naive 10.67), but behaves differently. Its 80% intervals are about half
+as wide and overconfident: they contain the outcome 60%, 70% and 69% of the time at 5, 10 and
+21 days, against AutoARIMA's 83%, 89% and 98%. It wins quiet weeks and loses shock weeks: at
+5 days its CRPS is 3.9 against 4.7 when no ±5% session falls in the window, and 11.4 against
+9.5 when one does. By volatility regime it is best in low (5.6 against 7.3) and worst in high
+(11.0 against 9.2). No rationale quotes a close it could not have seen.
+
+`charts.py` holds the scorecard charts. `load_scored_frame` and `load_shock_frame` glob
+`data/predictions/<spec_id>/`, so a new predictor appears the moment its YAML lands, and
+`SPEC_ID` in notebook 04 switches to the protected 2026 window. The coverage chart plots
+realised coverage of the 80% interval against its mean width, one panel per horizon: on the
+nominal-80% line is honest, below is overconfident, above is vague. `shock_leaderboard` scores
+each shock arm against its own spec's climatology on shared origins (Brier skill, separation,
+a 90% paired-bootstrap interval on the Brier difference), and `shock_separation` plots every
+shock forecast by outcome, with leaked forecasts ringed in grey. Tests are in
 `implementations/tests/ai_stocks_forecasting/test_charts.py`.
-
-[`02_arima_root_cause.ipynb`](02_arima_root_cause.ipynb) is the root-cause analysis of the
-original raw-price baseline's −77% forecast, described above. It reads the archived results
-and deliberately refits with the old code path, so the failure stays reproducible.
 
 Colour encodes the predictor **family**, marker shape the individual predictor. The
 categorical palette is only validated for colourblind separation up to three series on a
