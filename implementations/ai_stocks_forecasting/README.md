@@ -29,6 +29,7 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
 | `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
 | `exploratory.py` + `oot_eval.py` | *new* — not from energy | **done** — Gate A (loosened), the exploratory pattern tier, the climatology-plus-patterns and pattern-aware agent forecasters, and the one-time 2026 evaluation runner |
+| `basket.py` + `calendars/` | *new* — not from energy | **stage 0 done** — the four-stock AI basket (NVDA, AMD, MSFT, GOOG): volatility-relative shocks, pooled windows, calendar rules with a calendar-shift dependence test, and a logistic baseline model (see [Four-stock basket](#four-stock-basket)) |
 | `01`–`06` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop, one-time 2026 evaluation (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
 | `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
@@ -773,6 +774,51 @@ Fifteen candidates have been tested; the trails count them so any future graduat
 judged against that number. Experiment 07's peer-results question is the first to pass the
 holdout. At the simulated 2–6% false-pass rate, fifteen candidates with no effect would produce
 0.3 to 0.9 holdout passes by chance, so one is unremarkable, and the training half rejected it.
+
+## Four-stock basket
+
+One stock and one year give 13 post-cutoff shocks, too few to confirm rare patterns.
+[`basket.py`](basket.py) pools **NVDA, AMD, MSFT and GOOG**, pre-registered in
+[`experiments/basket/preregistration.md`](experiments/basket/preregistration.md). Fetch prices
+with `uv run python scripts/fetch_ai_basket.py`, then run stage 0 with
+`uv run python -m ai_stocks_forecasting.basket` from `implementations/` (no LLM calls).
+
+- **Relative shocks.** A session is a shock when its return is at least 2 standard deviations
+  of that ticker's previous 21 returns, so a 3% move in MSFT and a 6% move in NVDA count alike.
+  Each ticker's standardised returns go through the tested `signals` functions.
+- **Pooled windows.** 660 training windows (330 shock events) and 236 holdout windows (59
+  shock events, three controls each), against 13 holdout shocks for NVDA alone.
+- **Calendars as data.** [`calendars/`](calendars/) holds each company's results dates
+  (yfinance) and US CPI and jobs-report dates (FRED), plus scheduled Fed decision days, entered
+  by hand and cross-checked against FRED's target-rate changes.
+- **A dependence check.** Pooled ticker-days are not independent, so each rule must also pass a
+  calendar-shift test: its dates, shifted by a random number of sessions for every ticker at
+  once, must rarely match as many shocks as the real dates do.
+- **Stage 0 reads nothing after 2025-12-31.** The 2026 outcomes of AMD, MSFT and GOOG are
+  reserved for a blind test.
+
+**Stage 0 result: earnings clears the strict gate**, with no threshold loosened.
+
+| Rule | Training (2020 – Jan 2025) | Holdout (2025) | Verdict |
+|---|---|---|---|
+| Earnings reaction | 47 of 48 matches were shocks, lift 11.0, shift p 0.0005 | 7 of 8, lift 9.0, shift p 0.0005 | **Graduates** |
+| Fed decision day | lift 2.8, p 0.001, shift p 0.015 | 1 of 7, lift 0.5 | Fails the holdout |
+| CPI release day | lift 1.4, p 0.15 | lift 0.9 | Fails |
+| Jobs report day | lift 1.2, p 0.42 | lift 1.9, p 0.22 | Fails training |
+
+Across all ticker-days, 58% of earnings reactions were shocks in training and 47% in the
+holdout, against about 7% of ordinary days. Fed decision days were real before the model
+cutoff and not after it. The 2025 holdout was not blind for these rules (a feasibility check
+had seen the pooled earnings result, as the pre-registration discloses), so this is a
+confirmation with matched controls and a dependence check, not a first look.
+
+The **baseline model** (logistic regression on a volatility ratio, the current session's
+standardised move, and four next-session calendar flags) scores Brier 0.0599 on the 916
+holdout ticker-days against climatology's 0.0622: skill +3.7%, with a date-resampled interval
+of −0.0060 to +0.0010, so it does not meet the pre-registered rule. Its gain comes almost
+entirely from earnings days. Frozen, it is the baseline an agent must beat in the blind 2026
+test. Full results: [`experiments/basket/results.md`](experiments/basket/results.md). Tests are
+in `test_basket.py`.
 
 ## Notebooks
 

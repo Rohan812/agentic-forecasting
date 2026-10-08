@@ -1,0 +1,154 @@
+shock_definition: '|return| >= 2.0 x std of the previous 21 returns'
+data_through: '2025-12-31'
+windows:
+  train:
+    windows: 660
+    shock_events: 330
+    by_ticker:
+      NVDA: 79
+      AMD: 86
+      MSFT: 81
+      GOOG: 84
+    base_rate: 0.071
+  holdout:
+    windows: 236
+    shock_events: 59
+    by_ticker:
+      NVDA: 15
+      AMD: 13
+      MSFT: 16
+      GOOG: 15
+    base_rate: 0.0663
+rules:
+- rule: earnings
+  graduated: true
+  rejection_reasons: []
+  train:
+    n_windows: 660
+    n_matches: 48
+    n_hits: 47
+    precision: 0.7823
+    base_rate: 0.071
+    lift: 11.0162
+    p_value: 0.0
+    ci_low: 7.1951
+    ci_high: 14.0826
+    calendar_shift_p: 0.0005
+  holdout:
+    n_windows: 236
+    n_matches: 8
+    n_hits: 7
+    precision: 0.5986
+    base_rate: 0.0663
+    lift: 9.028
+    p_value: 0.0003
+    ci_low: 3.3364
+    ci_high: 15.082
+    calendar_shift_p: 0.0005
+- rule: fomc
+  graduated: false
+  rejection_reasons:
+  - holdout lift 0.52 is below 1.5
+  - holdout p-value 0.871 is not below 0.1, so the holdout result could be luck
+  - holdout calendar-shift p 0.787 is not below 0.1
+  train:
+    n_windows: 660
+    n_matches: 34
+    n_hits: 26
+    precision: 0.199
+    base_rate: 0.071
+    lift: 2.8023
+    p_value: 0.0011
+    ci_low: 1.5478
+    ci_high: 6.101
+    calendar_shift_p: 0.015
+  holdout:
+    n_windows: 236
+    n_matches: 7
+    n_hits: 1
+    precision: 0.0343
+    base_rate: 0.0663
+    lift: 0.5171
+    p_value: 0.8705
+    ci_low: 0.0
+    ci_high: 2.6488
+    calendar_shift_p: 0.7871
+- rule: cpi
+  graduated: false
+  rejection_reasons:
+  - training lift 1.42 is below 2
+  - training p-value 0.155 is not below 0.05
+  - training lift interval starts at 0.79, which does not exclude 1 (no effect)
+  - holdout lift 0.87 is below 1.5
+  - holdout p-value 0.705 is not below 0.1, so the holdout result could be luck
+  - training calendar-shift p 0.237 is not below 0.05
+  - holdout calendar-shift p 0.643 is not below 0.1
+  train:
+    n_windows: 660
+    n_matches: 37
+    n_hits: 22
+    precision: 0.1008
+    base_rate: 0.071
+    lift: 1.4196
+    p_value: 0.155
+    ci_low: 0.7854
+    ci_high: 2.6269
+    calendar_shift_p: 0.2369
+  holdout:
+    n_windows: 236
+    n_matches: 9
+    n_hits: 2
+    precision: 0.0574
+    base_rate: 0.0663
+    lift: 0.8653
+    p_value: 0.7049
+    ci_low: 0.0
+    ci_high: 2.6488
+    calendar_shift_p: 0.6432
+- rule: jobs
+  graduated: false
+  rejection_reasons:
+  - training lift 1.15 is below 2
+  - training p-value 0.421 is not below 0.05
+  - training lift interval starts at 0.55, which does not exclude 1 (no effect)
+  - holdout p-value 0.22 is not below 0.1, so the holdout result could be luck
+  - training calendar-shift p 0.686 is not below 0.05
+  - holdout calendar-shift p 0.216 is not below 0.1
+  train:
+    n_windows: 660
+    n_matches: 26
+    n_hits: 14
+    precision: 0.0819
+    base_rate: 0.071
+    lift: 1.153
+    p_value: 0.4209
+    ci_low: 0.5476
+    ci_high: 2.3534
+    calendar_shift_p: 0.6857
+  holdout:
+    n_windows: 236
+    n_matches: 10
+    n_hits: 4
+    precision: 0.1244
+    base_rate: 0.0663
+    lift: 1.8756
+    p_value: 0.2203
+    ci_low: 0.3902
+    ci_high: 5.8807
+    calendar_shift_p: 0.2164
+baseline_model:
+  n: 916
+  shocks: 61
+  brier_model: 0.0599
+  brier_climatology: 0.0622
+  skill: 0.0368
+  diff_low: -0.006
+  diff_high: 0.001
+  coefficients:
+    vol_ratio: -0.075
+    abs_z: 0.146
+    earnings_next: 2.783
+    fomc_next: 0.399
+    cpi_next: 0.406
+    jobs_next: -0.142
+  beats_climatology: false
