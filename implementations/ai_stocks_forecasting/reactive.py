@@ -563,6 +563,42 @@ def summary(frame: pd.DataFrame) -> pd.DataFrame:
     return table.reindex([a for a in ARMS if a in table.index])
 
 
+RESULTS_PATH = REACTIVE_DIR / "results.yaml"
+
+
+def write_results(path: Path = RESULTS_PATH) -> dict[str, Any]:
+    """Score every arm present and save the summary, comparisons, earnings subset and illustration as YAML."""
+    factor = earnings_factor()
+    frame = load_frame(factor=factor)
+    arms = set(frame["arm"])
+    out: dict[str, Any] = {
+        "window": f"{TEST_START} to {TEST_END}",
+        "tickers": list(TICKERS),
+        "earnings_factor": round(factor, 3),
+        "vxn_beta": {t: round(vxn_beta(t), 3) for t in TICKERS},
+        "arms_scored": [a for a in ARMS if a in arms],
+        "summary": {a: {k: round(float(v), 4) for k, v in row.items()} for a, row in summary(frame).iterrows()},
+        "comparisons": [
+            {
+                "a": a,
+                "b": b,
+                "question": q,
+                **{k: (round(v, 4) if isinstance(v, float) else v) for k, v in paired_difference(frame, a, b).items()},
+            }
+            for a, b, q in COMPARISONS
+            if {a, b} <= arms
+        ],
+        "earnings_reactions": {
+            a: {k: round(float(v), 4) for k, v in g[["interval_score", "covered", "width"]].mean().items()}
+            | {"n": len(g)}
+            for a, g in frame[frame["earnings_reaction"]].groupby("arm")
+        },
+        "vol_targeting_illustration": vol_targeting(frame).round(3).to_dict(orient="records"),
+    }
+    path.write_text(yaml.safe_dump(out, sort_keys=False))
+    return out
+
+
 def main() -> None:
     """Command-line entry: ``run`` one ticker and arm, or ``score`` everything."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -579,6 +615,9 @@ def main() -> None:
         sessions = [pd.Timestamp(d) for d in DEV_SESSIONS] if args.dev else target_sessions(close)
         run_agent(args.ticker, args.arm, sessions, dev=args.dev)
         return
+    if not args.dev:
+        write_results()
+        print(f"results written to {RESULTS_PATH}")
     factor = earnings_factor()
     frame = load_frame(dev=args.dev, factor=factor)
     print(f"earnings factor (2020-2025): {factor:.2f}\n")

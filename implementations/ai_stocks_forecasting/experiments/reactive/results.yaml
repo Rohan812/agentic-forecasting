@@ -1,0 +1,151 @@
+window: 2026-01-02 to 2026-09-30
+tickers:
+- AMD
+- MSFT
+- GOOG
+earnings_factor: 3.128
+vxn_beta:
+  AMD: 2.115
+  MSFT: 1.168
+  GOOG: 1.277
+arms_scored:
+- vol21
+- ewma
+- vol21_earnings
+- vxn
+summary:
+  vol21:
+    interval_score: 10.788
+    covered: 80.5704
+    width: 7.0894
+    crps: 1.6129
+    n: 561.0
+  ewma:
+    interval_score: 10.6167
+    covered: 83.2442
+    width: 7.2402
+    crps: 1.6033
+    n: 561.0
+  vol21_earnings:
+    interval_score: 10.2983
+    covered: 81.1052
+    width: 7.3111
+    crps: 1.5875
+    n: 561.0
+  vxn:
+    interval_score: 10.5048
+    covered: 78.4314
+    width: 6.0114
+    crps: 1.5804
+    n: 561.0
+comparisons:
+- a: vol21_earnings
+  b: vol21
+  question: does the earnings calendar help a volatility model?
+  n: 561
+  mean_diff: -0.4897
+  lo: -0.9373
+  hi: -0.097
+  improves: true
+- a: vxn
+  b: ewma
+  question: does implied volatility beat a realised-volatility model?
+  n: 561
+  mean_diff: -0.1119
+  lo: -0.3972
+  hi: 0.1854
+  improves: false
+earnings_reactions:
+  ewma:
+    interval_score: 74.3247
+    covered: 0.1111
+    width: 6.7627
+    n: 9
+  vol21:
+    interval_score: 75.4653
+    covered: 0.1111
+    width: 6.4669
+    n: 9
+  vol21_earnings:
+    interval_score: 44.9394
+    covered: 0.4444
+    width: 20.2863
+    n: 9
+  vxn:
+    interval_score: 78.1545
+    covered: 0.1111
+    width: 6.0336
+    n: 9
+vol_targeting_illustration:
+- arm: ewma
+  ticker: AMD
+  realised_vol_pct: 1.092
+  max_drawdown_pct: -8.509
+  buy_hold_vol_pct: 4.543
+  buy_hold_drawdown_pct: -26.467
+- arm: ewma
+  ticker: GOOG
+  realised_vol_pct: 1.079
+  max_drawdown_pct: -14.77
+  buy_hold_vol_pct: 2.005
+  buy_hold_drawdown_pct: -20.75
+- arm: ewma
+  ticker: MSFT
+  realised_vol_pct: 1.227
+  max_drawdown_pct: -16.796
+  buy_hold_vol_pct: 2.29
+  buy_hold_drawdown_pct: -26.696
+- arm: vol21
+  ticker: AMD
+  realised_vol_pct: 1.15
+  max_drawdown_pct: -8.535
+  buy_hold_vol_pct: 4.543
+  buy_hold_drawdown_pct: -26.467
+- arm: vol21
+  ticker: GOOG
+  realised_vol_pct: 1.149
+  max_drawdown_pct: -15.419
+  buy_hold_vol_pct: 2.005
+  buy_hold_drawdown_pct: -20.75
+- arm: vol21
+  ticker: MSFT
+  realised_vol_pct: 1.336
+  max_drawdown_pct: -18.371
+  buy_hold_vol_pct: 2.29
+  buy_hold_drawdown_pct: -26.696
+- arm: vol21_earnings
+  ticker: AMD
+  realised_vol_pct: 1.034
+  max_drawdown_pct: -5.527
+  buy_hold_vol_pct: 4.543
+  buy_hold_drawdown_pct: -26.467
+- arm: vol21_earnings
+  ticker: GOOG
+  realised_vol_pct: 1.045
+  max_drawdown_pct: -15.159
+  buy_hold_vol_pct: 2.005
+  buy_hold_drawdown_pct: -20.75
+- arm: vol21_earnings
+  ticker: MSFT
+  realised_vol_pct: 1.047
+  max_drawdown_pct: -14.328
+  buy_hold_vol_pct: 2.29
+  buy_hold_drawdown_pct: -26.696
+- arm: vxn
+  ticker: AMD
+  realised_vol_pct: 1.402
+  max_drawdown_pct: -9.492
+  buy_hold_vol_pct: 4.543
+  buy_hold_drawdown_pct: -26.467
+- arm: vxn
+  ticker: GOOG
+  realised_vol_pct: 0.998
+  max_drawdown_pct: -10.691
+  buy_hold_vol_pct: 2.005
+  buy_hold_drawdown_pct: -20.75
+- arm: vxn
+  ticker: MSFT
+  realised_vol_pct: 1.251
+  max_drawdown_pct: -15.832
+  buy_hold_vol_pct: 2.29
+  buy_hold_drawdown_pct: -26.696

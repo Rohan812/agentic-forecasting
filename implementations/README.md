@@ -24,13 +24,13 @@ implementations/
 |   `-- specs/                #     backtest and eval YAML
 |-- boc_rate_decisions/       # 4 · Discrete-event reference: BoC cut/hold/hike direction
 |   `-- specs/                #     direction + binary backtest / eval / smoke YAML
-|-- ai_stocks_forecasting/    # 5 · NVDA news-grounded equity forecaster (scaffold in progress)
+|-- ai_stocks_forecasting/    # 5 · NVDA news-grounded equity forecaster and pattern-discovery study
 |   `-- specs/                #     backtest and eval YAML
 |-- tests/                    # tests for implementation-specific helper modules
 `-- pyproject.toml            # local workspace packaging
 ```
 
-`ai_stocks_forecasting/` is a **work-in-progress scaffold**, not yet a finished reference implementation: it is a copy of the energy/oil Python modules with the package name rewired. Its data path, specs, shock definition, numerical baselines, statistics contract (`signals.py`), analyst prompt strings, news-grounded configs (`build_nvda_news_config`, `build_nvda_multitask_news_config`), prompt builders, shock task, predictor and outcome series (with a ten-origin scored smoke backtest), a full 2025 trajectory backtest of the news-grounded agent, notebooks 01–06 in energy/oil's numbered style, a discovery loop with a pre-registered 2026 evaluation, a four-stock basket study (NVDA, AMD, MSFT, GOOG), and gate-enforced master-strategy schema (`NvdaStrategyState`) are retargeted (`build_nvda_service()` registers NVDA's adjusted close as `nvda_stock_price`). The other factory names, the scenario task, the adaptive agent, and the skills are still WTI-targeted. See [`ai_stocks_forecasting/README.md`](ai_stocks_forecasting/README.md) for what remains.
+`ai_stocks_forecasting/` started as a copy of the energy/oil modules and is now fully NVDA: a news-grounded trajectory and shock agent with a fenced, verified search tool; a discovery loop whose statistics module (`signals.py`) graduates news patterns only after a two-period gate; a pre-registered one-time 2026 test; a four-stock basket study (NVDA, AMD, MSFT, GOOG); and a reactive next-day-range experiment on AMD, MSFT and GOOG's unseen 2026. Its results are mostly negative and reported as such. The WTI parts it never used (scenario task, code-execution and tool configs, adaptive curriculum agent, starter agent) were removed. See [`ai_stocks_forecasting/README.md`](ai_stocks_forecasting/README.md).
 
 YAML backtest and eval specs live under each use case in `specs/`. Each directory is independent; see its `README.md` for the walkthrough. For the build-phase moves — onboarding data, standing up an experiment, customizing an agent, auditing a result — see [`guides/`](../guides/). To chat with the concierge or a domain starter in the ADK browser UI, see [`guides/05-access-adk-web-via-ssh-tunnel.md`](../guides/05-access-adk-web-via-ssh-tunnel.md) (includes the Coder SSH tunnel).
 
