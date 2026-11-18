@@ -494,9 +494,10 @@ def two_halves_chart(results: pd.DataFrame, title: str = "Both halves of the gat
             label=f"{group} ({len(sub)})",
         )
         for x, y, (_, row) in zip(xs, ys, sub.iterrows(), strict=True):
-            if group != "no effect":
+            name = SHORT_NAMES.get((row["experiment"], row["candidate"]))
+            if name:
                 ax.annotate(
-                    f"{row['experiment'][:5]} {row['candidate']}",
+                    name,
                     (x, y),
                     xytext=(6, 4),
                     textcoords="offset points",
