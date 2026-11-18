@@ -16,8 +16,8 @@ from collections.abc import Callable
 import pytest
 from ai_stocks_forecasting.analyst_agent import (
     NvdaPriceForecastPromptBuilder,
+    build_nvda_agent_predictor,
     build_nvda_news_config,
-    build_wti_agent_predictor,
 )
 from ai_stocks_forecasting.analyst_agent.agent import _NVDA_ANALYST_INSTRUCTION
 from ai_stocks_forecasting.data import NVDA_SERIES_ID
@@ -35,7 +35,7 @@ def _no_proxy(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_predictions_are_filed_under_an_nvda_name() -> None:
     """The predictor id, which is the registry filename key, must not say WTI."""
-    predictor_id = build_wti_agent_predictor(build_nvda_news_config()).predictor_id
+    predictor_id = build_nvda_agent_predictor(build_nvda_news_config()).predictor_id
     assert predictor_id == "agent_predictor_nvda_analyst_news_gemini-3.1-flash-lite-preview_continuous"
 
 

@@ -1,32 +1,26 @@
 """NVDA equity analyst agent configurations and prompt builder.
 
 The instruction strings are NVDA-targeted (semiconductor cycle, hyperscaler AI
-capex, export controls, supply chain). The news-grounded factory is
-:func:`build_nvda_news_config` and the prompt builder is
-:class:`NvdaPriceForecastPromptBuilder`; the other factories still carry the
-``wti`` prefix inherited from the energy/oil parent and are renamed as their own
-tasks come up.
+capex, export controls, supply chain).  Three
+:class:`~aieng.forecasting.methods.agentic.agent_factory.AgentConfig`
+factories define the capability levels used here:
 
-Provides four :class:`~aieng.forecasting.methods.agentic.agent_factory.AgentConfig`
-factories that define progressive agent capability levels:
-
-1. :func:`build_wti_basic_config` — LLM reasons from price history alone (no tools).
-2. :func:`build_nvda_news_config` — Adds bounded Google Search via a
+1. :func:`build_nvda_basic_config`: the LLM reasons from price history alone (no tools).
+2. :func:`build_nvda_news_config`: adds bounded Google Search via a
    :class:`~aieng.forecasting.methods.agentic.agent_factory.ContextRetrievalConfig`
-   sub-agent with strict temporal cutoffs.
-3. :func:`build_wti_code_exec_config` — Adds Gemini native code execution and
-   three forecasting skills on top of the news-grounded configuration.
-4. :func:`build_wti_tool_config` — Adds a conventional
-   :class:`~aieng.forecasting.methods.agentic.forecast_tool.ForecastTool`
-   (AutoARIMA) on top of news grounding — a rigid, pre-specified alternative to
-   open-ended code execution.
+   sub-agent with strict temporal cutoffs and an independent leakage verifier.
+3. :func:`build_nvda_multitask_news_config`: the same news grounding with a
+   task-agnostic instruction, so one identity answers the trajectory and shock tasks.
 
 Also provides:
 
 - :class:`NvdaPriceForecastPromptBuilder`: Pydantic ``BaseModel`` that serialises
   the task and history into a structured JSON payload for the agent.
-- :func:`build_wti_agent_predictor`: convenience factory that wires a config to
+- :func:`build_nvda_agent_predictor`: convenience factory that wires a config to
   an :class:`~aieng.forecasting.methods.agentic.predictor.AgentPredictor`.
+
+The energy/oil parent also has code-execution and forecast-tool capability
+levels; they were not carried over, because no NVDA experiment uses them.
 
 Module-level ``__getattr__`` exposes ``root_agent`` lazily so ``adk web`` can
 load this module for interactive (schema-free) use without importing the full
@@ -36,27 +30,21 @@ predictor stack.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from ai_stocks_forecasting.data import NVDA_SERIES_ID, build_nvda_service
-from aieng.forecasting.data import DataService
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.evaluation.prediction import STANDARD_QUANTILES
 from aieng.forecasting.evaluation.task import ForecastingTask
 from aieng.forecasting.methods.agentic import (
     AgentPredictor,
     ContinuousAgentForecastOutput,
-    ForecastTool,
     build_adk_agent,
 )
 from aieng.forecasting.methods.agentic.agent_factory import (
     AgentConfig,
-    CodeExecutionConfig,
     ContextRetrievalConfig,
 )
-from aieng.forecasting.methods.numerical.darts_arima import DartsAutoARIMAPredictor
 from aieng.forecasting.models import ADVANCED_MODEL, LITE_MODEL
 from pydantic import BaseModel
 
@@ -102,7 +90,7 @@ def _build_nvda_analyst_instruction() -> str:
 
     Tool-specific guidance (web search, code exec, forecast tool) is appended
     by the config factories that enable those capabilities — never reference a
-    tool here that ``build_wti_basic_config`` does not attach.
+    tool here that ``build_nvda_basic_config`` does not attach.
 
     Using a function instead of a static string ensures the ``## Output schema``
     block is always in sync with ``ContinuousAgentForecastOutput`` —
@@ -215,72 +203,6 @@ write your summary. Do not supplement the search results with your own \
 background/training knowledge — if the results are insufficient, say so \
 explicitly rather than filling gaps from memory.\
 """
-
-# ---------------------------------------------------------------------------
-# Skills supplement (appended to instruction when skills are attached)
-# ---------------------------------------------------------------------------
-
-_CODE_EXEC_SKILLS_SUPPLEMENT = """
-
-## Skills
-
-You have access to two forecasting skills via the SkillToolset. All data
-available to code execution comes from the JSON payload in your context —
-there are no disk files to read.
-
-**Recommended invocation order:**
-
-1. `statistical-analysis` — run first. Provides diagnostic code patterns
-   for interrogating the price series you have been given: vol regime
-   classification, anomaly detection, and adaptive trend-window selection.
-   The output of Pattern 3 (trend window) is the input to the projection
-   skill below.
-
-2. `trend-projection` — run second. Provides code patterns for fitting a
-   linear trend on the window chosen above, projecting point forecasts to
-   each horizon, and calibrating 80% prediction interval widths.
-
-**To use a skill:**
-1. Call `list_skills` to see available skill names and descriptions.
-2. Call `load_skill(<name>)` to read the skill's full instructions.
-3. Call `load_skill_resource(<skill_name>, <file_path>)` to load a
-   reference file (e.g. `references/wti_benchmarks.json`).
-
-These skills have NO scripts. Do not call `run_skill_script`.\
-"""
-
-# ---------------------------------------------------------------------------
-# Forecast tool supplement (appended to instruction when the forecast tool is attached)
-# ---------------------------------------------------------------------------
-
-_FORECAST_TOOL_SUPPLEMENT = f"""
-
-## Statistical forecast tool
-
-You have access to `run_forecast`, a conventional statistical baseline
-(AutoARIMA) you can call directly. Unlike open-ended code, this tool has a fixed,
-auditable interface and returns a structured forecast you can reason from.
-
-Call it ONCE before producing your forecast, with:
-- `series_id`: "{NVDA_SERIES_ID}"
-- `cutoff_date`: the `as_of` date from the payload (YYYY-MM-DD). This is the
-  information cutoff — the model uses only data on or before it.
-- `horizons`: the `horizons` list from the payload.
-- `frequency`: "B" (NVDA trades on business days).
-
-The tool returns JSON with point forecasts and 80%/90% prediction intervals per
-horizon. Treat it as a disciplined statistical anchor: combine it with the
-market context from the search sub-agent. You may adjust away from the baseline
-when fundamentals or geopolitical risk justify it — document your reasoning in
-the `rationale` fields.\
-"""
-
-# ---------------------------------------------------------------------------
-# Skill directories
-# ---------------------------------------------------------------------------
-
-_SKILLS_ROOT = Path(__file__).parent / "skills"
-
 
 # ---------------------------------------------------------------------------
 # History compression
@@ -412,7 +334,7 @@ class NvdaPriceForecastPromptBuilder(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def build_wti_basic_config(model: str = LITE_MODEL) -> AgentConfig:
+def build_nvda_basic_config(model: str = LITE_MODEL) -> AgentConfig:
     """Build an :class:`AgentConfig` with no tools.
 
     The agent reasons purely from the price history in the prompt payload.
@@ -429,7 +351,7 @@ def build_wti_basic_config(model: str = LITE_MODEL) -> AgentConfig:
     AgentConfig
     """
     return AgentConfig(
-        name="wti_analyst_basic",
+        name="nvda_analyst_basic",
         model=model,
         instruction=_NVDA_ANALYST_INSTRUCTION,
     )
@@ -555,149 +477,12 @@ def build_nvda_news_config(
     )
 
 
-def build_wti_code_exec_config(
-    model: str = LITE_MODEL,
-    search_model: str = LITE_MODEL,
-    max_output_tokens: int = 16_384,
-    verifier_model: str = ADVANCED_MODEL,
-    verifier_max_attempts: int = 3,
-    verifier_confidence_threshold: int = 8,
-) -> AgentConfig:
-    """Build an :class:`AgentConfig` with E2B code execution and forecasting skills.
-
-    Combines bounded Google Search (temporal cutoff enforced) with E2B sandbox
-    code execution and two forecasting skills:
-
-    - ``statistical-analysis``: diagnostic patterns for the payload data
-      (vol regime, anomaly detection, adaptive trend window).
-    - ``trend-projection``: linear trend fit, CI calibration, and plausibility
-      guard using the window determined by statistical-analysis.
-
-    Parameters
-    ----------
-    model : str
-        Model for the top-level analyst agent.
-    search_model : str
-        Model for the context-retrieval (web-search) sub-tool. Defaults to
-        the lite model (``gemini-3.1-flash-lite-preview``) independently of ``model`` so that Gemini
-        handles Google Search even when the analyst uses a different provider.
-    max_output_tokens : int, default=16_384
-        Maximum tokens per model response.  The default is set well above
-        LiteLLM's OpenAI-compatible endpoint default of 4096, which is not
-        enough for Claude to write a complete ``run_code`` Python script in a
-        single function call — causing repeated retries with empty arguments.
-    verifier_model : str
-        Model for the independent temporal-leakage verifier that audits each
-        ``search_web`` result against ``cutoff_date`` before it is returned.
-        Defaults to the advanced model so it doesn't share ``search_model``'s
-        blind spots.
-    verifier_max_attempts : int
-        Maximum search-then-verify attempts before giving up and returning
-        the ``[SEARCH_VERIFICATION_FAILED]`` sentinel.
-    verifier_confidence_threshold : int
-        Minimum verifier confidence (1-10) required to accept a result.
-
-    Returns
-    -------
-    AgentConfig
-    """
-    return AgentConfig(
-        name="wti_analyst_code",
-        model=model,
-        instruction=(_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _CODE_EXEC_SKILLS_SUPPLEMENT),
-        max_output_tokens=max_output_tokens,
-        context_retrieval=ContextRetrievalConfig(
-            enabled=True,
-            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
-            search_model=search_model,
-            verifier_model=verifier_model,
-            verifier_max_attempts=verifier_max_attempts,
-            verifier_confidence_threshold=verifier_confidence_threshold,
-        ),
-        code_execution=CodeExecutionConfig(enabled=True),
-        skills_dirs=[
-            _SKILLS_ROOT / "statistical-analysis",
-            _SKILLS_ROOT / "trend-projection",
-        ],
-    )
-
-
-def build_wti_tool_config(
-    model: str = LITE_MODEL,
-    search_model: str = LITE_MODEL,
-    *,
-    data_service: DataService | None = None,
-    num_samples: int = 200,
-    verifier_model: str = ADVANCED_MODEL,
-    verifier_max_attempts: int = 3,
-    verifier_confidence_threshold: int = 8,
-) -> AgentConfig:
-    """Build an :class:`AgentConfig` with a conventional statistical forecast tool.
-
-    This is the fourth analyst capability level. It combines bounded Google
-    Search (temporal cutoff enforced) with a
-    :class:`~aieng.forecasting.methods.agentic.forecast_tool.ForecastTool`
-    that runs AutoARIMA on the NVDA series. In contrast to
-    :func:`build_wti_code_exec_config` — which gives the agent open-ended code
-    execution — this path exposes a rigid, pre-specified tool, trading
-    flexibility for control and reproducibility.
-
-    Parameters
-    ----------
-    model : str
-        Model for the top-level analyst agent.
-    search_model : str
-        Model for the context-retrieval (web-search) sub-tool. Defaults to
-        the lite model (``gemini-3.1-flash-lite-preview``) independently of ``model`` so that Gemini
-        handles Google Search even when the analyst uses a different provider.
-    data_service : DataService or None
-        Pre-populated data service with the NVDA series registered. When
-        ``None``, one is constructed via
-        :func:`~ai_stocks_forecasting.data.build_nvda_service` (cache-backed).
-        Series data is read by the tool but never enters the LLM context.
-    num_samples : int, default=200
-        Monte Carlo sample count for AutoARIMA. Kept modest to bound agent
-        latency, since AutoARIMA can be slow per origin.
-    verifier_model : str
-        Model for the independent temporal-leakage verifier that audits each
-        ``search_web`` result against ``cutoff_date`` before it is returned.
-        Defaults to the advanced model so it doesn't share ``search_model``'s
-        blind spots.
-    verifier_max_attempts : int
-        Maximum search-then-verify attempts before giving up and returning
-        the ``[SEARCH_VERIFICATION_FAILED]`` sentinel.
-    verifier_confidence_threshold : int
-        Minimum verifier confidence (1-10) required to accept a result.
-
-    Returns
-    -------
-    AgentConfig
-    """
-    service = data_service if data_service is not None else build_nvda_service()
-    forecast_tool = ForecastTool(service, predictor=DartsAutoARIMAPredictor(num_samples=num_samples))
-
-    return AgentConfig(
-        name="wti_analyst_tool",
-        model=model,
-        instruction=(_NVDA_ANALYST_INSTRUCTION + _CONTEXT_RETRIEVAL_SUPPLEMENT + _FORECAST_TOOL_SUPPLEMENT),
-        context_retrieval=ContextRetrievalConfig(
-            enabled=True,
-            instruction=_NVDA_CONTEXT_RETRIEVAL_INSTRUCTION,
-            search_model=search_model,
-            verifier_model=verifier_model,
-            verifier_max_attempts=verifier_max_attempts,
-            verifier_confidence_threshold=verifier_confidence_threshold,
-        ),
-        function_tools=[forecast_tool.as_function_tool()],
-    )
-
-
 # ---------------------------------------------------------------------------
 # Predictor convenience factory
 # ---------------------------------------------------------------------------
 
 
-def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
+def build_nvda_agent_predictor(config: AgentConfig) -> AgentPredictor:
     """Wrap an :class:`AgentConfig` in an :class:`AgentPredictor`.
 
     Uses :class:`NvdaPriceForecastPromptBuilder` and
@@ -707,8 +492,8 @@ def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
     Parameters
     ----------
     config : AgentConfig
-        Any of the configs produced by :func:`build_wti_basic_config`,
-        :func:`build_nvda_news_config`, or :func:`build_wti_code_exec_config`.
+        Any of the configs produced by :func:`build_nvda_basic_config`,
+        :func:`build_nvda_news_config` or :func:`build_nvda_multitask_news_config`.
 
     Returns
     -------
@@ -729,7 +514,6 @@ def build_wti_agent_predictor(config: AgentConfig) -> AgentPredictor:
 def __getattr__(name: str) -> Any:
     """Expose ``root_agent`` lazily for schema-free interactive use via ``adk web``."""
     if name == "root_agent":
-        # return build_adk_agent(build_wti_basic_config())
         return build_adk_agent(
             build_nvda_multitask_news_config(
                 model=ADVANCED_MODEL, search_model=ADVANCED_MODEL, verifier_model=ADVANCED_MODEL

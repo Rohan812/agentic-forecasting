@@ -1,6 +1,6 @@
 # AI Stocks Forecasting (NVDA)
 
-> **Status: scaffold in progress** on the `ai-stocks-poc` branch. This directory was created by copying the Python modules of [`energy_oil_forecasting/`](../energy_oil_forecasting/) and rewiring the package name. The **data path, specs, shock definition, numerical baselines, statistics contract, analyst prompt strings, news-grounded agent configs (`build_nvda_news_config`, `build_nvda_multitask_news_config`), prompt builders, shock task and its `AgentPredictor`, and master-strategy schema are NVDA**. Still WTI-targeted: the other config-factory *names* (`build_wti_*`), the scenario task, the adaptive agent's own instructions and skills, and the starter agent.
+> **Status:** a complete NVDA implementation built from the energy/oil modules. Every module it uses is retargeted to NVDA, and the WTI parts it never used were removed. Its experiments are pre-registered and their mostly negative results are reported in full below. One run is pending: the agent arms of the reactive next-day-range experiment (see [Reactive next-day ranges](#reactive-next-day-ranges)).
 
 The goal of this implementation is a **news-grounded equity forecaster with a learning loop**: an agent that discovers which news patterns precede large NVDA moves, validates each candidate pattern against a statistical gate, and reuses only the graduated patterns when it forecasts.
 
@@ -8,19 +8,17 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 
 ---
 
-## What is here after the scaffold step
+## What is here
 
-38 files copied from the energy implementation with every `energy_oil_forecasting` import rewritten to `ai_stocks_forecasting`:
+The modules, where each came from, and their state. Files copied from energy/oil had every `energy_oil_forecasting` import rewritten to `ai_stocks_forecasting`:
 
 | Path | Copied from energy | Retarget status |
 |------|--------------------|-----------------|
 | `data.py` | WTI `DataService` wiring (`CL=F` via `YFinanceDailyAdapter`) | **done** — `NVDA_SERIES_ID` + `build_nvda_service()`; covariate panel removed |
-| `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — shock is `\|1-day return\| >= 5%`, both directions. Cache-path constants are still energy-named |
-| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **trajectory and shock done** — two-sided ±5% shock spec with measured anchors, `nvda_shock_task()`, and NVDA-named predictors via `build_nvda_news_predictor` (see [Agent layer](#agent-layer)); scenario task still WTI |
+| `paths.py` | Cache paths, colour palette, `SHOCK_THRESHOLD` / `SHOCK_HORIZON` | **done** — the repo data dir and the shock definition (`\|1-day return\| >= 5%`, both directions); the energy cache paths and palette were removed |
+| `tasks.py` | Trajectory / shock / scenario task specs and prompt builders | **done** — trajectory and two-sided ±5% shock specs with measured anchors, `nvda_shock_task()`, the after-close shock predictor and `SessionDatePredictor` (see [Agent layer](#agent-layer)); the WTI scenario task was removed |
 | `shock_anchors.py` | *new* — not from energy | **done** — reproduces the shock-spec calibration anchors from 2020–2024 |
 | `analysis.py` | Shared scoring helpers | **fixed** — true 80% interval (q10–q90) and `mae_horizon` honoured; see *Two scoring fixes* |
-| `viz.py` | Plotly charts for the WTI notebooks | **not retargeted and unused** — still WTI-labelled (oil futures curve, US–Iran war annotations). The NVDA charts live in `charts.py` |
-| `prophet_baseline.py` | Prophet baseline | domain-neutral, unused so far |
 | `baselines.py` | *new* — not from energy | **done** — runs naive and log-return AutoARIMA through a spec |
 | `signals.py` | *new* — not from energy | **done** — flagging, control sampling, the train/holdout split, pattern scoring, the gate and regime labels, all tested (see below) |
 | `charts.py` | *new* — not from energy | **done** — leaderboard, coverage-vs-sharpness, predicted-vs-actual, shock leaderboard and separation chart |
@@ -29,24 +27,25 @@ Energy/oil is the parent implementation because it is the repo's other **daily, 
 | `discovery.py` + `experiments/` | *new* — not from energy | **in progress (Phase 2)** — the discovery engine: scores candidate rules on the study windows, runs the gate, records every candidate in a per-experiment trail (see [Discovery loop](#discovery-loop-phase-2)) |
 | `news_labels.py` + `news_study.py` | *new* — not from energy | **done** — fenced news labels per window under a hard spending cap, and the propose → holdout screen → full test runner |
 | `exploratory.py` + `oot_eval.py` | *new* — not from energy | **done** — Gate A (loosened), the exploratory pattern tier, the climatology-plus-patterns and pattern-aware agent forecasters, and the one-time 2026 evaluation runner |
+| `reactive.py` | *new* — not from energy | **baselines scored, agent arms pending** — next-day 80% ranges for AMD, MSFT and GOOG on 2026: four no-LLM arms (realised, EWMA, calendar-scaled and implied volatility) and three agent arms (see [Reactive next-day ranges](#reactive-next-day-ranges)) |
+| `basket.py` + `calendars/` | *new* — not from energy | **stage 0 done** — the four-stock AI basket (NVDA, AMD, MSFT, GOOG): volatility-relative shocks, pooled windows, calendar rules with a calendar-shift dependence test, and a logistic baseline model (see [Four-stock basket](#four-stock-basket)) |
 | `01`–`06` notebooks | Energy/oil's numbered series | **done** — case study, agentic predictor, one agent two tasks, systematic backtest, discovery loop, one-time 2026 evaluation (see [Notebooks](#notebooks)) |
 | `90_arima_root_cause.ipynb` | *new* — not from energy | **done** — appendix: diagnosis of the raw-price AutoARIMA −77% forecast |
-| `analyst_agent/` | Stateless news-grounded analyst + its skills | **prompts done** — analyst role, retrieval supplement and search sub-agent rewritten for NVDA (see [Agent layer](#agent-layer)); news-grounded factories are `build_nvda_news_config` and `build_nvda_multitask_news_config`; prompt builder is `NvdaPriceForecastPromptBuilder`; the basic, code-execution and tool factories are still `build_wti_*` |
-| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema done** — `NvdaStrategyState` with `NewsPattern` in `nvda_strategy_state.py`, gate-enforced on construction and on load; the agent's own instructions and skills still WTI |
-| `starter_agent/` | Hackable "build your own" agent | **pending** |
+| `analyst_agent/` | Stateless news-grounded analyst + its skills | **done** — NVDA analyst prompts; `build_nvda_basic_config`, `build_nvda_news_config`, `build_nvda_multitask_news_config`, `NvdaPriceForecastPromptBuilder` and `build_nvda_agent_predictor`. The code-execution and forecast-tool configs and their oil-benchmark skills were not carried over |
+| `adaptive_agent/` | Curriculum-trained analyst, `WtiStrategyState`, skill mutation tools | **schema only** — `NvdaStrategyState` with `NewsPattern`, gate-enforced on construction and on load. The WTI curriculum agent was removed: the discovery loop replaces it |
 
 Deliberately **not** copied: the energy notebooks, the committed WTI prediction YAMLs under `data/`, the 52 cached curriculum news files, the trained `wti-strategy-trained/` skill state, and the oil forecast animation. Those are WTI results, not scaffolding — the equivalents are produced here from NVDA runs. The energy `specs/` were not copied either; the NVDA specs below were written fresh rather than edited down from WTI ones.
 
-`adaptive_agent/skills/wti-strategy/` keeps its WTI name until the strategy-state schema is retargeted, so that the directory name never disagrees with its contents.
 
 ---
 
-## Remaining scaffold work
+## Open work
 
 | Step | Output |
 |------|--------|
-| Package `signals.py` for the sandbox | a self-contained copy the discovery agent can import inside E2B. Its only third-party dependencies are numpy and pandas; the import of the shock constants from `paths.py` would need inlining |
-| Finish the agent layer | renaming the remaining `build_wti_*` factories; find evidence that news separates shocks from calm days: no shock-agent variant has yet (see *After-close origins*). `nvda_shock_fresh` is closed to further iterations; move the adaptive agent onto `NvdaStrategyState` |
+| Run the reactive agent arms | prices only, prices plus the earnings calendar, and fenced news, on AMD, MSFT and GOOG's 2026 (estimated US$27, capped at US$36 in code); decides pre-registered comparisons 1–4 |
+| Blind test of an agent on the basket | does an agent beat the frozen calendar-and-volatility baseline on AMD, MSFT and GOOG's 2026 shocks |
+| Sandbox copy of `signals.py` | only if the discovery agent is moved into E2B; it runs locally today, so this is not needed |
 
 ---
 
@@ -142,7 +141,7 @@ Per horizon (USD/share):
 
 *The floor is roughly 23% better than naive on CRPS, and almost all of that comes from having intervals at all.* The point forecasts differ only by the drift, and the point-error gap is small (10.37 against 10.67). The CRPS gap is large because the naive predictor emits a point mass, so its CRPS is just its absolute error.
 
-*Its intervals are too wide, not too narrow.* The 80% interval covers 90% of outcomes overall and 98% at 21 days. The likely cause is that volatility is estimated from all history since 1999, including the dot-com era, which was far more volatile than 2025. **So there is room to move left on the coverage chart:** a forecaster can tighten these intervals, keep coverage near 80%, and improve CRPS. Widening them can't win. Fitting the baseline on a shorter window is the cheap numerical version of that move, and is worth doing first, so the agents are measured against the best honest floor.
+*Its intervals are probably too wide, not too narrow.* The 80% interval covers 90% of outcomes overall and 98% at 21 days, about 18% wider at 21 days than 2025's volatility called for. Coverage alone is borderline evidence: weekly forecasts that look a month ahead overlap, so the 51 one-month forecasts are worth about 8 independent ones. The likely cause is that volatility is estimated from all history since 1999, including the dot-com era, which was far more volatile than 2025. **So there is room to move left on the coverage chart:** a forecaster can tighten these intervals, keep coverage near 80%, and improve CRPS. Widening them can't win. Fitting the baseline on a shorter window is the cheap numerical version of that move, and is worth doing first, so the agents are measured against the best honest floor.
 
 *The headroom is in shock windows.* The floor's CRPS is 6.83 in quiet windows and 10.31 in the 56 of 145 forecast windows that contain a ±5% day. Anticipating those moves is what news grounding is meant to buy.
 
@@ -774,6 +773,83 @@ judged against that number. Experiment 07's peer-results question is the first t
 holdout. At the simulated 2–6% false-pass rate, fifteen candidates with no effect would produce
 0.3 to 0.9 holdout passes by chance, so one is unremarkable, and the training half rejected it.
 
+## Four-stock basket
+
+One stock and one year give 13 post-cutoff shocks, too few to confirm rare patterns.
+[`basket.py`](basket.py) pools **NVDA, AMD, MSFT and GOOG**, pre-registered in
+[`experiments/basket/preregistration.md`](experiments/basket/preregistration.md). Fetch prices
+with `uv run python scripts/fetch_ai_basket.py`, then run stage 0 with
+`uv run python -m ai_stocks_forecasting.basket` from `implementations/` (no LLM calls).
+
+- **Relative shocks.** A session is a shock when its return is at least 2 standard deviations
+  of that ticker's previous 21 returns, so a 3% move in MSFT and a 6% move in NVDA count alike.
+  Each ticker's standardised returns go through the tested `signals` functions.
+- **Pooled windows.** 660 training windows (330 shock events) and 236 holdout windows (59
+  shock events, three controls each), against 13 holdout shocks for NVDA alone.
+- **Calendars as data.** [`calendars/`](calendars/) holds each company's results dates
+  (yfinance) and US CPI and jobs-report dates (FRED), plus scheduled Fed decision days, entered
+  by hand and cross-checked against FRED's target-rate changes.
+- **A dependence check.** Pooled ticker-days are not independent, so each rule must also pass a
+  calendar-shift test: its dates, shifted by a random number of sessions for every ticker at
+  once, must rarely match as many shocks as the real dates do.
+- **Stage 0 reads nothing after 2025-12-31.** The 2026 outcomes of AMD, MSFT and GOOG are
+  reserved for a blind test.
+
+**Stage 0 result: earnings clears the strict gate**, with no threshold loosened.
+
+| Rule | Training (2020 – Jan 2025) | Holdout (2025) | Verdict |
+|---|---|---|---|
+| Earnings reaction | 47 of 48 matches were shocks, lift 11.0, shift p 0.0005 | 7 of 8, lift 9.0, shift p 0.0005 | **Graduates** |
+| Fed decision day | lift 2.8, p 0.001, shift p 0.015 | 1 of 7, lift 0.5 | Fails the holdout |
+| CPI release day | lift 1.4, p 0.15 | lift 0.9 | Fails |
+| Jobs report day | lift 1.2, p 0.42 | lift 1.9, p 0.22 | Fails training |
+
+Across all ticker-days, 58% of earnings reactions were shocks in training and 47% in the
+holdout, against about 7% of ordinary days. Fed decision days were real before the model
+cutoff and not after it. The 2025 holdout was not blind for these rules (a feasibility check
+had seen the pooled earnings result, as the pre-registration discloses), so this is a
+confirmation with matched controls and a dependence check, not a first look.
+
+The **baseline model** (logistic regression on a volatility ratio, the current session's
+standardised move, and four next-session calendar flags) scores Brier 0.0599 on the 916
+holdout ticker-days against climatology's 0.0622: skill +3.7%, with a date-resampled interval
+of −0.0060 to +0.0010, so it does not meet the pre-registered rule. Its gain comes almost
+entirely from earnings days. Frozen, it is the baseline an agent must beat in the blind 2026
+test. Full results: [`experiments/basket/results.md`](experiments/basket/results.md). Tests are
+in `test_basket.py`.
+
+## Reactive next-day ranges
+
+Every earlier result says the same thing: news public before a forecast is already in the price, so an agent cannot
+anticipate a shock. [`reactive.py`](reactive.py) asks a question an agent might answer instead: after the day's news,
+can it set a better **80% range for the next session's close**? Pre-registered in
+[`experiments/reactive/preregistration.md`](experiments/reactive/preregistration.md) before any 2026 forecast for these
+stocks was made, with one amendment (an implied-volatility arm and two more comparisons, also before any score).
+
+- **Stocks and window:** AMD, MSFT and GOOG, every session from 2026-01-02 to 2026-09-30 (187 each, 561 forecasts per
+  arm). Their 2026 prices had not been read by any analysis in this project.
+- **Timing:** each forecast is made at 00:00 on the target session, so it sees closes through the previous session and
+  fenced news through the end of the previous day, including after-close earnings releases.
+- **Arms:** `vol21`, `ewma`, `vol21_earnings` (×3.13 on earnings-reaction days, the 2020–2025 factor) and `vxn`
+  (Nasdaq-100 implied volatility from FRED, scaled per stock on 2020–2025), with no LLM; and three agent arms sharing
+  one frozen prompt: prices only, prices plus an earnings-reaction flag, and fenced news.
+- **Score:** the interval score of the 80% range (width plus 10 × any miss, in % of the previous close), with the same
+  "90% interval entirely below zero" rule as the 2026 shock test.
+
+**Results so far (no-LLM arms):** the earnings calendar measurably improves a volatility model's next-day ranges
+(interval score −0.49, 90% interval −0.94 to −0.10), the first comparison in this study to meet a pre-registered
+standard. All of the gain is on the 9 earnings-reaction sessions, where coverage rises from 1 of 9 to 4 of 9.
+Implied volatility gives the narrowest ranges and the best CRPS but does not demonstrably beat EWMA (−0.11, interval
+−0.40 to +0.19). The agent arms have not run yet. Full results:
+[`experiments/reactive/results.md`](experiments/reactive/results.md).
+
+```bash
+uv run python -m ai_stocks_forecasting.reactive run --ticker AMD --arm agent_news   # one stock, one agent arm
+uv run python -m ai_stocks_forecasting.reactive score                               # every arm present
+```
+
+Tests are in `test_reactive.py`.
+
 ## Notebooks
 
 The notebooks follow energy/oil's numbered series, each opening with a "Part N of 6"
@@ -784,7 +860,7 @@ seconds and call no LLM. Run them from `implementations/` after
 | Notebook | What it shows |
 |---|---|
 | [`01_nvda_case_study.ipynb`](01_nvda_case_study.ipynb) | The story in four acts: AutoARIMA forecasting blind, the 19 shock sessions of 2025 with their documented causes, how the baseline did (its error doubles in shock windows), and the information a better forecaster would need |
-| [`02_intro_agentic_predictor.ipynb`](02_intro_agentic_predictor.ipynb) | The news-grounded agent beside the baselines at two origins: the morning of the DeepSeek sell-off (2025-01-27) and the Monday after the tariff crash (2025-04-07), with its rationale |
+| [`02_intro_agentic_predictor.ipynb`](02_intro_agentic_predictor.ipynb) | The news-grounded agent beside the baselines at two origins: the morning of the DeepSeek sell-off (2025-01-27) and the Monday after the tariff crash (2025-04-07), with its rationale, and a measurement of "today's price plus optimism" across all 145 forecasts (`story.anchoring_table`) |
 | [`03_one_agent_two_tasks.ipynb`](03_one_agent_two_tasks.ipynb) | One identity, two task specs: the system prompt and fenced `search_web`, a trajectory answer, three shock answers for 2025-04-09, and the search-fence leak and its fix |
 | [`04_systematic_backtest_eval.ipynb`](04_systematic_backtest_eval.ipynb) | The full 2025 scorecard: CRPS leaderboard and paired comparison, coverage vs sharpness, CRPS by shock window and volatility regime, predicted vs actual, every prediction, and the shock task |
 | [`05_discovery_loop.ipynb`](05_discovery_loop.ipynb) | The Phase 2 discovery loop: study windows, the gate, how a fenced news label is made, all fifteen candidates with why each failed, the "both halves of the gate" chart, and the holdout power analysis |

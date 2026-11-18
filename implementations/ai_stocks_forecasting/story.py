@@ -232,9 +232,50 @@ def origin_fan(
         fontweight="600",
         pad=12,
     )
-    ax.legend(handles=handles, loc="upper left", frameon=False, fontsize=9, labelcolor=INK_SECONDARY)
+    ax.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.08),
+        ncol=min(len(handles), 3),
+        frameon=False,
+        fontsize=9,
+        labelcolor=INK_SECONDARY,
+    )
     fig.tight_layout()
     return fig, ax
+
+
+def anchoring_table(frame: pd.DataFrame, naive: str = "Naive (last value)") -> pd.DataFrame:
+    """How far each forecaster's median moves away from the last close it saw, per horizon.
+
+    The naive row's point forecast is the last close at each origin, so it is
+    the reference.  Columns: correlation of the median with that close, the
+    mean tilt (median over last close, in %), how many medians forecast a fall,
+    the share of origins where the median's direction matched the outcome's,
+    the same share for always saying "up", and the correlation between the
+    predicted and realised move.
+    """
+    last = frame[frame["predictor"] == naive][["as_of", "horizon", "point"]].rename(columns={"point": "last_close"})
+    rows = []
+    for (name, horizon), g in (
+        frame[frame["predictor"] != naive].merge(last, on=["as_of", "horizon"]).groupby(["predictor", "horizon"])
+    ):
+        predicted = g["q50"] / g["last_close"] - 1
+        realised = g["actual"] / g["last_close"] - 1
+        rows.append(
+            {
+                "predictor": name,
+                "horizon": int(horizon),
+                "n": len(g),
+                "corr_with_last_close": g["q50"].corr(g["last_close"]),
+                "mean_tilt_pct": predicted.mean() * 100,
+                "forecast_falls": int((predicted < 0).sum()),
+                "direction_hit_rate": float((np.sign(predicted) == np.sign(realised)).mean()),
+                "always_up_hit_rate": float((realised > 0).mean()),
+                "corr_predicted_vs_realised_move": predicted.corr(realised),
+            }
+        )
+    return pd.DataFrame(rows).set_index(["predictor", "horizon"])
 
 
 def regime_crps_table(frame: pd.DataFrame, prices: pd.DataFrame) -> pd.DataFrame:
@@ -494,9 +535,10 @@ def two_halves_chart(results: pd.DataFrame, title: str = "Both halves of the gat
             label=f"{group} ({len(sub)})",
         )
         for x, y, (_, row) in zip(xs, ys, sub.iterrows(), strict=True):
-            if group != "no effect":
+            name = SHORT_NAMES.get((row["experiment"], row["candidate"]))
+            if name:
                 ax.annotate(
-                    f"{row['experiment'][:5]} {row['candidate']}",
+                    name,
                     (x, y),
                     xytext=(6, 4),
                     textcoords="offset points",
