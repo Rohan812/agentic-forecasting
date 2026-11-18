@@ -98,3 +98,22 @@ US$0.014 per search.
 - Six arms and four comparisons. The four are fixed here; anything else is exploratory.
 - `agent_news` can find the earnings date through search, so comparison 1 mixes news with calendar knowledge.
   Comparison 3 isolates the calendar.
+
+## Amendment 1 (2026-11-18, before any 2026 forecast or score)
+
+Written after the original commit (`bb5b022`) and before any 2026 forecast for AMD, Microsoft or Alphabet was made
+or scored. The 2025 wiring check had not run: the proxy key had expired, so no agent output exists for any date.
+
+1. **A seventh arm, `vxn` (no LLM): implied volatility.** The normal distribution of `vol21`, with the standard
+   deviation set from the previous session's close of the CBOE Nasdaq-100 Volatility Index (FRED `VXNCLS`; all three
+   stocks are in the index): VXN ÷ 100 ÷ √252, times a per-stock scale measured on 2020–2025 only (the stock's daily
+   log-return standard deviation divided by the mean implied daily standard deviation over the same sessions). This
+   is the market's own forward-looking estimate of the next move, so it is the natural baseline for "can reading the
+   news size tomorrow's range better?".
+2. **Two more comparisons**, same decision rule:
+   5. `vol21_earnings` vs `vol21`: does the earnings calendar help a volatility model?
+   6. `vxn` vs `ewma`: does implied volatility beat a realised-volatility model?
+3. **The agent prompts are frozen as committed in `bb5b022`.** The 2025 wiring check may only fix failures that
+   stop a forecast from being produced or parsed; no wording change. Because the prompts can no longer change, the
+   no-LLM arms (`vol21`, `ewma`, `vol21_earnings`, `vxn`) may be scored on 2026 before the agent arms run, and
+   comparisons 5 and 6 are reported as soon as they are. Comparisons 1–4 wait for the agent arms.

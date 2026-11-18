@@ -39,6 +39,7 @@ from ai_stocks_forecasting.paths import DATA_DIR
 from ai_stocks_forecasting.tasks import MARKET_CLOSE
 from aieng.forecasting.data import DataService
 from aieng.forecasting.data.adapters.base import BaseAdapter
+from aieng.forecasting.data.adapters.fred import FREDAdapter
 from aieng.forecasting.data.adapters.yfinance import YFinanceDailyAdapter
 from aieng.forecasting.data.context import ForecastContext
 from aieng.forecasting.data.models import SeriesMetadata
@@ -73,14 +74,16 @@ TARGET_RISK_PCT = 1.0
 MAX_POSITION = 1.5
 Z80 = NormalDist().inv_cdf(0.9) * 2  # width of a central 80% normal interval, in sds (2.563)
 
-Arm = Literal["vol21", "ewma", "vol21_earnings", "agent_prices", "agent_calendar", "agent_news"]
-BASELINE_ARMS: tuple[Arm, ...] = ("vol21", "ewma", "vol21_earnings")
+Arm = Literal["vol21", "ewma", "vol21_earnings", "vxn", "agent_prices", "agent_calendar", "agent_news"]
+BASELINE_ARMS: tuple[Arm, ...] = ("vol21", "ewma", "vol21_earnings", "vxn")
 AGENT_ARMS: tuple[Arm, ...] = ("agent_prices", "agent_calendar", "agent_news")
 ARMS: tuple[Arm, ...] = BASELINE_ARMS + AGENT_ARMS
 
 REACTIVE_DIR = Path(__file__).parent / "experiments" / "reactive"
 PREDICTIONS_DIR = Path(__file__).parent / "data" / "predictions" / "reactive"
 EARNINGS_PATH = Path(__file__).parent / "calendars" / "earnings.yaml"
+VXN_SERIES = "VXNCLS"
+"""CBOE Nasdaq-100 Volatility Index (FRED), the implied volatility of options on the index all three tickers belong to."""
 TICKER_BUDGET_USD = 12.0
 DEV_BUDGET_USD = 2.0
 WORST_COST_PER_ORIGIN = {"agent_prices": 0.01, "agent_calendar": 0.01, "agent_news": 0.012 * 1.5 + 3 * SEARCH_FEE_USD}
@@ -91,7 +94,10 @@ COMPARISONS: tuple[tuple[Arm, Arm, str], ...] = (
     ("agent_news", "ewma", "does the news agent beat a standard volatility model?"),
     ("agent_calendar", "agent_prices", "does knowing the earnings date help?"),
     ("agent_calendar", "vol21_earnings", "does the agent add anything beyond calendar-scaled volatility?"),
+    ("vol21_earnings", "vol21", "does the earnings calendar help a volatility model?"),
+    ("vxn", "ewma", "does implied volatility beat a realised-volatility model?"),
 )
+"""Comparisons 1-4 are the original pre-registration; 5 and 6 were added by amendment 1, before any 2026 score."""
 
 
 # ---------------------------------------------------------------------------
@@ -181,9 +187,36 @@ def earnings_factor(tickers: tuple[str, ...] = TICKERS) -> float:
     return float(np.std(ratios, ddof=1))
 
 
+def load_vxn() -> pd.Series:
+    """Daily VXN close (percent, annualised) from the FRED cache, indexed by date."""
+    df = FREDAdapter(VXN_SERIES, cache_dir=DATA_DIR / "fred").fetch()
+    return df.set_index(pd.to_datetime(df["timestamp"]).dt.normalize())["value"].sort_index()
+
+
+def vxn_daily_sd(vxn: pd.Series, day: pd.Timestamp) -> float:
+    """VXN's implied daily sd (as a fraction) at the last VXN close on or before ``day``."""
+    return float(vxn.loc[:day].iloc[-1]) / 100 / math.sqrt(252)
+
+
+def vxn_beta(ticker: str, vxn: pd.Series | None = None) -> float:
+    """Scale from the index's implied daily sd to this stock's, measured on 2020-2025 only.
+
+    The ratio of the stock's realised daily log-return sd to the mean implied
+    daily sd from the previous session's VXN, over the calibration years.
+    """
+    vxn = load_vxn() if vxn is None else vxn
+    close = load_close(ticker).loc[CALIBRATION_START:CALIBRATION_END]
+    logret = np.log(close).diff().dropna()
+    implied = [vxn_daily_sd(vxn, previous_session(close, d)) for d in logret.index]
+    return float(logret.std() / np.mean(implied))
+
+
 def baseline_forecasts(ticker: str, arm: Arm, sessions: list[pd.Timestamp], factor: float) -> list[dict[str, Any]]:
-    """Forecasts for one baseline arm; each uses only closes before the target session."""
+    """Forecasts for one baseline arm; each uses only closes (and VXN) before the target session."""
     close = load_close(ticker)
+    if arm == "vxn":
+        vxn = load_vxn()
+        beta = vxn_beta(ticker, vxn)
     logret = np.log(close).diff()
     vol21 = logret.rolling(VOL_WINDOW).std()
     ewma_var = (logret**2).ewm(alpha=1 - EWMA_DECAY, adjust=False).mean()
@@ -191,7 +224,12 @@ def baseline_forecasts(ticker: str, arm: Arm, sessions: list[pd.Timestamp], fact
     rows = []
     for day in sessions:
         prev = previous_session(close, day)
-        sd = math.sqrt(ewma_var.loc[prev]) if arm == "ewma" else float(vol21.loc[prev])
+        if arm == "vxn":
+            sd = beta * vxn_daily_sd(vxn, prev)
+        elif arm == "ewma":
+            sd = math.sqrt(ewma_var.loc[prev])
+        else:
+            sd = float(vol21.loc[prev])
         if arm == "vol21_earnings" and day in reactions:
             sd *= factor
         rows.append(_row(ticker, arm, day, prev, float(close.loc[prev]), _normal_quantiles(float(close.loc[prev]), sd)))
