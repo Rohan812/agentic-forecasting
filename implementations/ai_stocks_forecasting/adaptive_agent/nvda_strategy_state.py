@@ -1,14 +1,14 @@
-"""NVDA master-strategy state — the schema behind the ``nvda-strategy`` adaptive skill.
+"""NVDA master-strategy state: the file a forecaster reads its graduated news patterns from.
 
-The field set is final for the mutation tool (``graduate_news_pattern``) and
-the study prompt to code against.  The per-experiment research-trail files are
-a separate schema, written when the discovery agent is built.  The WTI schema
-in :mod:`~ai_stocks_forecasting.adaptive_agent.skill_state` stays in place
-until the adaptive agent is retargeted, so the inherited agent keeps loading.
+The discovery loop (:mod:`ai_stocks_forecasting.discovery`) is the only writer;
+the per-experiment research trails under ``experiments/`` hold every candidate
+and rejection.  No pattern has graduated the strict gate, so no master file
+has been written yet.
 
-How this differs from the WTI strategy
---------------------------------------
-The WTI agent graduates a hypothesis after a *count* of confirming resolutions.
+How this differs from the energy/oil strategy
+---------------------------------------------
+The energy/oil adaptive agent graduates a hypothesis after a *count* of
+confirming resolutions.
 Here a news pattern graduates only after clearing the statistical gate in
 :mod:`ai_stocks_forecasting.signals` — so every :class:`NewsPattern` carries the
 train and holdout :class:`PatternEvidence` that ``gate_pass`` was called with.
