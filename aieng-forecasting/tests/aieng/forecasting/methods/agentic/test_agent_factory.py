@@ -93,8 +93,15 @@ class TestAgentConfig:
 class TestBuildAdkAgent:
     """build_adk_agent wires output_schema, proxy model, and skills correctly."""
 
-    def test_output_schema_retained_with_skills(self, tmp_path: Path) -> None:
-        """Skills and output_schema can be combined without error."""
+    def test_output_schema_retained_with_skills(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Skills and output_schema can be combined without error.
+
+        Runs without the proxy: a proxy-routed (LiteLlm) agent deliberately clears
+        ``output_schema`` in favour of the set_model_response shim, so with
+        ``OPENAI_BASE_URL`` set in the environment this check would not apply.
+        """
+        monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         skill_dir = tmp_path / "test-skill"
         skill_dir.mkdir()
         (skill_dir / "SKILL.md").write_text("---\nname: test-skill\ndescription: test\n---\n", encoding="utf-8")
