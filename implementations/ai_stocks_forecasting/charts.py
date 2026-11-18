@@ -26,6 +26,7 @@ rest on colour alone.
 
 from __future__ import annotations
 
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -582,7 +583,7 @@ def shock_separation(
     line is climatology's mean forecast on that spec.
     """
     specs = list(dict.fromkeys(frame["spec"])) if not frame.empty else []
-    fig, axes = plt.subplots(1, max(len(specs), 1), figsize=(4.6 * max(len(specs), 1), 4.8), sharey=True)
+    fig, axes = plt.subplots(1, max(len(specs), 1), figsize=(5.4 * max(len(specs), 1), 5.2), sharey=True)
     fig.patch.set_facecolor(SURFACE)
     axes_list = list(np.atleast_1d(axes))
     jitter = np.random.default_rng(0)
@@ -611,7 +612,7 @@ def shock_separation(
                     linewidth=np.where(sub["quotes_unseen_close"], 3.0, 1.6),
                     zorder=3,
                 )
-        ax.set_xticks(range(len(arms)), [a.replace("Agent, ", "Agent,\n") for a in arms], fontsize=9)
+        ax.set_xticks(range(len(arms)), [textwrap.fill(a, 12) for a in arms], fontsize=8.5)
         ax.set_xlim(-0.6, len(arms) - 0.4)
         n = spec_frame["as_of"].nunique()
         shocks = int(spec_frame.drop_duplicates("as_of")["outcome"].sum())
@@ -648,7 +649,15 @@ def shock_separation(
             label="leaked (quotes unseen close)",
         ),
     ]
-    fig.legend(handles=handles, loc="upper right", frameon=False, fontsize=9, labelcolor=INK_SECONDARY)
+    fig.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.94),
+        ncol=3,
+        frameon=False,
+        fontsize=9,
+        labelcolor=INK_SECONDARY,
+    )
     fig.suptitle(title, fontsize=13, color=INK_PRIMARY, fontweight="600", y=0.995)
     fig.text(
         0.5,
@@ -658,5 +667,5 @@ def shock_separation(
         fontsize=9,
         color=INK_MUTED,
     )
-    fig.tight_layout(rect=(0, 0.03, 1, 0.93))
+    fig.tight_layout(rect=(0, 0.03, 1, 0.88))
     return fig, axes
